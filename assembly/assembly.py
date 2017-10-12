@@ -5,7 +5,6 @@ All rights reserved.
 
 @author: neilswainston
 '''
-import json
 import sys
 
 
