@@ -5,8 +5,6 @@ All rights reserved.
 
 @author: neilswainston
 '''
-import sys
-
 from assembly.plate import Plate
 
 
@@ -26,13 +24,15 @@ class AssemblyGenie(object):
         '''Gets plates.'''
         return self.__plates
 
-    def __assemble(self, recipe, level=0):
+    def __assemble(self, components, level=0, dest=None):
         '''Recursively assembles a recipe.'''
-        print str(self.__add(level, recipe)) + '\t' + str(recipe)
+        plate_idx, well, obj = self.__add(level, components)
+        new_dest = (plate_idx, well, obj)
+        print str(new_dest) + '\t->\t' + str(dest)
 
-        for term in recipe[0]:
-            if isinstance(term, tuple):
-                self.__assemble(term, level + 1)
+        for component in components[0]:
+            if isinstance(component, tuple):
+                self.__assemble(component, level + 1, new_dest)
 
     def __add(self, plate_idx, obj):
         '''Add object to plate.'''
@@ -43,10 +43,10 @@ class AssemblyGenie(object):
         found = self.__find(component)
 
         if found:
-            return found[0]
+            return tuple(found[0] + [component])
 
-        row, col = self.__plates[plate_idx].add(component)
-        return plate_idx, row, col
+        well = self.__plates[plate_idx].add(component)
+        return plate_idx, well, component
 
     def __find(self, obj):
         '''Finds an object in Plates.'''
@@ -59,7 +59,7 @@ class AssemblyGenie(object):
         return locations
 
 
-def main(args):
+def main():
     '''main method.'''
     a = (('A', 5), ('B', 7.5))
     b = (('A', 50), ('C', 17.5))
@@ -74,4 +74,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
