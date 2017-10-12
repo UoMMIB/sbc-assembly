@@ -79,7 +79,7 @@ class Plate(object):
         '''Sets an object in the given well.'''
         row, col = self.get_row_col(idx)
         self.set(obj, row, col)
-        return row, col
+        return self.__plate[col + 1].index[row] + str(col + 1)
 
     def __repr__(self):
         return self.__plate.__repr__()

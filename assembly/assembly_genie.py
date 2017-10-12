@@ -28,8 +28,7 @@ class AssemblyGenie(object):
 
     def __assemble(self, recipe, level=0):
         '''Recursively assembles a recipe.'''
-        print str(level) + '\t' + str(recipe)
-        self.__add(level, recipe)
+        print str(self.__add(level, recipe)) + '\t' + str(recipe)
 
         for term in recipe[0]:
             if isinstance(term, tuple):
@@ -38,9 +37,26 @@ class AssemblyGenie(object):
     def __add(self, plate_idx, obj):
         '''Add object to plate.'''
         if plate_idx >= len(self.__plates):
-            self.__plates.append(Plate())
+            self.__plates.append(Plate(plate_idx))
 
-        self.__plates[plate_idx].add(obj[0])
+        component = obj[0]
+        found = self.__find(component)
+
+        if found:
+            return found[0]
+
+        row, col = self.__plates[plate_idx].add(component)
+        return plate_idx, row, col
+
+    def __find(self, obj):
+        '''Finds an object in Plates.'''
+        locations = []
+
+        for plate in self.__plates:
+            for location in plate.find(obj):
+                locations.append([plate.get_id(), location])
+
+        return locations
 
 
 def main(args):
