@@ -17,8 +17,8 @@ class TestPlate(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.__plate_col = Plate(col_ord=True)
-        cls.__plate_row = Plate()
+        cls.__plate_col = Plate('col', col_ord=True)
+        cls.__plate_row = Plate('row')
 
     def test_get_set(self):
         '''Tests get and set methods.'''
@@ -47,6 +47,11 @@ class TestPlate(unittest.TestCase):
         self.__plate_row.add(obj2)
         self.assertEqual(obj2, self.__plate_row.get(row + 1, col))
 
+    def test_find(self):
+        '''Tests find methods.'''
+        self.__test_find(self.__plate_col)
+        self.__test_find(self.__plate_row)
+
     def test_idx_row_col(self):
         '''Tests get_idx and get_row_col methods.'''
         self.__test_idx_row_col(self.__plate_col)
@@ -61,6 +66,13 @@ class TestPlate(unittest.TestCase):
         plate.set(val, row, col)
         self.assertEqual(val, plate.get(row, col))
         self.assertEqual(val, plate.get_by_well('D6'))
+
+    def __test_find(self, plate):
+        '''Tests find method.'''
+        obj = 'OBJ'
+        plate.set(obj, 3, 5)
+        plate.set(obj, 6, 10)
+        self.assertEqual(['D6', 'G11'], self.__plate_col.find(obj))
 
     def __test_idx_row_col(self, plate):
         '''Tests get_idx and get_row_col methods.'''
