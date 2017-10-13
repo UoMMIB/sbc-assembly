@@ -33,7 +33,10 @@ class AssemblyGenie(object):
         '''Recursively assembles a recipe.'''
         plate_idx, well, obj = self.__add(level, components)
         new_dest = (plate_idx, well, obj)
-        print str(new_dest) + '\t->\t' + str(dest)
+        # print str(new_dest) + '\t->\t' + str(dest)
+
+        if dest:
+            self.__mappings.append((components[0], dest[2], components[1]))
 
         for component in components[0]:
             if isinstance(component, tuple):
