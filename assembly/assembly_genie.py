@@ -13,6 +13,7 @@ class AssemblyGenie(object):
 
     def __init__(self, recipes):
         self.__plates = []
+        self.__mappings = []
         self.__recipes = recipes
 
     def assemble(self):
@@ -23,6 +24,10 @@ class AssemblyGenie(object):
     def get_plates(self):
         '''Gets plates.'''
         return self.__plates
+
+    def get_mappings(self):
+        '''Gets mappings.'''
+        return self.__mappings
 
     def __assemble(self, components, level=0, dest=None):
         '''Recursively assembles a recipe.'''
@@ -71,6 +76,9 @@ def main():
 
     for plate in ass_gen.get_plates():
         print plate
+
+    for mapping in ass_gen.get_mappings():
+        print mapping
 
 
 if __name__ == '__main__':
