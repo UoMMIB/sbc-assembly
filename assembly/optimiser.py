@@ -27,10 +27,9 @@ def optimise(ingredients):
                     mask = pd.DataFrame(0.0, columns=df.columns,
                                         index=df.index)
                     mask[col1] = match_col.values
-                    # mask[col2] = match_col.values
                     max_match_col = match_col
 
-                if (match_col == max_match_col).all():
+                if match_col.sum() and (match_col == max_match_col).all():
                     mask[col2] = match_col.values
 
         if mask is None or max(mask.astype(bool).sum()) < 2:
@@ -47,13 +46,13 @@ def _init(ingredients):
 
     for product, comps in ingredients.iteritems():
         components.add(product)
-        components.update(comps)
+        components.update([comp[0] for comp in comps])
 
     df = pd.DataFrame(0.0, columns=components, index=components)
 
     for product, comps in ingredients.iteritems():
         for comp in comps:
-            df[product][comp] = 1
+            df[product][comp[0]] = comp[1]
 
     return _drop(df)
 
@@ -78,12 +77,13 @@ def _add_intermediate(df, mask, max_match_col):
 
 def main():
     '''main method.'''
-    ingredients = {'A': ['X', 'D', 'E', 'F'],
-                   'B': ['D', 'E', 'F', 'Y'],
-                   'C': ['D', 'E', 'F', 'Z']}
+    ingredients = {'A': [('X', 10), ('D', 10), ('E', 10), ('F', 10)],
+                   'B': [('D', 10), ('E', 10), ('F', 10), ('Y', 10)],
+                   'C': [('D', 10), ('E', 10), ('F', 5), ('Z', 10)]}
 
     df = optimise(ingredients)
     print df
+    df.to_csv('optimise.csv')
 
 
 if __name__ == '__main__':
