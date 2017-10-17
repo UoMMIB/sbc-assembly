@@ -6,8 +6,6 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-from macerrors import destPortErr
-
 from assembly import tree_plotter
 import pandas as pd
 

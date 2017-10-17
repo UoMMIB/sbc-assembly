@@ -47,14 +47,8 @@ def plot_matrix(df):
     for col in df.columns:
         for idx, coeff in enumerate(df[col]):
             if coeff > 0:
-                print indices[idx] + ' -> ' + col + '\t\t' + \
-                    str(vertices.index(indices[idx])) + ' -> ' + \
-                    str(vertices.index(col))
-
                 graph.add_edge(vertices.index(indices[idx]),
                                vertices.index(col))
-
-                print ' '.join([str(e.tuple) for e in graph.es])
 
     plot_graph(vertices, graph,
                root=[vertices.index(root) for root in roots])
@@ -65,7 +59,8 @@ def _get_positions(tree, root):
     if root is None:
         root = [0]
 
-    layout = tree.layout_reingold_tilford(mode='in', root=root)
+    # layout = tree.layout_reingold_tilford(mode='in', root=root)
+    layout = tree.layout('kk')
     return {k: layout[k] for k in range(len(layout.coords))}
 
 
