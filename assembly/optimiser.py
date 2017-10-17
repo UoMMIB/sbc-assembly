@@ -5,6 +5,10 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-few-public-methods
+import igraph
+
+from assembly import tree_plotter
 import pandas as pd
 
 
@@ -45,6 +49,24 @@ class Optimiser(object):
             self.__add_intermediate(mask, max_match_col)
 
         print self.__df
+
+    def plot(self):
+        '''Plots tree.'''
+        graph = igraph.Graph()
+
+        indices = list(self.__df.index.values)
+        vertices = sorted(list(set(list(self.__df.columns.values) + indices)))
+
+        for vertex in vertices:
+            graph.add_vertex(vertex)
+
+        for col in self.__df.columns:
+            for idx, coeff in enumerate(self.__df[col]):
+                if coeff > 0:
+                    graph.add_edge(vertices.index(indices[idx]),
+                                   vertices.index(col))
+
+        tree_plotter.plot(vertices, graph)
 
     def __get_components(self, comps, vol, dest=None):
         '''Gets components.'''
@@ -93,9 +115,10 @@ class Optimiser(object):
         self.__df = self.__df.fillna(0)
         self.__drop()
 
-    def __get_intermediate_name(self):
+    def __get_intermediate_name(self, intermediate=True):
         '''Get unique intermediate name.'''
-        int_id = '_i' + str(self.__intermediates)
+        prefix = 'i' if intermediate else 'p'
+        int_id = '_' + prefix + str(self.__intermediates)
         self.__intermediates += 1
         return int_id
 
@@ -109,7 +132,9 @@ def main():
          ), 0)
 
     optim = Optimiser(ingredients)
+    optim.plot()
     optim.optimise()
+    optim.plot()
 
 
 if __name__ == '__main__':
