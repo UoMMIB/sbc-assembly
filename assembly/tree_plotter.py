@@ -13,31 +13,19 @@ from igraph import Graph
 import matplotlib.pyplot as plt
 
 
-def plot_graph(labels, tree, markersize=24, root=None):
+def plot_graph(labels, tree, root=None):
     '''Plot labelled graph.'''
     positions = _get_positions(tree, root)
-
-    # Plot edges:
-    for edge in [e.tuple for e in tree.es]:
-        x = [positions[edge[0]][0], positions[edge[1]][0]]
-        y = [positions[edge[0]][1], positions[edge[1]][1]]
-        plt.plot(x, y, lw=1, color='gray')
-        plt.arrow(x[0], y[0], (x[1] - x[0]) / 2.0, (y[1] - y[0]) / 2.0,
-                  head_width=0.1,
-                  head_length=0.1,
-                  fc='grey',
-                  ec='grey')
+    xs, ys = zip(*positions.values())
+    ax = plt.gca()
+    ax.set_xlim(min(xs), max(xs))
+    ax.set_ylim(min(ys), max(ys))
 
     # Plot nodes:
-    xs, ys = zip(*positions.values())
+    patches = _plot_vertices(positions, labels)
 
-    plt.plot(xs, ys,
-             'o',
-             markersize=markersize,
-             markerfacecolor='lightblue',
-             markeredgecolor='grey')
-
-    _annotate(xs, ys, labels)
+    # Plot edges:
+    _plot_edges(positions, [e.tuple for e in tree.es], patches)
 
     plt.axis('off')
     plt.show()
@@ -77,18 +65,45 @@ def _get_positions(tree, root):
     if root is None:
         root = [0]
 
-    layout = tree.layout_reingold_tilford(mode="in", root=root)
+    layout = tree.layout_reingold_tilford(mode='in', root=root)
     return {k: layout[k] for k in range(len(layout.coords))}
 
 
-def _annotate(xs, ys, labels):
-    '''Annotate.'''
-    # TODO: Calculate accurately, based on text size:
-    y_offset = 0.06
-    x_offsets = [0.05 * len(val) for val in labels]
+def _plot_vertices(positions, labels):
+    '''Plot vertices.'''
+    patches = []
 
-    for x, y, label, text_offset in zip(xs, ys, labels, x_offsets):
-        plt.annotate(label, xy=(x - text_offset, y - y_offset))
+    xs, ys = zip(*positions.values())
+
+    for x, y, label in zip(xs, ys, labels):
+        bbox_props = dict(boxstyle='circle,pad=0.5',
+                          fc='lightblue',
+                          ec='grey',
+                          lw=1)
+
+        patches.append(plt.text(x, y, label, ha='center', va='center',
+                                size=10,
+                                zorder=-1,
+                                bbox=bbox_props))
+    return patches
+
+
+def _plot_edges(positions, edges, patches):
+    '''Plot edges.'''
+    for edge in edges:
+        x = [positions[edge[0]][0], positions[edge[1]][0]]
+        y = [positions[edge[0]][1], positions[edge[1]][1]]
+
+        plt.annotate('',
+                     xy=(x[0], y[0]), xycoords='data',
+                     xytext=(x[1], y[1]), textcoords='data',
+                     zorder=1,
+                     arrowprops=dict(arrowstyle='->',
+                                     color='0.5',
+                                     patchA=patches[edge[1]],
+                                     patchB=patches[edge[0]],
+                                     ),
+                     )
 
 
 def _get_graph(vertices=16, children=2):
