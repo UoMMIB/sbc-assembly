@@ -23,7 +23,7 @@ def plot_graph(labels, tree, markersize=24, root=None):
         y = [positions[edge[0]][1], positions[edge[1]][1]]
         plt.plot(x, y, lw=1, color='gray')
         plt.arrow(x[0], y[0], (x[1] - x[0]) / 2.0, (y[1] - y[0]) / 2.0,
-                  head_width=0.075,
+                  head_width=0.1,
                   head_length=0.1,
                   fc='grey',
                   ec='grey')

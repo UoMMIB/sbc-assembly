@@ -6,6 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+from macerrors import destPortErr
+
 from assembly import tree_plotter
 import pandas as pd
 
@@ -58,7 +60,7 @@ class Optimiser(object):
             comp_id = comps
             self.__add_row_col(comp_id)
         else:
-            comp_id = self.__get_intermediate_name()
+            comp_id = self.__get_intermediate_name(vol)
 
             self.__add_row_col(comp_id)
 
