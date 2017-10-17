@@ -91,8 +91,8 @@ def _plot_vertices(positions, labels):
 def _plot_edges(positions, edges, patches):
     '''Plot edges.'''
     for edge in edges:
-        x = [positions[edge[0]][0], positions[edge[1]][0]]
-        y = [positions[edge[0]][1], positions[edge[1]][1]]
+        x = [positions[edge[1]][0], positions[edge[0]][0]]
+        y = [positions[edge[1]][1], positions[edge[0]][1]]
 
         plt.annotate('',
                      xy=(x[0], y[0]), xycoords='data',
@@ -100,8 +100,8 @@ def _plot_edges(positions, edges, patches):
                      zorder=1,
                      arrowprops=dict(arrowstyle='->',
                                      color='0.5',
-                                     patchA=patches[edge[1]],
-                                     patchB=patches[edge[0]],
+                                     patchA=patches[edge[0]],
+                                     patchB=patches[edge[1]],
                                      ),
                      )
 
