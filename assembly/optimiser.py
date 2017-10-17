@@ -118,7 +118,7 @@ class Optimiser(object):
     def __get_intermediate_name(self, intermediate=True):
         '''Get unique intermediate name.'''
         prefix = 'i' if intermediate else 'p'
-        int_id = '_' + prefix + str(self.__intermediates)
+        int_id = prefix + str(self.__intermediates)
         self.__intermediates += 1
         return int_id
 

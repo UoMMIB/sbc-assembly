@@ -17,29 +17,34 @@ def plot(labels, tree, markersize=24):
     lay = tree.layout('tree', 0)
     position = {k: lay[k] for k in range(len(lay.coords))}
 
-    # _, ax = plt.subplots()
-    # ax.axis('off')
-
+    # Plot edges:
     for edge in [e.tuple for e in tree.es]:
         x = [position[edge[0]][0], position[edge[1]][0]]
         y = [position[edge[0]][1], position[edge[1]][1]]
-        plt.arrow(x[0], y[0], x[1] - x[0], y[1] - y[0],
-                  head_width=0.1,
+        plt.plot(x, y, lw=1, color='gray')
+        plt.arrow(x[0], y[0], (x[1] - x[0]) / 2.0, (y[1] - y[0]) / 2.0,
+                  head_width=0.075,
                   head_length=0.1,
                   fc='grey',
                   ec='grey')
 
+    # Plot nodes:
     xs, ys = zip(*position.values())
+
     plt.plot(xs, ys,
              'o',
-             alpha=0.25,
              markersize=markersize,
-             markerfacecolor='navy',
-             markeredgecolor='black')
+             markerfacecolor='lightblue',
+             markeredgecolor='grey')
 
-    for x, y, label in zip(xs, ys, labels):
-        plt.annotate(label, xy=(x, y))
+    # TODO: Calculate accurately, based on text size:
+    y_offset = 0.06
+    x_offsets = [0.05 * len(val) for val in labels]
 
+    for x, y, label, text_offset in zip(xs, ys, labels, x_offsets):
+        plt.annotate(label, xy=(x - text_offset, y - y_offset))
+
+    plt.axis('off')
     plt.show()
 
 
