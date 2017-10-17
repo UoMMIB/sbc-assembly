@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 import sys
 
 from igraph import Graph
@@ -20,9 +21,9 @@ def plot(labels, tree):
     ax.axis('off')
 
     for edge in [e.tuple for e in tree.es]:
-        X = [position[edge[0]][0], position[edge[1]][0]]
-        Y = [position[edge[0]][1], position[edge[1]][1]]
-        plt.plot(X, Y, lw=1, color='gray')
+        x = [position[edge[0]][0], position[edge[1]][0]]
+        y = [position[edge[0]][1], position[edge[1]][1]]
+        plt.plot(x, y, lw=1, color='gray')
 
     xs, ys = zip(*position.values())
     ax.plot(xs, ys, 'o')
