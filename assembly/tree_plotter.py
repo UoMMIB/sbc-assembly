@@ -33,7 +33,7 @@ def plot_graph(labels, tree, root=None):
 
 def plot_matrix(df):
     '''Plots tree.'''
-    graph = Graph()
+    graph = Graph(directed=True)
 
     roots = sorted(list(set(list(df.columns.values)) -
                         set(df.index.values)))
