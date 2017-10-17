@@ -5,9 +5,60 @@ All rights reserved.
 
 @author: neilswainston
 '''
-import uuid
-
 import pandas as pd
+
+
+class Optimiser(object):
+    '''Recipes optimiser.'''
+
+    def __init__(self, ingredients):
+        self.__df = pd.DataFrame()
+        self.__intermediates = 1
+        self.__get_components(ingredients[0], ingredients[1])
+        self.__drop()
+        print self.__df
+
+    def __get_components(self, comps, vol, dest=None):
+        '''Gets components.'''
+        print str(comps) + '\t' + str(vol) + '\t' + str(dest)
+
+        if isinstance(comps, str):
+            comp_id = comps
+            self.__add_row_col(comp_id)
+        else:
+            comp_id = '_i' + str(self.__intermediates)
+            self.__intermediates += 1
+
+            self.__add_row_col(comp_id)
+
+            for comp in comps:
+                try:
+                    self.__get_components(comp[0], comp[1], comp_id)
+                except IndexError, e:
+                    print e
+
+        if dest:
+            self.__df[dest][comp_id] = vol
+
+    def __drop(self):
+        '''Drop empty columns and rows.'''
+        self.__df = self.__df[self.__df.columns[(self.__df != 0).any()]]
+        self.__df = self.__df[(self.__df.T != 0).any()]
+
+    def __add_row_col(self, comp_id):
+        '''Add new row and column.'''
+        if self.__df.empty:
+            self.__df[comp_id] = pd.Series([0.0], index=[comp_id])
+        else:
+            # Add row:
+            new_row = pd.Series([0.0] * len(self.__df.columns),
+                                index=self.__df.columns)
+            new_row.name = comp_id
+            self.__df = self.__df.append(new_row)
+
+            # Add col:
+            self.__df[comp_id] = pd.Series([0.0] * len(self.__df.index),
+                                           index=self.__df.index)
 
 
 def optimise(ingredients):
@@ -40,29 +91,6 @@ def optimise(ingredients):
     return df
 
 
-def _init(ingredients):
-    '''Initialise dataframe.'''
-    components = set()
-
-    for product, comps in ingredients.iteritems():
-        components.add(product)
-        components.update([comp[0] for comp in comps])
-
-    df = pd.DataFrame(0.0, columns=components, index=components)
-
-    for product, comps in ingredients.iteritems():
-        for comp in comps:
-            df[product][comp[0]] = comp[1]
-
-    return _drop(df)
-
-
-def _drop(df):
-    '''Drop empty columns and rows.'''
-    df = df[df.columns[(df != 0).any()]]
-    return df[(df.T != 0).any()]
-
-
 def _add_intermediate(df, mask, max_match_col):
     '''Adds an intermediate.'''
     df = df - mask
@@ -77,13 +105,14 @@ def _add_intermediate(df, mask, max_match_col):
 
 def main():
     '''main method.'''
-    ingredients = {'A': [('X', 10), ('D', 10), ('E', 10), ('F', 10)],
-                   'B': [('D', 10), ('E', 10), ('F', 10), ('Y', 10)],
-                   'C': [('D', 10), ('E', 10), ('F', 5), ('Z', 10)]}
+    ingredients = (
+        (((((('K', 1), ('L', 2)), 3), ('D', 4), ('E', 5), ('F', 6)), 0),
+         ((('D', 7), ('E', 8), ('F', 9), ('Y', 10)), 0),
+         ((('D', 11), ('E', 12), ('F', 13), ('Z', 14)), 0)
+         ), 0)
 
-    df = optimise(ingredients)
-    print df
-    df.to_csv('optimise.csv')
+    optim = Optimiser(ingredients)
+    # df = optimise(ingredients)
 
 
 if __name__ == '__main__':
