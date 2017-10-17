@@ -49,7 +49,7 @@ class Optimiser(object):
         '''Add new row and column.'''
         if self.__df.empty:
             self.__df[comp_id] = pd.Series([0.0], index=[comp_id])
-        else:
+        elif comp_id not in self._Optimiser__df:
             # Add row:
             new_row = pd.Series([0.0] * len(self.__df.columns),
                                 index=self.__df.columns)
