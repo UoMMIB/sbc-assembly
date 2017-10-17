@@ -6,8 +6,6 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-import igraph
-
 from assembly import tree_plotter
 import pandas as pd
 
@@ -51,22 +49,8 @@ class Optimiser(object):
         print self.__df
 
     def plot(self):
-        '''Plots tree.'''
-        graph = igraph.Graph()
-
-        indices = list(self.__df.index.values)
-        vertices = sorted(list(set(list(self.__df.columns.values) + indices)))
-
-        for vertex in vertices:
-            graph.add_vertex(vertex)
-
-        for col in self.__df.columns:
-            for idx, coeff in enumerate(self.__df[col]):
-                if coeff > 0:
-                    graph.add_edge(vertices.index(indices[idx]),
-                                   vertices.index(col))
-
-        tree_plotter.plot(vertices, graph)
+        '''Plots matrix as graph.'''
+        tree_plotter.plot_matrix(self.__df)
 
     def __get_components(self, comps, vol, dest=None):
         '''Gets components.'''
