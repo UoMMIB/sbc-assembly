@@ -5,7 +5,9 @@ All rights reserved.
 
 @author: neilswainston
 '''
+import itertools
 import sys
+
 from assembly.optimiser import Optimiser
 
 
@@ -28,7 +30,52 @@ _DEFAULT_REAG = {
     }}
 
 
-def get_ingredients(designs, concs=None, reagents=None):
+def combine(oligos, n_mutated=0, mutant_oligos=None, n_blocks=1):
+    '''Design combinatorial assembly.'''
+    designs = _combine(oligos, n_mutated, mutant_oligos, n_blocks)
+    return _get_ingredients(designs)
+
+
+def _combine(oligos, n_mutated, mutant_oligos, n_blocks):
+    '''Design combinatorial assembly.'''
+
+    # Assertion sanity checks:
+    assert len(oligos) % 2 == 0
+    assert len(oligos) / n_blocks >= 2
+    assert mutant_oligos if n_mutated > 0 else True
+
+    designs = []
+
+    # Get combinations:
+    combis = itertools.combinations(mutant_oligos, n_mutated)
+
+    for combi in combis:
+        design = list(oligos)
+
+        for var in combi:
+            design[design.index(var[0])] = var[1]
+
+        block_lengths = [0] * n_blocks
+
+        for idx in itertools.cycle(range(0, n_blocks)):
+            block_lengths[idx] = block_lengths[idx] + 2
+
+            if sum(block_lengths) == len(design):
+                break
+
+        idx = 0
+        blocks = []
+
+        for val in block_lengths:
+            blocks.append(design[idx: idx + val])
+            idx = idx + val
+
+        designs.append(blocks)
+
+    return designs
+
+
+def _get_ingredients(designs, concs=None, reagents=None):
     '''Gets ingredients.'''
     all_ingredients = []
 
@@ -66,16 +113,7 @@ def main(args):
     oligos = [str(val) for val in range(1, 29)]
     mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
 
-    from geneorator.combinatorial import combine
-    designs = combine(oligos, int(args[0]), mutant_oligos, int(args[1]))
-
-    for design in designs:
-        print design
-
-    ingredients = get_ingredients(designs)
-
-    # for ingredient in ingredients[0]:
-    #    print ingredient
+    ingredients = combine(oligos, int(args[0]), mutant_oligos, int(args[1]))
 
     optim = Optimiser(ingredients)
     optim.plot('init.png', layout_name='tree')
