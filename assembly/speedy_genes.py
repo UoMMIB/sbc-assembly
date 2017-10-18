@@ -78,10 +78,10 @@ def main(args):
     #    print ingredient
 
     optim = Optimiser(ingredients)
-    optim.plot('init.png')
+    optim.plot('init.png', layout_name='tree')
     optim.save_matrix('init.csv')
     optim.optimise()
-    optim.plot('optim.png')
+    optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
 
 

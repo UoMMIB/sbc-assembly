@@ -13,9 +13,9 @@ from igraph import Graph
 import matplotlib.pyplot as plt
 
 
-def plot_graph(labels, tree, root=None, outfile=None):
+def plot_graph(labels, tree, root=None, outfile=None, layout_name='kk'):
     '''Plot labelled graph.'''
-    positions = _get_positions(tree, root)
+    positions = _get_positions(tree, root, layout_name)
     xs, ys = zip(*positions.values())
     ax = plt.gca()
     ax.set_xlim(min(xs), max(xs))
@@ -35,7 +35,7 @@ def plot_graph(labels, tree, root=None, outfile=None):
         plt.show()
 
 
-def plot_matrix(df, outfile=None):
+def plot_matrix(df, outfile=None, layout_name='kk'):
     '''Plots tree.'''
     graph = Graph(directed=True)
 
@@ -56,16 +56,20 @@ def plot_matrix(df, outfile=None):
 
     plot_graph(vertices, graph,
                root=[vertices.index(root) for root in roots],
-               outfile=outfile)
+               outfile=outfile,
+               layout_name=layout_name)
 
 
-def _get_positions(tree, root):
+def _get_positions(tree, root, layout_name):
     '''Gets positions.'''
-    if root is None:
-        root = [0]
+    if layout_name == 'tree':
+        if root is None:
+            root = [0]
 
-    # layout = tree.layout_reingold_tilford(mode='in', root=root)
-    layout = tree.layout('kk')
+        layout = tree.layout(layout_name, mode='in', root=root)
+    else:
+        layout = tree.layout(layout_name)
+
     return {k: layout[k] for k in range(len(layout.coords))}
 
 

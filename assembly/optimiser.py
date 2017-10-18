@@ -46,9 +46,9 @@ class Optimiser(object):
 
             self.__add_intermediate(mask, max_match_col)
 
-    def plot(self, outfile=None):
+    def plot(self, outfile=None, layout_name='kk'):
         '''Plots matrix as graph.'''
-        tree_plotter.plot_matrix(self.__df, outfile)
+        tree_plotter.plot_matrix(self.__df, outfile, layout_name=layout_name)
 
     def save_matrix(self, outfile):
         '''Saves matrix as csv.'''
@@ -122,10 +122,10 @@ def main():
          ), 0)
 
     optim = Optimiser(ingredients)
-    optim.plot('init.png')
+    optim.plot('init.png', layout_name='tree')
     optim.save_matrix('init.csv')
     optim.optimise()
-    optim.plot('optim.png')
+    optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
 
 
