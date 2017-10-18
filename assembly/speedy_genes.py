@@ -6,47 +6,53 @@ All rights reserved.
 @author: neilswainston
 '''
 import sys
+from assembly.optimiser import Optimiser
 
-_DEFAULT_VOLS = {
+
+_DEFAULT_CONCS = {
     'block': {
-        'outer': 500,
-        'inner': 30
+        'outer': 500.0,
+        'inner': 30.0
     },
     'gene': {
-        'outer': 400,
-        'inner': 25
+        'outer': 400.0,
+        'inner': 25.0
     }}
 
 _DEFAULT_REAG = {
     'block': {
-        'mastermix': 50
+        'mastermix': 50.0
     },
     'gene': {
-        'mastermix': 45
+        'mastermix': 45.0
     }}
 
 
-def get_recipes(designs, vols=None, reagents=None):
-    '''Gets recipes.'''
-    recipes = []
+def get_ingredients(designs, concs=None, reagents=None):
+    '''Gets ingredients.'''
+    all_ingredients = []
 
-    if not vols:
-        vols = _DEFAULT_VOLS
+    if not concs:
+        concs = _DEFAULT_CONCS
 
     if not reagents:
         reagents = _DEFAULT_REAG
 
     for design in designs:
-        recipe = [_get_sub_recipe(block, vols['block'], reagents['block'])
-                  for block in design]
+        ingredients = [_get_sub_ingredients(block, concs['block'],
+                                            reagents['block'])
+                       for block in design]
 
-        recipes.append(recipe)
+        all_ingredients.append((_get_sub_ingredients(ingredients,
+                                                     concs['gene'],
+                                                     reagents['gene']),
+                                0.0))
 
-    return recipes
+    return tuple((all_ingredients, 0.0))
 
 
-def _get_sub_recipe(design, des_vols, reagents):
-    '''Gets sub recipe.'''
+def _get_sub_ingredients(design, des_vols, reagents):
+    '''Gets sub ingredients.'''
     vols = [des_vols['inner']] * len(design)
     vols[0] = des_vols['outer']
     vols[-1] = des_vols['outer']
@@ -61,8 +67,15 @@ def main(args):
     from geneorator.combinatorial import combine
     designs = combine(oligos, int(args[0]), mutant_oligos, int(args[1]))
 
-    for recipe in get_recipes(designs):
-        print recipe
+    ingredients = get_ingredients(designs)
+
+    for ingredient in ingredients:
+        print ingredient
+
+    optim = Optimiser(ingredients)
+    optim.plot()
+    optim.optimise()
+    optim.plot()
 
 
 if __name__ == '__main__':
