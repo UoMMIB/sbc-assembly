@@ -10,6 +10,7 @@ import sys
 
 from igraph import Graph
 
+from assembly.utils import get_graph
 import matplotlib.pyplot as plt
 
 
@@ -37,22 +38,7 @@ def plot_graph(labels, tree, root=None, outfile=None, layout_name='kk'):
 
 def plot_matrix(df, outfile=None, layout_name='kk'):
     '''Plots tree.'''
-    graph = Graph(directed=True)
-
-    roots = sorted(list(set(list(df.columns.values)) -
-                        set(df.index.values)))
-
-    indices = list(df.index.values)
-    vertices = sorted(list(roots) + indices)
-
-    for vertex in vertices:
-        graph.add_vertex(vertex)
-
-    for col in df.columns:
-        for idx, coeff in enumerate(df[col]):
-            if coeff > 0:
-                graph.add_edge(vertices.index(indices[idx]),
-                               vertices.index(col))
+    graph, roots, vertices = get_graph(df)
 
     plot_graph(vertices, graph,
                root=[vertices.index(root) for root in roots],
