@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=not-an-iterable
 # pylint: disable=too-few-public-methods
 # pylint: disable=unsubscriptable-object
 from assembly.utils import get_graph
