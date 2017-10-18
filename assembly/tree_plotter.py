@@ -13,7 +13,7 @@ from igraph import Graph
 import matplotlib.pyplot as plt
 
 
-def plot_graph(labels, tree, root=None):
+def plot_graph(labels, tree, root=None, outfile=None):
     '''Plot labelled graph.'''
     positions = _get_positions(tree, root)
     xs, ys = zip(*positions.values())
@@ -28,10 +28,14 @@ def plot_graph(labels, tree, root=None):
     _plot_edges(positions, [e.tuple for e in tree.es], patches)
 
     plt.axis('off')
-    plt.show()
+
+    if outfile:
+        plt.savefig(outfile)
+    else:
+        plt.show()
 
 
-def plot_matrix(df):
+def plot_matrix(df, outfile=None):
     '''Plots tree.'''
     graph = Graph(directed=True)
 
@@ -51,7 +55,8 @@ def plot_matrix(df):
                                vertices.index(col))
 
     plot_graph(vertices, graph,
-               root=[vertices.index(root) for root in roots])
+               root=[vertices.index(root) for root in roots],
+               outfile=outfile)
 
 
 def _get_positions(tree, root):
