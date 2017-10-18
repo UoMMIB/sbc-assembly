@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=unsubscriptable-object
 from igraph import Graph
 
 
@@ -29,6 +30,7 @@ def get_graph(df):
             if coeff > 0:
                 graph.add_edge(vertices.index(indices[idx]),
                                vertices.index(col))
+                graph.es[graph.ecount() - 1]['coeff'] = coeff
 
     return graph, roots, vertices
 

@@ -7,7 +7,7 @@ All rights reserved.
 '''
 # pylint: disable=too-few-public-methods
 from assembly import tree_plotter
-from assembly.utils import drop, get_graph
+from assembly.utils import drop
 import pandas as pd
 
 
@@ -47,6 +47,10 @@ class Optimiser(object):
 
             self.__add_intermediate(mask, max_match_col)
 
+    def get_matrix(self):
+        '''Gets matrix.'''
+        return self.__df
+
     def plot(self, outfile=None, layout_name='kk'):
         '''Plots matrix as graph.'''
         tree_plotter.plot_matrix(self.__df, outfile, layout_name=layout_name)
@@ -54,13 +58,6 @@ class Optimiser(object):
     def save_matrix(self, outfile):
         '''Saves matrix as csv.'''
         self.__df.to_csv(outfile)
-
-    def get_worklist(self):
-        '''Gets worklist.'''
-        graph, roots, vertices = get_graph(self.__df)
-
-        for root in roots:
-            print root
 
     def __get_components(self, comps, vol, dest=None):
         '''Gets components.'''
@@ -134,8 +131,6 @@ def main():
     optim.optimise()
     optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
-
-    optim.get_worklist()
 
 
 if __name__ == '__main__':

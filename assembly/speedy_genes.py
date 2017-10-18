@@ -9,6 +9,7 @@ import itertools
 import sys
 
 from assembly.optimiser import Optimiser
+from assembly.worklist import WorklistGenerator
 
 
 _DEFAULT_CONCS = {
@@ -121,6 +122,11 @@ def main(args):
     optim.optimise()
     optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
+
+    worklist_gen = WorklistGenerator(optim.get_matrix())
+
+    for item in worklist_gen.get_worklist():
+        print item
 
 
 if __name__ == '__main__':
