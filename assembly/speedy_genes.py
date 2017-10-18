@@ -21,10 +21,10 @@ _DEFAULT_CONCS = {
 
 _DEFAULT_REAG = {
     'block': {
-        'mastermix': 50.0
+        'mm': 50.0
     },
     'gene': {
-        'mastermix': 45.0
+        'mm': 45.0
     }}
 
 

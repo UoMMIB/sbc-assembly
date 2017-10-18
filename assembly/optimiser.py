@@ -16,6 +16,7 @@ class Optimiser(object):
     def __init__(self, ingredients):
         self.__df = pd.DataFrame()
         self.__intermediates = 1
+        self.__products = 1
         self.__get_components(ingredients[0], ingredients[1])
         self.__drop()
 
@@ -44,8 +45,6 @@ class Optimiser(object):
                 break
 
             self.__add_intermediate(mask, max_match_col)
-
-        print self.__df
 
     def plot(self, outfile=None):
         '''Plots matrix as graph.'''
@@ -104,9 +103,13 @@ class Optimiser(object):
 
     def __get_intermediate_name(self, intermediate=True):
         '''Get unique intermediate name.'''
-        prefix = 'i' if intermediate else 'p'
-        int_id = prefix + str(self.__intermediates)
-        self.__intermediates += 1
+        if intermediate:
+            int_id = 'i' + str(self.__intermediates)
+            self.__intermediates += 1
+        else:
+            int_id = 'p' + str(self.__products)
+            self.__products += 1
+
         return int_id
 
 
