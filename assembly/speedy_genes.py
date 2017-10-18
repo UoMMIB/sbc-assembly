@@ -43,6 +43,8 @@ def get_ingredients(designs, concs=None, reagents=None):
                                             reagents['block'])
                        for block in design]
 
+        ingredients = [design[0][0]] + ingredients + [design[-1][-1]]
+
         all_ingredients.append((_get_sub_ingredients(ingredients,
                                                      concs['gene'],
                                                      reagents['gene']),
@@ -67,15 +69,20 @@ def main(args):
     from geneorator.combinatorial import combine
     designs = combine(oligos, int(args[0]), mutant_oligos, int(args[1]))
 
+    for design in designs:
+        print design
+
     ingredients = get_ingredients(designs)
 
-    for ingredient in ingredients:
-        print ingredient
+    # for ingredient in ingredients[0]:
+    #    print ingredient
 
     optim = Optimiser(ingredients)
-    optim.plot()
+    optim.plot('init.png')
+    optim.save_matrix('init.csv')
     optim.optimise()
-    optim.plot()
+    optim.plot('optim.png')
+    optim.save_matrix('optim.csv')
 
 
 if __name__ == '__main__':
