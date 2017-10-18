@@ -18,7 +18,6 @@ class Optimiser(object):
         self.__intermediates = 1
         self.__get_components(ingredients[0], ingredients[1])
         self.__drop()
-        print self.__df
 
     def optimise(self):
         '''Optimise dataframe.'''
@@ -48,9 +47,13 @@ class Optimiser(object):
 
         print self.__df
 
-    def plot(self):
+    def plot(self, outfile=None):
         '''Plots matrix as graph.'''
-        tree_plotter.plot_matrix(self.__df)
+        tree_plotter.plot_matrix(self.__df, outfile)
+
+    def save_matrix(self, outfile):
+        '''Saves matrix as csv.'''
+        self.__df.to_csv(outfile)
 
     def __get_components(self, comps, vol, dest=None):
         '''Gets components.'''
@@ -116,9 +119,11 @@ def main():
          ), 0)
 
     optim = Optimiser(ingredients)
-    optim.plot()
+    optim.plot('init.png')
+    optim.save_matrix('init.csv')
     optim.optimise()
-    optim.plot()
+    optim.plot('optim.png')
+    optim.save_matrix('optim.csv')
 
 
 if __name__ == '__main__':
