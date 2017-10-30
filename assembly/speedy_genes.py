@@ -109,12 +109,12 @@ def _get_sub_ingredients(design, des_vols, reagents):
     return tuple(list(reagents.iteritems()) + zip(design, vols))
 
 
-def main(args):
-    '''main method.'''
+def _test(n_mutated, n_blocks):
+    '''Test method.'''
     oligos = [str(val) for val in range(1, 29)]
     mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
 
-    ingredients = combine(oligos, int(args[0]), mutant_oligos, int(args[1]))
+    ingredients = combine(oligos, n_mutated, mutant_oligos, n_blocks)
 
     optim = Optimiser(ingredients)
     optim.plot('init.png', layout_name='tree')
@@ -127,6 +127,19 @@ def main(args):
 
     for item in worklist_gen.get_worklist():
         print item
+
+
+def main(args):
+    '''main method.'''
+    n_mutated = int(args[0])
+    n_blocks = int(args[1])
+
+    import cProfile
+    cProfile.runctx('_test(n_mutated, n_blocks)',
+                    {'_test': _test,
+                     'n_mutated': n_mutated,
+                     'n_blocks': n_blocks},
+                    {})
 
 
 if __name__ == '__main__':

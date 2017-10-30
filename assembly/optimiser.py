@@ -39,7 +39,7 @@ class Optimiser(object):
                         mask[col1] = match_col.values
                         max_match_col = match_col
 
-                    if match_col.sum() and (match_col == max_match_col).all():
+                    if match_col.any() and (match_col == max_match_col).all():
                         mask[col2] = match_col.values
 
             if mask is None or max(mask.astype(bool).sum()) < 2:
