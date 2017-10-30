@@ -35,7 +35,7 @@ class WorklistGenerator(object):
             idx = self.__vertices.index(root)
             self.__traverse(self.__graph.vs[idx], 0)
 
-        self.__worklist.sort(key=lambda row: (-row[3], row[0], row[1]))
+        self.__worklist.sort(key=lambda row: (-row[3]))
 
     def __traverse(self, vertex, level):
         '''Traverse tree.'''
