@@ -124,9 +124,7 @@ def _test(n_mutated, n_blocks):
     optim.save_matrix('optim.csv')
 
     worklist_gen = WorklistGenerator(optim.get_matrix())
-
-    for item in worklist_gen.get_worklist():
-        print item
+    return worklist_gen.get_worklist()
 
 
 def main(args):
@@ -134,12 +132,15 @@ def main(args):
     n_mutated = int(args[0])
     n_blocks = int(args[1])
 
-    import cProfile
-    cProfile.runctx('_test(n_mutated, n_blocks)',
-                    {'_test': _test,
-                     'n_mutated': n_mutated,
-                     'n_blocks': n_blocks},
-                    {})
+    for item in _test(n_mutated, n_blocks):
+        print item
+
+    # import cProfile
+    # cProfile.runctx('_test(n_mutated, n_blocks)',
+    #                {'_test': _test,
+    #                 'n_mutated': n_mutated,
+    #                 'n_blocks': n_blocks},
+    #                {})
 
 
 if __name__ == '__main__':
