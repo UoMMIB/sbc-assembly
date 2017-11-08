@@ -14,12 +14,12 @@ from assembly.worklist import WorklistGenerator
 
 _DEFAULT_OLIGO_VOLS = {
     'block': {
-        'outer': 500.0,
-        'inner': 30.0
+        'primer': 3.0,
+        'oligo_pool': 0.75
     },
     'gene': {
-        'outer': 400.0,
-        'inner': 25.0
+        'primer': 3,
+        'inner': 0.75
     }}
 
 _DEFAULT_REAG_VOLS = {
@@ -104,17 +104,21 @@ def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
 
 def _get_block_ingredients(design, des_vols, reagents):
     '''Gets sub ingredients.'''
-    vols = [des_vols['inner']] * len(design)
-    vols[0] = des_vols['outer']
-    vols[-1] = des_vols['outer']
-    return tuple(list(reagents.iteritems()) + zip(design, vols))
+    vols = [des_vols['primer'], des_vols['oligo_pool'], des_vols['primer']]
+    components = [design[0], _get_oligo_pool(design), design[-1]]
+    return tuple(list(reagents.iteritems()) + zip(components, vols))
+
+
+def _get_oligo_pool(design, oligo_pool_vol=10.0):
+    '''Get oligo pool.'''
+    return ((oligo, oligo_pool_vol) for oligo in design[1:-1])
 
 
 def _get_gene_ingredients(design, des_vols, reagents):
     '''Gets sub ingredients.'''
     vols = [des_vols['inner']] * len(design)
-    vols[0] = des_vols['outer']
-    vols[-1] = des_vols['outer']
+    vols[0] = des_vols['primer']
+    vols[-1] = des_vols['primer']
     return tuple(list(reagents.iteritems()) + zip(design, vols))
 
 
