@@ -8,6 +8,7 @@ All rights reserved.
 import itertools
 import sys
 
+from assembly import plate
 from assembly.optimiser import Optimiser
 from assembly.worklist import WorklistGenerator
 
@@ -144,9 +145,8 @@ def main(args):
     '''main method.'''
     n_mutated = int(args[0])
     n_blocks = int(args[1])
-
-    for item in _test(n_mutated, n_blocks):
-        print item
+    worklist = _test(n_mutated, n_blocks)
+    plate.write_plates(worklist)
 
     # import cProfile
     # cProfile.runctx('_test(n_mutated, n_blocks)',

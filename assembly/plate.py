@@ -83,3 +83,34 @@ class Plate(object):
 
     def __repr__(self):
         return self.__plate.__repr__()
+
+
+def write_plates(worklist):
+    '''Writes plates from worklist.'''
+    plates = {}
+
+    for injection in worklist:
+        print injection
+        src = injection[0]
+        dest = injection[1]
+        depth = injection[3]
+        _add_component(src, depth, plates)
+
+        if depth == 0:
+            _add_component(dest, depth, plates)
+
+    for plate in plates.values():
+        print plate
+
+
+def _add_component(component, plate_id, plates):
+    '''Add a component to a plate.'''
+    for plate in plates.values():
+        if plate.find(component):
+            return
+
+    if plate_id not in plates:
+        plate = Plate(plate_id)
+        plates[plate_id] = plate
+
+    plates[plate_id].add(component)
