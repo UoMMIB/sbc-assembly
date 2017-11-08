@@ -12,7 +12,7 @@ from assembly.optimiser import Optimiser
 from assembly.worklist import WorklistGenerator
 
 
-_DEFAULT_CONCS = {
+_DEFAULT_OLIGO_VOLS = {
     'block': {
         'outer': 500.0,
         'inner': 30.0
@@ -22,7 +22,7 @@ _DEFAULT_CONCS = {
         'inner': 25.0
     }}
 
-_DEFAULT_REAG = {
+_DEFAULT_REAG_VOLS = {
     'block': {
         'mm': 50.0
     },
@@ -76,32 +76,41 @@ def _combine(oligos, n_mutated, mutant_oligos, n_blocks):
     return designs
 
 
-def _get_ingredients(designs, concs=None, reagents=None):
+def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
     '''Gets ingredients.'''
     all_ingredients = []
 
-    if not concs:
-        concs = _DEFAULT_CONCS
+    if not oligo_vols:
+        oligo_vols = _DEFAULT_OLIGO_VOLS
 
-    if not reagents:
-        reagents = _DEFAULT_REAG
+    if not reagent_vols:
+        reagent_vols = _DEFAULT_REAG_VOLS
 
     for design in designs:
-        ingredients = [_get_sub_ingredients(block, concs['block'],
-                                            reagents['block'])
+        ingredients = [_get_block_ingredients(block,
+                                              oligo_vols['block'],
+                                              reagent_vols['block'])
                        for block in design]
 
         ingredients = [design[0][0]] + ingredients + [design[-1][-1]]
 
-        all_ingredients.append((_get_sub_ingredients(ingredients,
-                                                     concs['gene'],
-                                                     reagents['gene']),
+        all_ingredients.append((_get_gene_ingredients(ingredients,
+                                                      oligo_vols['gene'],
+                                                      reagent_vols['gene']),
                                 0.0))
 
     return tuple((all_ingredients, 0.0))
 
 
-def _get_sub_ingredients(design, des_vols, reagents):
+def _get_block_ingredients(design, des_vols, reagents):
+    '''Gets sub ingredients.'''
+    vols = [des_vols['inner']] * len(design)
+    vols[0] = des_vols['outer']
+    vols[-1] = des_vols['outer']
+    return tuple(list(reagents.iteritems()) + zip(design, vols))
+
+
+def _get_gene_ingredients(design, des_vols, reagents):
     '''Gets sub ingredients.'''
     vols = [des_vols['inner']] * len(design)
     vols[0] = des_vols['outer']
