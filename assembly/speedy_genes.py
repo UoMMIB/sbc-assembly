@@ -107,7 +107,9 @@ def _get_block_ingredients(design, des_vols, reagents):
     '''Gets sub ingredients.'''
     vols = [des_vols['primer'], des_vols['oligo_pool'], des_vols['primer']]
     components = [design[0], _get_oligo_pool(design), design[-1]]
-    return tuple(list(reagents.iteritems()) + zip(components, vols))
+    return tuple([(reag, vol, True)
+                  for reag, vol in reagents.iteritems()] +
+                 zip(components, vols, [False] * len(components)))
 
 
 def _get_oligo_pool(design, oligo_pool_vol=10.0):
@@ -120,7 +122,9 @@ def _get_gene_ingredients(design, des_vols, reagents):
     vols = [des_vols['inner']] * len(design)
     vols[0] = des_vols['primer']
     vols[-1] = des_vols['primer']
-    return tuple(list(reagents.iteritems()) + zip(design, vols))
+    return tuple([(reag, vol, True)
+                  for reag, vol in reagents.iteritems()] +
+                 zip(design, vols, [False] * len(design)))
 
 
 def _test(n_mutated, n_blocks):
