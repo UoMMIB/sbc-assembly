@@ -45,6 +45,19 @@ class Plate(object):
         '''Adds an object to the next well.'''
         return self.__set(obj, self.__next)
 
+    def add_line(self, obj):
+        '''Adds a line of objects (row or col) in next empty line.'''
+        if self.__col_ord:
+            line_len = len(self.__plate.columns)
+        else:
+            line_len = len(self.__plate.index)
+
+        start = ((self.__next + line_len - 1) / line_len) * line_len
+
+        for idx in range(start, start + line_len):
+            row, col = self.get_row_col(idx)
+            self.set(obj, row, col)
+
     def find(self, obj):
         '''Finds an object.'''
         wells = []
@@ -58,7 +71,7 @@ class Plate(object):
         return wells
 
     def get_row_col(self, idx):
-        '''Map idx to well, column ordered.'''
+        '''Map idx to well.'''
         rows, cols = self.__plate.shape
 
         if self.__col_ord:
@@ -116,6 +129,9 @@ def _add_component(component, plate_id, is_reagent, plates):
     if is_reagent:
         plate = Plate('reagents')
         plates['reagents'] = plate
+        plate.add_line(component)
+        return _add_component(component, plate_id, is_reagent, plates)
+
     elif plate_id not in plates:
         plate = Plate(plate_id)
         plates[plate_id] = plate
