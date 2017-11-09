@@ -15,10 +15,11 @@ from assembly.utils import get_graph
 class WorklistGenerator(object):
     '''Class to generate worklists.'''
 
-    def __init__(self, df):
+    def __init__(self, df, reagents):
         self.__graph, self.__roots, self.__vertices = get_graph(df)
         self.__edges = [e.tuple for e in self.__graph.es]
         self.__worklist = None
+        self.__reagents = reagents
 
     def get_worklist(self):
         '''Gets worklist.'''
@@ -43,7 +44,8 @@ class WorklistGenerator(object):
             self.__worklist.append([predecessor['name'],
                                     vertex['name'],
                                     self.__get_vol(predecessor, vertex),
-                                    level])
+                                    level,
+                                    self.__reagents[predecessor['name']]])
             self.__traverse(predecessor, level + 1)
 
     def __get_vol(self, src, dst):

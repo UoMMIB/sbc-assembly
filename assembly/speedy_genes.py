@@ -141,7 +141,7 @@ def _test(n_mutated, n_blocks):
     optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
 
-    worklist_gen = WorklistGenerator(optim.get_matrix())
+    worklist_gen = WorklistGenerator(optim.get_matrix(), optim.get_reagents())
     return worklist_gen.get_worklist()
 
 
