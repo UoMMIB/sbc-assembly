@@ -16,6 +16,7 @@ class Optimiser(object):
 
     def __init__(self, ingredients):
         self.__df = pd.DataFrame()
+        self.__reagents = {}
         self.__intermediates = 1
         self.__products = 1
         self.__get_components(ingredients[0], ingredients[1], ingredients[2])
@@ -51,9 +52,14 @@ class Optimiser(object):
         '''Gets matrix.'''
         return self.__df
 
+    def get_reagents(self):
+        '''Gets reagents.'''
+        return self.__reagents
+
     def plot(self, outfile=None, layout_name='kk'):
         '''Plots matrix as graph.'''
-        tree_plotter.plot_matrix(self.__df, outfile, layout_name=layout_name)
+        tree_plotter.plot_matrix(self.__df, self.__reagents,
+                                 outfile, layout_name=layout_name)
 
     def save_matrix(self, outfile):
         '''Saves matrix as csv.'''
@@ -64,7 +70,6 @@ class Optimiser(object):
         if isinstance(comps, str):
             comp_id = comps
             self.__add_row_col(comp_id)
-            print is_reagent
         else:
             comp_id = self.__get_intermediate_name(vol)
 
@@ -72,6 +77,8 @@ class Optimiser(object):
 
             for comp in comps:
                 self.__get_components(comp[0], comp[1], comp[2], comp_id)
+
+        self.__reagents[comp_id] = is_reagent
 
         if dest:
             self.__df[dest][comp_id] = vol
@@ -121,10 +128,13 @@ class Optimiser(object):
 def main():
     '''main method.'''
     ingredients = (
-        (((((('K', 1), ('L', 2)), 3), ('D', 4), ('E', 5), ('F', 6)), 0),
-         ((('D', 4), ('E', 5), ('F', 6), ('Y', 10)), 0),
-         ((('D', 4), ('E', 5), ('F', 13), ('Z', 14)), 0)
-         ), 0)
+        (((((('K', 1, False), ('L', 2, False)), 3, False), ('D', 4, False),
+           ('E', 5, False), ('F', 6, False)), 0, False),
+         ((('D', 4, False), ('E', 5, False), ('F', 6, False),
+           ('Y', 10, False)), 0, False),
+         ((('D', 4, False), ('E', 5, False), ('F', 13, False),
+           ('Z', 14, False)), 0, False)
+         ), 0, False)
 
     optim = Optimiser(ingredients)
     optim.plot('init.png', layout_name='tree')

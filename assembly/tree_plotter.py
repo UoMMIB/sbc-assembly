@@ -6,15 +6,15 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=invalid-name
-import sys
-
+# pylint: disable=too-many-arguments
 from igraph import Graph
 
 from assembly.utils import get_graph
 import matplotlib.pyplot as plt
 
 
-def plot_graph(labels, tree, root=None, outfile=None, layout_name='kk'):
+def plot_graph(labels, tree, colours, root=None, outfile=None,
+               layout_name='kk'):
     '''Plot labelled graph.'''
     positions = _get_positions(tree, root, layout_name)
     xs, ys = zip(*positions.values())
@@ -23,7 +23,7 @@ def plot_graph(labels, tree, root=None, outfile=None, layout_name='kk'):
     ax.set_ylim(min(ys), max(ys))
 
     # Plot nodes:
-    patches = _plot_vertices(positions, labels)
+    patches = _plot_vertices(positions, labels, colours)
 
     # Plot edges:
     _plot_edges(positions, [e.tuple for e in tree.es], patches)
@@ -36,11 +36,13 @@ def plot_graph(labels, tree, root=None, outfile=None, layout_name='kk'):
         plt.show()
 
 
-def plot_matrix(df, outfile=None, layout_name='kk'):
+def plot_matrix(df, reagents, outfile=None, layout_name='kk'):
     '''Plots tree.'''
     graph, roots, vertices = get_graph(df)
+    colours = ['lightgreen' if reagents[vertex] else 'lightblue'
+               for vertex in vertices]
 
-    plot_graph(vertices, graph,
+    plot_graph(vertices, graph, colours,
                root=[vertices.index(root) for root in roots],
                outfile=outfile,
                layout_name=layout_name)
@@ -59,15 +61,15 @@ def _get_positions(tree, root, layout_name):
     return {k: layout[k] for k in range(len(layout.coords))}
 
 
-def _plot_vertices(positions, labels):
+def _plot_vertices(positions, labels, colours):
     '''Plot vertices.'''
     patches = []
 
     xs, ys = zip(*positions.values())
 
-    for x, y, label in zip(xs, ys, labels):
+    for x, y, label, colour in zip(xs, ys, labels, colours):
         bbox_props = dict(boxstyle='circle,pad=0.5',
-                          fc='lightblue',
+                          fc=colour,
                           ec='grey',
                           lw=1)
 
@@ -101,13 +103,3 @@ def _get_graph(vertices=16, children=2):
     labels = map(str, range(vertices))
     graph = Graph.Tree(vertices, children)
     return labels, graph
-
-
-def main(args):
-    '''main method.'''
-    labels, graph = _get_graph(int(args[0]), int(args[1]))
-    plot_graph(labels, graph)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
