@@ -97,7 +97,7 @@ def write_plates(worklist):
         _add_component(src, depth, plates)
 
         if depth == 0:
-            _add_component(dest, depth, plates)
+            _add_component(dest, depth - 1, plates)
 
     for plate in plates.values():
         print plate
