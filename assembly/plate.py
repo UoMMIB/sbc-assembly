@@ -91,21 +91,21 @@ def write_plates(worklist):
 
     for injection in worklist:
         print injection
-        src = injection[0]
-        dest = injection[1]
         depth = injection[3]
-        well, plate = _add_component(src, depth, plates)
+        is_reagent = injection[4]
+        well, plate = _add_component(injection[0], depth, is_reagent, plates)
         print well, plate.get_id()
 
         if depth == 0:
-            well, plate = _add_component(dest, depth - 1, plates)
+            well, plate = _add_component(injection[1], depth - 1, is_reagent,
+                                         plates)
             print well, plate.get_id()
 
     for plate in plates.values():
         print plate
 
 
-def _add_component(component, plate_id, plates):
+def _add_component(component, plate_id, is_reagent, plates):
     '''Add a component to a plate.'''
     for plate in plates.values():
         wells = plate.find(component)
@@ -113,7 +113,10 @@ def _add_component(component, plate_id, plates):
         if wells:
             return wells[0], plate
 
-    if plate_id not in plates:
+    if is_reagent:
+        plate = Plate('reagents')
+        plates['reagents'] = plate
+    elif plate_id not in plates:
         plate = Plate(plate_id)
         plates[plate_id] = plate
     else:
