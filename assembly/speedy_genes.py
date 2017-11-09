@@ -98,9 +98,9 @@ def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
         all_ingredients.append((_get_gene_ingredients(ingredients,
                                                       oligo_vols['gene'],
                                                       reagent_vols['gene']),
-                                0.0))
+                                0.0, False))
 
-    return tuple((all_ingredients, 0.0))
+    return tuple((all_ingredients, 0.0, False))
 
 
 def _get_block_ingredients(design, des_vols, reagents):
@@ -114,7 +114,7 @@ def _get_block_ingredients(design, des_vols, reagents):
 
 def _get_oligo_pool(design, oligo_pool_vol=10.0):
     '''Get oligo pool.'''
-    return ((oligo, oligo_pool_vol) for oligo in design[1:-1])
+    return ((oligo, oligo_pool_vol, False) for oligo in design[1:-1])
 
 
 def _get_gene_ingredients(design, des_vols, reagents):

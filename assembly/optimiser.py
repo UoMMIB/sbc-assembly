@@ -18,7 +18,7 @@ class Optimiser(object):
         self.__df = pd.DataFrame()
         self.__intermediates = 1
         self.__products = 1
-        self.__get_components(ingredients[0], ingredients[1])
+        self.__get_components(ingredients[0], ingredients[1], ingredients[2])
         self.__drop()
 
     def optimise(self):
@@ -59,18 +59,19 @@ class Optimiser(object):
         '''Saves matrix as csv.'''
         self.__df.to_csv(outfile)
 
-    def __get_components(self, comps, vol, dest=None):
+    def __get_components(self, comps, vol, is_reagent, dest=None):
         '''Gets components.'''
         if isinstance(comps, str):
             comp_id = comps
             self.__add_row_col(comp_id)
+            print is_reagent
         else:
             comp_id = self.__get_intermediate_name(vol)
 
             self.__add_row_col(comp_id)
 
             for comp in comps:
-                self.__get_components(comp[0], comp[1], comp_id)
+                self.__get_components(comp[0], comp[1], comp[2], comp_id)
 
         if dest:
             self.__df[dest][comp_id] = vol
