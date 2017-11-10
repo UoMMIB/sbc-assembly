@@ -102,7 +102,7 @@ def write_plates(worklist):
     '''Writes plates from worklist.'''
     plates = {}
 
-    for injection in worklist:
+    for injection in sorted(worklist, key=lambda x: (-x[4], x[3])):
         print injection
         depth = injection[3]
         is_reagent = injection[4]
@@ -114,8 +114,10 @@ def write_plates(worklist):
                                          plates)
             print well, plate.get_id()
 
-    for plate in plates.values():
+    for plate_id, plate in plates.iteritems():
+        print 'Plate: ' + str(plate_id)
         print plate
+        print
 
 
 def _add_component(component, plate_id, is_reagent, plates):
