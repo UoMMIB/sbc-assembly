@@ -1,5 +1,5 @@
 '''
-AssemblyGenie (c) GeneGenie 2017
+AssemblyGenie (c) University of Manchester 2018
 
 All rights reserved.
 
