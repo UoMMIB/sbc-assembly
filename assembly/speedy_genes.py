@@ -10,6 +10,7 @@ import sys
 
 from assembly import plate
 from assembly.optimiser import Optimiser
+from assembly.utils import get_optimal_src_dest
 from assembly.worklist import WorklistGenerator
 
 
@@ -137,9 +138,9 @@ def _test(n_mutated, n_blocks):
     optim = Optimiser(ingredients)
     optim.plot('init.png', layout_name='tree')
     optim.save_matrix('init.csv')
-    optim.optimise()
-    optim.plot('optim.png', layout_name='tree')
-    optim.save_matrix('optim.csv')
+    # optim.optimise()
+    # optim.plot('optim.png', layout_name='tree')
+    # optim.save_matrix('optim.csv')
 
     worklist_gen = WorklistGenerator(optim.get_matrix(), optim.get_reagents())
     return worklist_gen.get_worklist()
@@ -150,7 +151,23 @@ def main(args):
     n_mutated = int(args[0])
     n_blocks = int(args[1])
     worklist = _test(n_mutated, n_blocks)
-    plate.write_plates(worklist)
+    plates = plate.write_plates(worklist)
+
+    for plate_id in sorted(plates, reverse=True):
+        print 'Plate: ' + str(plate_id)
+        print plates[plate_id]
+        print
+
+    for injection in sorted(worklist, key=lambda x: (-x[4], x[3]),
+                            reverse=True):
+        srcs = plate.find(plates, injection[0])
+        dests = plate.find(plates, injection[1])
+
+        print '\t'.join([str(val)
+                         for val in [injection[0],
+                                     injection[1],
+                                     injection[2],
+                                     get_optimal_src_dest(srcs, dests)]])
 
     # import cProfile
     # cProfile.runctx('_test(n_mutated, n_blocks)',

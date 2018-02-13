@@ -8,6 +8,8 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=unsubscriptable-object
 from igraph import Graph
+from scipy.spatial.distance import cityblock
+from assembly import plate
 
 
 def get_graph(df):
@@ -39,3 +41,22 @@ def drop(df):
     '''Drop empty columns and rows.'''
     df = df[df.columns[(df != 0).any()]]
     return df[(df.T != 0).any()]
+
+
+def get_optimal_src_dest(srcs, dests):
+    '''Get the optimial src and dest pair for efficient pipetting.'''
+    shortest_dist = float('inf')
+    optimal_pair = None
+
+    for src_plate, src_wells in srcs.iteritems():
+        for dest_plate, dest_wells in dests.iteritems():
+            for src_well in src_wells:
+                for dest_well in dest_wells:
+                    dist = cityblock(plate.get_indices(src_well),
+                                     plate.get_indices(dest_well))
+
+                    if dist < shortest_dist:
+                        shortest_dist = dist
+                        optimal_pair = [[src_plate, src_well],
+                                        [dest_plate, dest_well]]
+    return optimal_pair
