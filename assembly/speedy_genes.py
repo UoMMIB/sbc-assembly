@@ -132,8 +132,12 @@ def _test(n_mutated, n_blocks):
     '''Test method.'''
     oligos = [str(val) for val in range(1, 29)]
     mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+    return combine(oligos, n_mutated, mutant_oligos, n_blocks)
 
-    ingredients = combine(oligos, n_mutated, mutant_oligos, n_blocks)
+
+def main(args):
+    '''main method.'''
+    ingredients = _test(int(args[0]), int(args[1]))
 
     optim = Optimiser(ingredients)
     optim.plot('init.png', layout_name='tree')
@@ -143,14 +147,7 @@ def _test(n_mutated, n_blocks):
     # optim.save_matrix('optim.csv')
 
     worklist_gen = WorklistGenerator(optim.get_matrix(), optim.get_reagents())
-    return worklist_gen.get_worklist()
-
-
-def main(args):
-    '''main method.'''
-    n_mutated = int(args[0])
-    n_blocks = int(args[1])
-    worklist = _test(n_mutated, n_blocks)
+    worklist = worklist_gen.get_worklist()
     plates = plate.write_plates(worklist)
 
     for plate_id in sorted(plates, reverse=True):
@@ -168,13 +165,6 @@ def main(args):
                                      injection[1],
                                      injection[2],
                                      get_optimal_src_dest(srcs, dests)]])
-
-    # import cProfile
-    # cProfile.runctx('_test(n_mutated, n_blocks)',
-    #                {'_test': _test,
-    #                 'n_mutated': n_mutated,
-    #                 'n_blocks': n_blocks},
-    #                {})
 
 
 if __name__ == '__main__':
