@@ -17,8 +17,8 @@ class Optimiser(object):
     def __init__(self, ingredients):
         self.__df = pd.DataFrame()
         self.__reagents = {}
-        self.__intermediates = 1
-        self.__products = 1
+        self.__intermediates = []
+        self.__products = []
         self.__get_components(ingredients[0], ingredients[1], ingredients[2])
         self.__drop()
 
@@ -116,11 +116,11 @@ class Optimiser(object):
     def __get_intermediate_name(self, intermediate=True):
         '''Get unique intermediate name.'''
         if intermediate:
-            int_id = 'i' + str(self.__intermediates)
-            self.__intermediates += 1
+            int_id = 'i' + str(len(self.__intermediates) + 1)
+            self.__intermediates.append(int_id)
         else:
-            int_id = 'p' + str(self.__products)
-            self.__products += 1
+            int_id = 'p' + str(len(self.__products) + 1)
+            self.__products.append(int_id)
 
         return int_id
 
