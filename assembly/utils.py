@@ -57,6 +57,6 @@ def get_optimal_src_dest(srcs, dests):
 
                     if dist < shortest_dist:
                         shortest_dist = dist
-                        optimal_pair = [[src_plate, src_well],
-                                        [dest_plate, dest_well]]
+                        optimal_pair = [src_plate, src_well,
+                                        dest_plate, dest_well]
     return optimal_pair

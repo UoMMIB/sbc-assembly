@@ -39,7 +39,8 @@ class Plate(object):
 
     def get_by_well(self, well_name):
         '''Get by well, e.g. by C12.'''
-        return self.get(get_indices(well_name))
+        row, col = get_indices(well_name)
+        return self.get(row, col)
 
     def add(self, obj):
         '''Adds an object to the next well.'''
@@ -103,22 +104,6 @@ def get_indices(well_name):
     return ord(well_name[0]) - ord('A'), int(well_name[1:]) - 1
 
 
-def write_plates(worklist):
-    '''Writes plates from worklist.'''
-    plates = {}
-
-    for injection in sorted(worklist, key=lambda x: (-x[4], x[3])):
-        depth = injection[3]
-        is_reagent = injection[4]
-        _add_component(injection[0], depth, is_reagent, plates)
-
-        if depth == 0:
-            _add_component(injection[1], depth - 1, is_reagent,
-                           plates)
-
-    return plates
-
-
 def find(plates, obj):
     '''Find object in plates.'''
     found = {}
@@ -132,7 +117,7 @@ def find(plates, obj):
     return found
 
 
-def _add_component(component, plate_id, is_reagent, plates):
+def add_component(component, plate_id, is_reagent, plates):
     '''Add a component to a plate.'''
     for plate in plates.values():
         wells = plate.find(component)
@@ -144,7 +129,7 @@ def _add_component(component, plate_id, is_reagent, plates):
         plate = Plate('reagents')
         plates['reagents'] = plate
         plate.add_line(component)
-        return _add_component(component, plate_id, is_reagent, plates)
+        return add_component(component, plate_id, is_reagent, plates)
 
     elif plate_id not in plates:
         plate = Plate(plate_id)
