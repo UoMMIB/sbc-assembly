@@ -6,7 +6,6 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-from assembly import tree_plotter
 from assembly.utils import drop
 import pandas as pd
 
@@ -55,11 +54,6 @@ class Optimiser(object):
     def get_reagents(self):
         '''Gets reagents.'''
         return self.__reagents
-
-    def plot(self, outfile=None, layout_name='kk'):
-        '''Plots matrix as graph.'''
-        tree_plotter.plot_matrix(self.__df, self.__reagents,
-                                 outfile, layout_name=layout_name)
 
     def save_matrix(self, outfile):
         '''Saves matrix as csv.'''
