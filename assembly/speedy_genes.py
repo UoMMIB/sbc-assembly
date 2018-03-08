@@ -8,6 +8,8 @@ All rights reserved.
 import itertools
 import sys
 
+from assembly.optimiser import Optimiser
+from assembly.utils import get_graph
 from assembly.worklist import WorklistGenerator
 
 
@@ -135,7 +137,12 @@ def _test(n_mutated, n_blocks):
 def main(args):
     '''main method.'''
     ingredients = _test(int(args[0]), int(args[1]))
-    worklist_gen = WorklistGenerator(ingredients)
+
+    # Convert ingredients to graph:
+    optim = Optimiser(ingredients)
+    graph = get_graph(optim.get_matrix(), optim.get_reagents())
+
+    worklist_gen = WorklistGenerator(graph)
     worklist, plates = worklist_gen.get_worklist()
 
     for plate_id in sorted(plates, reverse=True):

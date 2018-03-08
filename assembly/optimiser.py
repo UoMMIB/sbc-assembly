@@ -16,7 +16,7 @@ class Optimiser(object):
 
     def __init__(self, ingredients):
         self.__df = pd.DataFrame()
-        self.__reagents = {}
+        self.__reagents = []
         self.__intermediates = []
         self.__products = []
         self.__get_components(ingredients[0], ingredients[1], ingredients[2])
@@ -52,6 +52,10 @@ class Optimiser(object):
         '''Gets matrix.'''
         return self.__df
 
+    def get_reagents(self):
+        '''Gets reagents.'''
+        return self.__reagents
+
     def plot(self, outfile=None, layout_name='kk'):
         '''Plots matrix as graph.'''
         tree_plotter.plot_matrix(self.__df, self.__reagents,
@@ -74,7 +78,8 @@ class Optimiser(object):
             for comp in comps:
                 self.__get_components(comp[0], comp[1], comp[2], comp_id)
 
-        self.__reagents[comp_id] = is_reagent
+        if is_reagent and comp_id not in self.__reagents:
+            self.__reagents.append(comp_id)
 
         if dest:
             self.__df[dest][comp_id] = vol

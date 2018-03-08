@@ -13,7 +13,7 @@ from scipy.spatial.distance import cityblock
 from assembly import plate
 
 
-def get_graph(df):
+def get_graph(df, reagents):
     '''Convert a Dataframe (matrix) to a graph.'''
     graph = Graph(directed=True)
 
@@ -27,6 +27,7 @@ def get_graph(df):
 
     for vertex in vertices:
         graph.add_vertex(vertex)
+        graph.vs[graph.vcount() - 1]['is_reagent'] = vertex in reagents
 
     for col in df.columns:
         for idx, coeff in enumerate(df[col]):

@@ -12,30 +12,31 @@ All rights reserved.
 from synbiochem.utils import sort
 
 from assembly import plate
-from assembly.optimiser import Optimiser
-from assembly.utils import get_graph, get_optimal_src_dest
+from assembly.utils import get_optimal_src_dest
 import pandas as pd
 
 
 class WorklistGenerator(object):
     '''Class to generate worklists.'''
 
-    def __init__(self, ingredients):
-        # Get inputs and reagents:
-        self.__inputs = set([])
-        self.__reagents = set([])
-        self.__analyse_ingredients(ingredients)
+    def __init__(self, graph):
+        self.__graph = graph
 
-        # Convert ingredients to graph:
-        optim = Optimiser(ingredients)
+        self.__vertices = [v['name'] for v in graph.vs]
 
-        self.__graph = get_graph(optim.get_matrix())
-        self.__vertices = [v['name'] for v in self.__graph.vs]
-        self.__roots = [vs['name']
-                        for vs, outdg in zip(self.__graph.vs,
-                                             self.__graph.outdegree())
+        self.__roots = [vs
+                        for vs, outdg in zip(graph.vs, graph.outdegree())
                         if not outdg]
-        self.__edges = [e.tuple for e in self.__graph.es]
+
+        self.__inputs = [vs['name']
+                         for vs, indg in zip(graph.vs, graph.indegree())
+                         if not indg and not vs['is_reagent']]
+
+        self.__reagents = [vs['name']
+                           for vs, indg in zip(graph.vs, graph.indegree())
+                           if not indg and vs['is_reagent']]
+
+        self.__edges = [e.tuple for e in graph.es]
 
         self.__worklist = None
         self.__plates = {}
@@ -47,31 +48,12 @@ class WorklistGenerator(object):
 
         return self.__worklist, self.__plates
 
-    def __analyse_ingredients(self, ingredients):
-        try:
-            for ingredient in ingredients:
-                if isinstance(ingredient, tuple) and \
-                        len(ingredient) == 3 and \
-                        isinstance(ingredient[0], str) and \
-                        isinstance(ingredient[1], (int, long, float)) and \
-                        isinstance(ingredient[2], bool):
-                    if ingredient[2]:
-                        self.__reagents.add(ingredient[0])
-                    else:
-                        self.__inputs.add(ingredient[0])
-                else:
-                    self.__analyse_ingredients(ingredient)
-        except TypeError:
-            # If not iterable:
-            return
-
     def __create_worklist(self):
         '''Creates worklist and plates.'''
         data = []
 
         for root in self.__roots:
-            idx = self.__vertices.index(root)
-            self.__traverse(self.__graph.vs[idx], 0, data)
+            self.__traverse(root, 0, data)
 
         self.__worklist = pd.DataFrame(data)
 
