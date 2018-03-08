@@ -9,24 +9,29 @@ All rights reserved.
 # pylint: disable=too-many-arguments
 from igraph import Graph
 
-from assembly.utils import get_graph
+from assembly.utils import get_roots
 import matplotlib.pyplot as plt
 
 
-def plot_graph(labels, tree, colours, root=None, outfile=None,
-               layout_name='kk'):
+def plot_graph(graph, outfile=None, layout_name='kk'):
     '''Plot labelled graph.'''
-    positions = _get_positions(tree, root, layout_name)
+    positions = _get_positions(graph, layout_name)
+
     xs, ys = zip(*positions.values())
     ax = plt.gca()
     ax.set_xlim(min(xs), max(xs))
     ax.set_ylim(min(ys), max(ys))
 
     # Plot nodes:
+    labels = [vertex['name'] for vertex in graph.vs]
+
+    colours = ['lightgreen' if vertex['is_reagent'] else 'lightblue'
+               for vertex in graph.vs]
+
     patches = _plot_vertices(positions, labels, colours)
 
     # Plot edges:
-    _plot_edges(positions, [e.tuple for e in tree.es], patches)
+    _plot_edges(positions, [e.tuple for e in graph.es], patches)
 
     plt.axis('off')
 
@@ -36,27 +41,17 @@ def plot_graph(labels, tree, colours, root=None, outfile=None,
         plt.show()
 
 
-def plot_matrix(df, reagents, outfile=None, layout_name='kk'):
-    '''Plots tree.'''
-    graph, roots, vertices = get_graph(df)
-    colours = ['lightgreen' if reagents[vertex] else 'lightblue'
-               for vertex in vertices]
-
-    plot_graph(vertices, graph, colours,
-               root=[vertices.index(root) for root in roots],
-               outfile=outfile,
-               layout_name=layout_name)
-
-
-def _get_positions(tree, root, layout_name):
+def _get_positions(graph, layout_name):
     '''Gets positions.'''
     if layout_name == 'tree':
-        if root is None:
-            root = [0]
+        roots = [v.index for v in get_roots(graph)]
 
-        layout = tree.layout(layout_name, mode='in', root=root)
+        if not roots:
+            roots = [0]
+
+        layout = graph.layout(layout_name, mode='in', root=roots)
     else:
-        layout = tree.layout(layout_name)
+        layout = graph.layout(layout_name)
 
     return {k: layout[k] for k in range(len(layout.coords))}
 

@@ -12,7 +12,7 @@ All rights reserved.
 from synbiochem.utils import sort
 
 from assembly import plate
-from assembly.utils import get_optimal_src_dest
+from assembly.utils import get_optimal_src_dest, get_roots
 import pandas as pd
 
 
@@ -35,11 +35,7 @@ class WorklistGenerator(object):
         '''Creates worklist and plates.'''
         data = []
 
-        roots = [vs for vs, outdg in zip(self.__graph.vs,
-                                         self.__graph.outdegree())
-                 if not outdg]
-
-        for root in roots:
+        for root in get_roots(self.__graph):
             self.__traverse(root, 0, data)
 
         self.__worklist = pd.DataFrame(data)

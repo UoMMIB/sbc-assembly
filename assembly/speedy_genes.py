@@ -142,6 +142,9 @@ def main(args):
     optim = Optimiser(ingredients)
     graph = get_graph(optim.get_matrix(), optim.get_reagents())
 
+    from assembly.tree_plotter import plot_graph
+    plot_graph(graph, layout_name='tree')
+
     worklist_gen = WorklistGenerator(graph)
     worklist, plates = worklist_gen.get_worklist()
 
