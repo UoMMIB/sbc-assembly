@@ -67,6 +67,8 @@ class WorklistGenerator(object):
             plate.add_component(row['src_name'], row['level'], False,
                                 self.__plates)
 
+        # Write products:
+        for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
                 plate.add_component(row['dest_name'], 'output', False,
                                     self.__plates)
@@ -100,7 +102,7 @@ class WorklistGenerator(object):
         for pre in vertex.predecessors():
             edge_idx = self.__graph.get_eid(pre.index, vertex.index)
             edge = self.__graph.es[edge_idx]
-            vol = edge['coeff']
+            vol = edge['vol']
             opr = {'src_name': pre['name'],
                    'dest_name': vertex['name'],
                    'Volume': vol,

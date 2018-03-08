@@ -17,7 +17,7 @@ _REAGENTS = {'water': 23.0, 'mm': 25.0}
 
 def get_graph(plasmid_ids):
     '''Get graph.'''
-    graph = Graph()
+    graph = Graph(directed=True)
 
     reagents = {add_vertex(graph, reagent, {'is_reagent': True}): vol
                 for reagent, vol in _REAGENTS.iteritems()}
@@ -46,8 +46,7 @@ def add_vertex(graph, name, kwds=None):
             kwds = {}
 
         graph.add_vertex(name, **kwds)
-        vertex = graph.vs[graph.vcount() - 1]
-        return vertex
+        return graph.vs.find(name)
 
 
 def add_edge(graph, vertex_from, vertex_to, vol):

@@ -34,7 +34,7 @@ def get_graph(df, reagents):
             if coeff > 0:
                 graph.add_edge(vertices.index(indices[idx]),
                                vertices.index(col))
-                graph.es[graph.ecount() - 1]['coeff'] = coeff
+                graph.es[graph.ecount() - 1]['vol'] = coeff
 
     return graph
 
