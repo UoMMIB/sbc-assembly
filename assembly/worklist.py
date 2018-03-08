@@ -21,23 +21,6 @@ class WorklistGenerator(object):
 
     def __init__(self, graph):
         self.__graph = graph
-
-        self.__vertices = [v['name'] for v in graph.vs]
-
-        self.__roots = [vs
-                        for vs, outdg in zip(graph.vs, graph.outdegree())
-                        if not outdg]
-
-        self.__inputs = [vs['name']
-                         for vs, indg in zip(graph.vs, graph.indegree())
-                         if not indg and not vs['is_reagent']]
-
-        self.__reagents = [vs['name']
-                           for vs, indg in zip(graph.vs, graph.indegree())
-                           if not indg and vs['is_reagent']]
-
-        self.__edges = [e.tuple for e in graph.es]
-
         self.__worklist = None
         self.__plates = {}
 
@@ -52,7 +35,11 @@ class WorklistGenerator(object):
         '''Creates worklist and plates.'''
         data = []
 
-        for root in self.__roots:
+        roots = [vs for vs, outdg in zip(self.__graph.vs,
+                                         self.__graph.outdegree())
+                 if not outdg]
+
+        for root in roots:
             self.__traverse(root, 0, data)
 
         self.__worklist = pd.DataFrame(data)
@@ -114,14 +101,15 @@ class WorklistGenerator(object):
 
     def __traverse(self, vertex, level, data):
         '''Traverse tree.'''
-        for predecessor in vertex.predecessors():
-            vol = self.__graph.es[self.__edges.index(
-                (predecessor.index, vertex.index))]['coeff']
-            opr = {'src_name': predecessor['name'],
+        for pre in vertex.predecessors():
+            edge_idx = self.__graph.get_eid(pre.index, vertex.index)
+            edge = self.__graph.es[edge_idx]
+            vol = edge['coeff']
+            opr = {'src_name': pre['name'],
                    'dest_name': vertex['name'],
                    'Volume': vol,
                    'level': level,
-                   'input': predecessor['name'] in self.__inputs,
-                   'reagent': predecessor['name'] in self.__reagents}
+                   'input': not pre.indegree() and not pre['is_reagent'],
+                   'reagent': pre['is_reagent']}
             data.append(opr)
-            self.__traverse(predecessor, level + 1, data)
+            self.__traverse(pre, level + 1, data)
