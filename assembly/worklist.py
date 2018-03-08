@@ -29,9 +29,12 @@ class WorklistGenerator(object):
         # Convert ingredients to graph:
         optim = Optimiser(ingredients)
 
-        self.__graph, self.__roots, self.__vertices = \
-            get_graph(optim.get_matrix())
-
+        self.__graph = get_graph(optim.get_matrix())
+        self.__vertices = [v['name'] for v in self.__graph.vs]
+        self.__roots = [vs['name']
+                        for vs, outdg in zip(self.__graph.vs,
+                                             self.__graph.outdegree())
+                        if not outdg]
         self.__edges = [e.tuple for e in self.__graph.es]
 
         self.__worklist = None

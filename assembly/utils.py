@@ -9,6 +9,7 @@ All rights reserved.
 # pylint: disable=unsubscriptable-object
 from igraph import Graph
 from scipy.spatial.distance import cityblock
+
 from assembly import plate
 
 
@@ -34,7 +35,7 @@ def get_graph(df):
                                vertices.index(col))
                 graph.es[graph.ecount() - 1]['coeff'] = coeff
 
-    return graph, roots, vertices
+    return graph
 
 
 def drop(df):
