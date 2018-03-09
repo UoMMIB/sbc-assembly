@@ -19,6 +19,22 @@ def get_graph(plasmid_ids):
     '''Get graph.'''
     graph = Graph(directed=True)
 
+    for plasmid_id in plasmid_ids:
+        plasmid = add_vertex(graph, plasmid_id, {'is_reagent': False})
+        primer_mix = add_vertex(graph, _get_primer_mix_id(plasmid_id),
+                                {'is_reagent': True})
+        part = add_vertex(graph, plasmid_id + '_part', {'is_reagent': False})
+
+        add_edge(graph, plasmid, part, {'vol': 1.0})
+        add_edge(graph, primer_mix, part, {'vol': 24.0})
+
+    return graph
+
+
+def get_graph_full(plasmid_ids):
+    '''Get graph.'''
+    graph = Graph(directed=True)
+
     reagents = {add_vertex(graph, reagent, {'is_reagent': True}): vol
                 for reagent, vol in _REAGENTS.iteritems()}
 
