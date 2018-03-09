@@ -10,7 +10,7 @@ import sys
 from igraph import Graph
 
 from assembly.worklist import WorklistGenerator
-
+from synbiochem.utils.graph_utils import add_edge, add_vertex
 
 _REAGENTS = {'water': 23.0, 'mm': 25.0}
 
@@ -37,26 +37,6 @@ def get_graph(plasmid_ids):
     return graph
 
 
-def add_vertex(graph, name, kwds=None):
-    '''Add vertex.'''
-    try:
-        return graph.vs.find(name)
-    except ValueError:
-        if not kwds:
-            kwds = {}
-
-        graph.add_vertex(name, **kwds)
-        return graph.vs.find(name)
-
-
-def add_edge(graph, vertex_from, vertex_to, kwds=None):
-    '''Add edge.'''
-    if not kwds:
-        kwds = {}
-
-    graph.add_edge(vertex_from.index, vertex_to.index, **kwds)
-
-
 def _get_primer_mix_id(plasmid_id):
     '''Get primer mix id.'''
     return 'primer_mix'
@@ -66,7 +46,7 @@ def main(args):
     '''main method.'''
     graph = get_graph(args)
 
-    from assembly.graph_plotter import plot_graph
+    from synbiochem.utils.graph_utils import plot_graph
     plot_graph(graph, layout_name='tree')
 
     worklist_gen = WorklistGenerator(graph)

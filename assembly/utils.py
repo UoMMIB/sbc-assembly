@@ -39,12 +39,6 @@ def get_graph(df, reagents):
     return graph
 
 
-def get_roots(graph):
-    '''Get roots.'''
-    return [vs for vs, outdg in zip(graph.vs, graph.outdegree())
-            if not outdg]
-
-
 def drop(df):
     '''Drop empty columns and rows.'''
     df = df[df.columns[(df != 0).any()]]

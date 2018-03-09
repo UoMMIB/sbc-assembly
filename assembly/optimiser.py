@@ -132,10 +132,8 @@ def main():
          ), 0, False)
 
     optim = Optimiser(ingredients)
-    optim.plot('init.png', layout_name='tree')
     optim.save_matrix('init.csv')
     optim.optimise()
-    optim.plot('optim.png', layout_name='tree')
     optim.save_matrix('optim.csv')
 
 

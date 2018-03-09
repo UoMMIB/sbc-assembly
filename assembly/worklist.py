@@ -8,12 +8,14 @@ All rights reserved.
 # pylint: disable=not-an-iterable
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
 from synbiochem.utils import sort
 
 from assembly import plate
-from assembly.utils import get_optimal_src_dest, get_roots
+from assembly.utils import get_optimal_src_dest
 import pandas as pd
+from synbiochem.utils.graph_utils import get_roots
 
 
 class WorklistGenerator(object):

@@ -142,7 +142,7 @@ def main(args):
     optim = Optimiser(ingredients)
     graph = get_graph(optim.get_matrix(), optim.get_reagents())
 
-    from assembly.graph_plotter import plot_graph
+    from synbiochem.utils.graph_utils import plot_graph
     plot_graph(graph, layout_name='tree')
 
     worklist_gen = WorklistGenerator(graph)
