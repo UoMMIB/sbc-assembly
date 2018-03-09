@@ -25,8 +25,8 @@ def get_graph(plasmid_ids):
                                 {'is_reagent': True})
         part = add_vertex(graph, plasmid_id + '_part', {'is_reagent': False})
 
-        add_edge(graph, plasmid, part, {'vol': 1.0})
-        add_edge(graph, master_mix, part, {'vol': 24.0})
+        add_edge(graph, plasmid, part, {'Volume': 1.0})
+        add_edge(graph, master_mix, part, {'Volume': 24.0})
 
     return graph
 
@@ -45,10 +45,10 @@ def get_graph_full(plasmid_ids):
         part = add_vertex(graph, plasmid_id + '_part', {'is_reagent': False})
 
         for reagent, vol in reagents.iteritems():
-            add_edge(graph, reagent, part, {'vol': vol})
+            add_edge(graph, reagent, part, {'Volume': vol})
 
-        add_edge(graph, plasmid, part, {'vol': 1.0})
-        add_edge(graph, primer_mix, part, {'vol': 1.0})
+        add_edge(graph, plasmid, part, {'Volume': 1.0})
+        add_edge(graph, primer_mix, part, {'Volume': 1.0})
 
     return graph
 

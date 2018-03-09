@@ -49,21 +49,23 @@ class WorklistGenerator(object):
         '''Writes plates from worklist.'''
         # Write input plate:
         inpt = \
-            self.__worklist.loc[self.__worklist['input']]['src_name'].values
+            self.__worklist.loc[self.__worklist['src_is_input']
+                                ]['src_name'].values
 
         for val in sort(inpt):
-            plate.add_component(val, 'input', False, self.__plates)
+            plate.add_component(val, 'src_is_input', False, self.__plates)
 
         # Write reagents plate:
         reags = \
-            self.__worklist.loc[self.__worklist['reagent']]['src_name'].values
+            self.__worklist.loc[self.__worklist['src_is_reagent']
+                                ]['src_name'].values
 
         for val in sort(reags):
             plate.add_component(val, 'MastermixTrough', True, self.__plates)
 
         # Write intermediates:
-        intrm = self.__worklist[~(self.__worklist['input']) &
-                                ~(self.__worklist['reagent'])]
+        intrm = self.__worklist[~(self.__worklist['src_is_input']) &
+                                ~(self.__worklist['src_is_reagent'])]
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
             plate.add_component(row['src_name'], row['level'], False,
@@ -86,7 +88,7 @@ class WorklistGenerator(object):
                           'DestinationPlateBarcode', 'DestinationPlateWell']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
-        self.__worklist.sort_values(['level', 'reagent',
+        self.__worklist.sort_values(['level', 'src_is_reagent',
                                      'DestinationPlateWell'],
                                     ascending=[False, False, True],
                                     inplace=True)
@@ -99,17 +101,22 @@ class WorklistGenerator(object):
 
         return get_optimal_src_dest(srcs, dests)
 
-    def __traverse(self, vertex, level, data):
+    def __traverse(self, dest, level, data):
         '''Traverse tree.'''
-        for pre in vertex.predecessors():
-            edge_idx = self.__graph.get_eid(pre.index, vertex.index)
+        for src in dest.predecessors():
+            edge_idx = self.__graph.get_eid(src.index, dest.index)
             edge = self.__graph.es[edge_idx]
-            vol = edge['vol']
-            opr = {'src_name': pre['name'],
-                   'dest_name': vertex['name'],
-                   'Volume': vol,
-                   'level': level,
-                   'input': not pre.indegree() and not pre['is_reagent'],
-                   'reagent': pre['is_reagent']}
+
+            opr = edge.attributes()
+
+            for key, val in src.attributes().iteritems():
+                opr['src_' + key] = val
+
+            for key, val in dest.attributes().iteritems():
+                opr['dest_' + key] = val
+
+            opr['level'] = level
+            opr['src_is_input'] = not src.indegree() and not src['is_reagent']
+
             data.append(opr)
-            self.__traverse(pre, level + 1, data)
+            self.__traverse(src, level + 1, data)

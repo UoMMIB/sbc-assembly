@@ -13,15 +13,24 @@ from assembly.worklist import WorklistGenerator
 from synbiochem.utils.graph_utils import add_edge, add_vertex
 
 
-def get_graph(plasmid_ids):
+def get_graph(part_ids):
     '''Get graph.'''
     graph = Graph(directed=True)
 
-    for plasmid_id in plasmid_ids:
-        part = add_vertex(graph, plasmid_id + '_part', {'is_reagent': False})
-        primer_mix = add_vertex(graph, 'mm', {'is_reagent': True})
+    ladder = add_vertex(graph, 'ladder', {'is_reagent': False})
+    bffer = add_vertex(graph, 'buffer', {'is_reagent': True, 'well': 'H12'})
+    ladder_product = add_vertex(graph, 'ladder_product',
+                                {'is_reagent': False, 'well': 'H12'})
+    add_edge(graph, ladder, ladder_product, {'Volume': 2.0})
+    add_edge(graph, bffer, ladder_product, {'Volume': 22.0})
 
-        add_edge(graph, primer_mix, part, {'Volume': 24.0})
+    for part_id in part_ids:
+        part = add_vertex(graph, part_id, {'is_reagent': False})
+        product = add_vertex(graph, part_id + '_product',
+                             {'is_reagent': False})
+
+        add_edge(graph, part, product, {'Volume': 1.0})
+        add_edge(graph, bffer, product, {'Volume': 23.0})
 
     return graph
 
