@@ -59,8 +59,8 @@ class WorklistGenerator(object):
             self.__worklist.loc[self.__worklist['src_is_input']
                                 ][['src_name', 'src_well']].values
 
-        for val in sorted(inpt, key=itemgetter(0)):
-            plate.add_component(val[0], 'src_is_input', False, self.__plates,
+        for val in inpt:
+            plate.add_component(val[0], 'input', False, self.__plates,
                                 val[1])
 
         # Write reagents plate:
