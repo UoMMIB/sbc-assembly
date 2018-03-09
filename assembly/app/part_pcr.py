@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-few-public-methods
 # pylint: disable=ungrouped-imports
 import sys
 
@@ -34,24 +35,30 @@ class PartPcrWriter(object):
         '''Get graph.'''
         graph = Graph(directed=True)
 
+        parts = {}
+
         for plasmid_id in plasmid_ids:
             for part_ice in self.__get_parts(plasmid_id):
                 if part_ice.get_parameter('Type') != 'DOMINO':
                     part_id = part_ice.get_ice_id()
-                    part_plasmid_ice, primer_id = \
-                        self.__get_plasmid_primer(part_ice)
 
-                    part_plasmid = add_vertex(graph,
-                                              part_plasmid_ice.get_ice_id() +
-                                              '(' + part_id + ')',
-                                              {'is_reagent': False})
-                    master_mix = add_vertex(graph, primer_id,
-                                            {'is_reagent': True})
-                    part = add_vertex(graph, part_id,
+                    if part_id not in parts:
+                        parts[part_id] = part_ice
+
+        for part_id, part_ice in parts.iteritems():
+            part_plasmid_ice, primer_id = self.__get_plasmid_primer(part_ice)
+
+            part_plasmid = add_vertex(graph,
+                                      part_plasmid_ice.get_ice_id() +
+                                      ' (' + part_id + ')',
                                       {'is_reagent': False})
+            master_mix = add_vertex(graph, primer_id,
+                                    {'is_reagent': True})
+            part = add_vertex(graph, part_id,
+                              {'is_reagent': False})
 
-                    add_edge(graph, part_plasmid, part, {'Volume': 1.0})
-                    add_edge(graph, master_mix, part, {'Volume': 24.0})
+            add_edge(graph, part_plasmid, part, {'Volume': 1.0})
+            add_edge(graph, master_mix, part, {'Volume': 24.0})
 
         return graph
 
@@ -80,10 +87,6 @@ class PartPcrWriter(object):
                     return parent, _BACKBONE_PRIMER[linked_part_ids[0]]
 
         return None, None
-
-    def __get_master_mix_id(self, part_id):
-        '''Get master mix id.'''
-        return 'mm'
 
     def __get_ice_entry(self, ice_id):
         '''Get ICE entry.'''
