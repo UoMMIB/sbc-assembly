@@ -5,11 +5,12 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=unsubscriptable-object
 import itertools
 import sys
-
+from igraph import Graph
 from assembly.optimiser import Optimiser
-from assembly.utils import get_graph
 from assembly.worklist import WorklistGenerator
 
 
@@ -127,6 +128,38 @@ def _get_gene_ingredients(design, des_vols, reagents):
                  zip(design, vols, [False] * len(design)))
 
 
+def _get_graph(df, reagents):
+    '''Convert a Dataframe (matrix) to a graph.'''
+    graph = Graph(directed=True)
+
+    df = _drop(df)
+
+    roots = sorted(list(set(list(df.columns.values)) -
+                        set(df.index.values)))
+
+    indices = list(df.index.values)
+    vertices = sorted(list(roots) + indices)
+
+    for vertex in vertices:
+        graph.add_vertex(vertex)
+        graph.vs[graph.vcount() - 1]['is_reagent'] = vertex in reagents
+
+    for col in df.columns:
+        for idx, coeff in enumerate(df[col]):
+            if coeff > 0:
+                graph.add_edge(vertices.index(indices[idx]),
+                               vertices.index(col))
+                graph.es[graph.ecount() - 1]['Volume'] = coeff
+
+    return graph
+
+
+def _drop(df):
+    '''Drop empty columns and rows.'''
+    df = df[df.columns[(df != 0).any()]]
+    return df[(df.T != 0).any()]
+
+
 def _test(n_mutated, n_blocks):
     '''Test method.'''
     oligos = [str(val) for val in range(1, 29)]
@@ -140,7 +173,7 @@ def main(args):
 
     # Convert ingredients to graph:
     optim = Optimiser(ingredients)
-    graph = get_graph(optim.get_matrix(), optim.get_reagents())
+    graph = _get_graph(optim.get_matrix(), optim.get_reagents())
 
     from synbiochem.utils.graph_utils import plot_graph
     plot_graph(graph, layout_name='tree')

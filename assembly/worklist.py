@@ -10,10 +10,10 @@ All rights reserved.
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
+from scipy.spatial.distance import cityblock
 from synbiochem.utils import sort
 
 from assembly import plate
-from assembly.utils import get_optimal_src_dest
 import pandas as pd
 from synbiochem.utils.graph_utils import get_roots
 
@@ -99,7 +99,21 @@ class WorklistGenerator(object):
         srcs = plate.find(self.__plates, src_name)
         dests = plate.find(self.__plates, dest_name)
 
-        return get_optimal_src_dest(srcs, dests)
+        shortest_dist = float('inf')
+        optimal_pair = None
+
+        for src_plate, src_wells in srcs.iteritems():
+            for dest_plate, dest_wells in dests.iteritems():
+                for src_well in src_wells:
+                    for dest_well in dest_wells:
+                        dist = cityblock(plate.get_indices(src_well),
+                                         plate.get_indices(dest_well))
+
+                        if dist < shortest_dist:
+                            shortest_dist = dist
+                            optimal_pair = [src_plate, src_well,
+                                            dest_plate, dest_well]
+        return optimal_pair
 
     def __traverse(self, dest, level, data):
         '''Traverse tree.'''
