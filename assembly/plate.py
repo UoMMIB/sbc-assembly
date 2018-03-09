@@ -126,8 +126,11 @@ def add_component(component, plate_id, is_reagent, plates):
             return wells[0], plate
 
     if is_reagent:
-        plate = Plate('reagents')
-        plates['reagents'] = plate
+        if 'reagents' not in plates:
+            plate = Plate('reagents')
+            plates['reagents'] = plate
+
+        plate = plates['reagents']
         plate.add_line(component)
         return add_component(component, plate_id, is_reagent, plates)
 

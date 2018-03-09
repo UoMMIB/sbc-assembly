@@ -29,10 +29,10 @@ def get_graph(plasmid_ids):
         part = add_vertex(graph, plasmid_id + '_part', {'is_reagent': False})
 
         for reagent, vol in reagents.iteritems():
-            add_edge(graph, reagent, part, vol)
+            add_edge(graph, reagent, part, {'vol': vol})
 
-        add_edge(graph, plasmid, part, 1.0)
-        add_edge(graph, primer_mix, part, 1.0)
+        add_edge(graph, plasmid, part, {'vol': 1.0})
+        add_edge(graph, primer_mix, part, {'vol': 1.0})
 
     return graph
 
@@ -49,10 +49,12 @@ def add_vertex(graph, name, kwds=None):
         return graph.vs.find(name)
 
 
-def add_edge(graph, vertex_from, vertex_to, vol):
+def add_edge(graph, vertex_from, vertex_to, kwds=None):
     '''Add edge.'''
-    graph.add_edge(vertex_from.index, vertex_to.index)
-    graph.es[graph.ecount() - 1]['vol'] = vol
+    if not kwds:
+        kwds = {}
+
+    graph.add_edge(vertex_from.index, vertex_to.index, **kwds)
 
 
 def _get_primer_mix_id(plasmid_id):
