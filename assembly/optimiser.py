@@ -6,7 +6,6 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-from assembly.utils import drop
 import pandas as pd
 
 
@@ -80,7 +79,8 @@ class Optimiser(object):
 
     def __drop(self):
         '''Drop empty columns and rows.'''
-        self.__df = drop(self.__df)
+        self.__df = self.__df[self.__df.columns[(self.__df != 0).any()]]
+        self.__df = self.__df[(self.__df.T != 0).any()]
 
     def __add_row_col(self, comp_id):
         '''Add new row and column.'''
