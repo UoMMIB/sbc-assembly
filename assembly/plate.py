@@ -42,9 +42,13 @@ class Plate(object):
         row, col = get_indices(well_name)
         return self.get(row, col)
 
-    def add(self, obj):
+    def add(self, obj, well_name=None):
         '''Adds an object to the next well.'''
-        return self.__set(obj, self.__next)
+        if well_name:
+            row, col = get_indices(well_name)
+            self.__plate[col + 1][row] = obj
+        else:
+            return self.__set(obj, self.__next)
 
     def add_line(self, obj):
         '''Adds a line of objects (row or col) in next empty line.'''
@@ -117,7 +121,7 @@ def find(plates, obj):
     return found
 
 
-def add_component(component, plate_id, is_reagent, plates):
+def add_component(component, plate_id, is_reagent, plates, well_name):
     '''Add a component to a plate.'''
     for plate in plates.values():
         wells = plate.find(component)
@@ -131,8 +135,14 @@ def add_component(component, plate_id, is_reagent, plates):
             plates['reagents'] = plate
 
         plate = plates['reagents']
-        plate.add_line(component)
-        return add_component(component, plate_id, is_reagent, plates)
+
+        if well_name:
+            return plate.add(component, well_name), plate
+        else:
+            plate.add_line(component)
+
+        return add_component(component, plate_id, is_reagent, plates,
+                             well_name)
 
     elif plate_id not in plates:
         plate = Plate(plate_id)
@@ -140,4 +150,4 @@ def add_component(component, plate_id, is_reagent, plates):
     else:
         plate = plates[plate_id]
 
-    return plate.add(component), plate
+    return plate.add(component, well_name), plate

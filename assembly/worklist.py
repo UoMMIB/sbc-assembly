@@ -10,8 +10,9 @@ All rights reserved.
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
+from operator import itemgetter
+
 from scipy.spatial.distance import cityblock
-from synbiochem.utils import sort
 
 from assembly import plate
 import pandas as pd
@@ -48,20 +49,28 @@ class WorklistGenerator(object):
     def __write_plates(self):
         '''Writes plates from worklist.'''
         # Write input plate:
+        if 'src_well' not in self.__worklist:
+            self.__worklist['src_well'] = None
+
+        if 'dest_well' not in self.__worklist:
+            self.__worklist['dest_well'] = None
+
         inpt = \
             self.__worklist.loc[self.__worklist['src_is_input']
-                                ]['src_name'].values
+                                ][['src_name', 'src_well']].values
 
-        for val in sort(inpt):
-            plate.add_component(val, 'src_is_input', False, self.__plates)
+        for val in sorted(inpt, key=itemgetter(0)):
+            plate.add_component(val[0], 'src_is_input', False, self.__plates,
+                                val[1])
 
         # Write reagents plate:
         reags = \
             self.__worklist.loc[self.__worklist['src_is_reagent']
-                                ]['src_name'].values
+                                ][['src_name', 'src_well']].values
 
-        for val in sort(reags):
-            plate.add_component(val, 'MastermixTrough', True, self.__plates)
+        for val in sorted(reags, key=itemgetter(0)):
+            plate.add_component(val[0], 'MastermixTrough', True,
+                                self.__plates, val[1])
 
         # Write intermediates:
         intrm = self.__worklist[~(self.__worklist['src_is_input']) &
@@ -69,13 +78,13 @@ class WorklistGenerator(object):
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
             plate.add_component(row['src_name'], row['level'], False,
-                                self.__plates)
+                                self.__plates, row['src_well'])
 
         # Write products:
         for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
                 plate.add_component(row['dest_name'], 'output', False,
-                                    self.__plates)
+                                    self.__plates, row['dest_well'])
 
     def __add_locations(self):
         '''Add locations to worklist.'''

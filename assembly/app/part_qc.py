@@ -17,8 +17,8 @@ def get_graph(part_ids):
     '''Get graph.'''
     graph = Graph(directed=True)
 
-    ladder = add_vertex(graph, 'ladder', {'is_reagent': False})
-    bffer = add_vertex(graph, 'buffer', {'is_reagent': True, 'well': 'H12'})
+    ladder = add_vertex(graph, 'ladder', {'is_reagent': True, 'well': 'H12'})
+    bffer = add_vertex(graph, 'buffer', {'is_reagent': True})
     ladder_product = add_vertex(graph, 'ladder_product',
                                 {'is_reagent': False, 'well': 'H12'})
     add_edge(graph, ladder, ladder_product, {'Volume': 2.0})
