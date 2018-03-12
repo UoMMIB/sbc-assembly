@@ -5,7 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
-# pylint: disable=ungrouped-imports
+# pylint: disable=too-few-public-methods
 import sys
 
 from igraph import Graph
@@ -22,51 +22,57 @@ _BACKBONE_PRIMER = {4613: 'E2cprim',
                     6384: 'Oriprim'}
 
 
-def get_graph(parts_ice, ice_helper):
-    '''Get graph.'''
-    graph = Graph(directed=True)
+class PartPcrWriter(object):
+    '''Class for generating Part PCR worklist graphs.'''
 
-    for part_id, part_ice in parts_ice.iteritems():
-        part_plasmid_ice, primer_id = _get_plasmid_primer(part_ice, ice_helper)
+    def __init__(self, parts_ice, ice_helper):
+        self.__parts_ice = parts_ice
+        self.__ice_helper = ice_helper
 
-        part_plasmid = add_vertex(graph,
-                                  part_plasmid_ice.get_ice_id(),
-                                  {'is_reagent': False})
-        master_mix = add_vertex(graph, primer_id, {'is_reagent': True})
-        part = add_vertex(graph, part_id, {'is_reagent': False})
+    def get_graph(self):
+        '''Get graph.'''
+        graph = Graph(directed=True)
 
-        add_edge(graph, part_plasmid, part, {'Volume': 1.0})
-        add_edge(graph, master_mix, part, {'Volume': 24.0})
+        for part_id, part_ice in self.__parts_ice.iteritems():
+            part_plasmid_ice, primer_id = self.__get_plasmid_primer(part_ice)
 
-    return graph
+            part_plasmid = add_vertex(graph,
+                                      part_plasmid_ice.get_ice_id(),
+                                      {'is_reagent': False})
+            master_mix = add_vertex(graph, primer_id, {'is_reagent': True})
+            part = add_vertex(graph, part_id, {'is_reagent': False})
 
+            add_edge(graph, part_plasmid, part, {'Volume': 1.0})
+            add_edge(graph, master_mix, part, {'Volume': 24.0})
 
-def _get_plasmid_primer(part_ice, ice_helper):
-    '''Get "parent" Plasmid from Part.'''
-    part_metadata = part_ice.get_metadata()
+        return graph
 
-    for parent in part_metadata['parents']:
-        if parent['visible'] == 'OK':
-            parent = ice_helper.get_ice_entry(parent['id'])
-            linked_part_ids = \
-                [linked_part['id']
-                 for linked_part in parent.get_metadata()['linkedParts']]
+    def __get_plasmid_primer(self, part_ice):
+        '''Get "parent" Plasmid from Part.'''
+        part_metadata = part_ice.get_metadata()
 
-            if len(linked_part_ids) == 2 and \
-                    part_metadata['id'] in linked_part_ids:
-                linked_part_ids.remove(part_metadata['id'])
-                return parent, _BACKBONE_PRIMER[linked_part_ids[0]]
+        for parent in part_metadata['parents']:
+            if parent['visible'] == 'OK':
+                parent = self.__ice_helper.get_ice_entry(parent['id'])
+                linked_part_ids = \
+                    [linked_part['id']
+                     for linked_part in parent.get_metadata()['linkedParts']]
 
-    return None, None
+                if len(linked_part_ids) == 2 and \
+                        part_metadata['id'] in linked_part_ids:
+                    linked_part_ids.remove(part_metadata['id'])
+                    return parent, _BACKBONE_PRIMER[linked_part_ids[0]]
+
+        return None, None
 
 
 def main(args):
     '''main method.'''
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    parts = ice_helper.get_parts(args[3:])
-    graph = get_graph(parts, ice_helper)
+    parts_ice = ice_helper.get_parts(args[3:])
 
-    worklist_gen = worklist.WorklistGenerator(graph)
+    writer = PartPcrWriter(parts_ice, ice_helper)
+    worklist_gen = worklist.WorklistGenerator(writer.get_graph())
     wrklst, plates = worklist_gen.get_worklist()
 
     for plt in plates:
