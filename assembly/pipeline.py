@@ -25,7 +25,7 @@ def run(writers, input_plates=None, parent_out_dir_name='.'):
         os.makedirs(out_dir)
 
         worklist_gen = worklist.WorklistGenerator(writer.get_graph())
-        wrklst, plates = worklist_gen.get_worklist()
+        wrklst, plates = worklist_gen.get_worklist(input_plates)
 
         for plt in plates:
             plt.to_csv(out_dir)
