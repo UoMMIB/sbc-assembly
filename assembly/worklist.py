@@ -27,16 +27,19 @@ class WorklistGenerator(object):
         self.__worklist = None
         self.__plates = {}
 
-    def get_worklist(self):
+    def get_worklist(self, plates=None):
         '''Gets worklist and plates.'''
         if not self.__worklist:
-            self.__create_worklist()
+            self.__create_worklist(plates)
 
         return self.__worklist, self.__plates
 
-    def __create_worklist(self):
+    def __create_worklist(self, plates):
         '''Creates worklist and plates.'''
         data = []
+
+        if plates:
+            self.__plates.update(plates)
 
         for root in get_roots(self.__graph):
             self.__traverse(root, 0, data)
