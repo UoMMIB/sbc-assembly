@@ -11,7 +11,7 @@ All rights reserved.
 # pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
 from operator import itemgetter
-
+import os
 from scipy.spatial.distance import cityblock
 
 from assembly import plate
@@ -32,7 +32,7 @@ class WorklistGenerator(object):
         if not self.__worklist:
             self.__create_worklist(plates)
 
-        return self.__worklist, self.__plates
+        return self.__worklist, self.__plates.values()
 
     def __create_worklist(self, plates):
         '''Creates worklist and plates.'''
@@ -104,7 +104,6 @@ class WorklistGenerator(object):
                                      'DestinationPlateWell'],
                                     ascending=[False, False, True],
                                     inplace=True)
-        self.__worklist.to_csv('worklist.csv', index=False)
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
@@ -146,3 +145,10 @@ class WorklistGenerator(object):
 
             data.append(opr)
             self.__traverse(src, level + 1, data)
+
+
+def to_csv(wrklst, out_dir_name='.'):
+    '''Export worklist as csv file.'''
+    filepath = os.path.abspath(os.path.join(out_dir_name,
+                                            'worklist.csv'))
+    wrklst.to_csv(filepath, encoding='utf-8', index=False)

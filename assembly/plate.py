@@ -5,24 +5,25 @@ All rights reserved.
 
 @author: neilswainston
 '''
+import os
+
 import pandas as pd
 
 
 class Plate(object):
     '''Class to represent a well plate.'''
 
-    def __init__(self, plate_id, rows=8, cols=12, col_ord=False):
-        self.__plate_id = plate_id
+    def __init__(self, name, rows=8, cols=12, col_ord=False):
         self.__plate = pd.DataFrame(index=[chr(r + ord('A'))
                                            for r in range(0, rows)],
                                     columns=range(1, cols + 1))
-
+        self.__plate.name = name
         self.__col_ord = col_ord
         self.__next = 0
 
-    def get_id(self):
-        '''Get id.'''
-        return self.__plate_id
+    def get_name(self):
+        '''Get name.'''
+        return self.__plate.name
 
     def shape(self):
         '''Get plate shape.'''
@@ -92,6 +93,12 @@ class Plate(object):
             return row * cols + col
 
         return col * rows + row
+
+    def to_csv(self, out_dir_name='.'):
+        '''Export plate to csv.'''
+        filepath = os.path.abspath(os.path.join(out_dir_name,
+                                                self.__plate.name + '.csv'))
+        self.__plate.to_csv(filepath, encoding='utf-8')
 
     def __set(self, obj, idx):
         '''Sets an object in the given well.'''

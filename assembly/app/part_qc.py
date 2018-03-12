@@ -9,7 +9,7 @@ import sys
 
 from igraph import Graph
 
-from assembly.worklist import WorklistGenerator
+from assembly import worklist
 from synbiochem.utils.graph_utils import add_edge, add_vertex
 
 
@@ -39,18 +39,13 @@ def main(args):
     '''main method.'''
     graph = get_graph(args)
 
-    from synbiochem.utils.graph_utils import plot_graph
-    plot_graph(graph, layout_name='tree')
+    worklist_gen = worklist.WorklistGenerator(graph)
+    wrklst, plates = worklist_gen.get_worklist()
 
-    worklist_gen = WorklistGenerator(graph)
-    worklist, plates = worklist_gen.get_worklist()
+    for plt in plates:
+        plt.to_csv()
 
-    for plate_id in sorted(plates, reverse=True):
-        print 'Plate: ' + str(plate_id)
-        print plates[plate_id]
-        print
-
-    print worklist
+    worklist.to_csv(wrklst)
 
 
 if __name__ == '__main__':
