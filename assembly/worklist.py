@@ -12,6 +12,7 @@ All rights reserved.
 # pylint: disable=unsubscriptable-object
 from operator import itemgetter
 import os
+
 from scipy.spatial.distance import cityblock
 
 from assembly import plate
@@ -48,6 +49,7 @@ class WorklistGenerator(object):
 
         self.__write_plates()
         self.__add_locations()
+        self.__rename()
 
     def __write_plates(self):
         '''Writes plates from worklist.'''
@@ -145,6 +147,11 @@ class WorklistGenerator(object):
 
             data.append(opr)
             self.__traverse(src, level + 1, data)
+
+    def __rename(self):
+        '''Renames columns appropriately.'''
+        self.__worklist.rename(columns={'src_name': 'ComponentName'},
+                               inplace=True)
 
 
 def to_csv(wrklst, out_dir_name='.'):
