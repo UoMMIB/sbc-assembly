@@ -43,7 +43,7 @@ class PartPcrWriter(object):
             part = add_vertex(graph, part_id, {'is_reagent': False})
 
             add_edge(graph, part_plasmid, part, {'Volume': 1.0})
-            add_edge(graph, master_mix, part, {'Volume': 24.0})
+            add_edge(graph, master_mix, part, {'Volume': 49.0})
 
         return graph
 

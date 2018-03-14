@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 import os
 
 import pandas as pd
@@ -158,3 +159,16 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
         plate = plates[plate_id]
 
     return plate.add(component, well_name), plate
+
+
+def from_table(filename):
+    '''Generate Plate from tabular data.'''
+    _, name = os.path.split(filename)
+    plt = Plate(name.split('.')[0])
+
+    df = pd.read_csv(filename)
+
+    for _, row in df.iterrows():
+        plt.add(row['name'], row['well'])
+
+    return plt
