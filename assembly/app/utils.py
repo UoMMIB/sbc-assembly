@@ -22,11 +22,10 @@ class ICEHelper(object):
 
         for plasmid_id in plasmid_ids:
             for part_ice in self.__get_parts(plasmid_id):
-                if part_ice.get_parameter('Type') != 'DOMINO':
-                    part_id = part_ice.get_ice_id()
+                part_id = part_ice.get_ice_id()
 
-                    if part_id not in parts:
-                        parts[part_id] = part_ice
+                if part_id not in parts:
+                    parts[part_id] = part_ice
 
         return parts
 
