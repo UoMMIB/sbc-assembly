@@ -28,14 +28,14 @@ class WorklistGenerator(object):
         self.__worklist = None
         self.__plates = {}
 
-    def get_worklist(self, plates=None):
+    def get_worklist(self, reagent_plate_name, plates=None):
         '''Gets worklist and plates.'''
         if not self.__worklist:
-            self.__create_worklist(plates)
+            self.__create_worklist(plates, reagent_plate_name)
 
         return self.__worklist, self.__plates.values()
 
-    def __create_worklist(self, plates):
+    def __create_worklist(self, plates, reagent_plate_name):
         '''Creates worklist and plates.'''
         data = []
 
@@ -47,11 +47,11 @@ class WorklistGenerator(object):
 
         self.__worklist = pd.DataFrame(data)
 
-        self.__write_plates()
+        self.__write_plates(reagent_plate_name)
         self.__add_locations()
         self.__rename()
 
-    def __write_plates(self):
+    def __write_plates(self, reagent_plate_name):
         '''Writes plates from worklist.'''
         # Write input plate:
         if 'src_well' not in self.__worklist:
@@ -65,8 +65,8 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well']].values
 
         for val in inpt:
-            plate.add_component(val[0], 'input', False, self.__plates,
-                                val[1])
+            plate.add_component(val[0], 'input', False, self.__plates, val[1],
+                                reagent_plate_name)
 
         # Write reagents plate:
         reags = \
@@ -74,8 +74,8 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well']].values
 
         for val in sorted(reags, key=itemgetter(0)):
-            plate.add_component(val[0], 'MastermixTrough', True,
-                                self.__plates, val[1])
+            plate.add_component(val[0], 'MastermixTrough', True, self.__plates,
+                                val[1], reagent_plate_name)
 
         # Write intermediates:
         intrm = self.__worklist[~(self.__worklist['src_is_input']) &
@@ -83,13 +83,15 @@ class WorklistGenerator(object):
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
             plate.add_component(row['src_name'], row['level'], False,
-                                self.__plates, row['src_well'])
+                                self.__plates, row['src_well'],
+                                reagent_plate_name)
 
         # Write products:
         for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
                 plate.add_component(row['dest_name'], 'output', False,
-                                    self.__plates, row['dest_well'])
+                                    self.__plates, row['dest_well'],
+                                    reagent_plate_name)
 
     def __add_locations(self):
         '''Add locations to worklist.'''

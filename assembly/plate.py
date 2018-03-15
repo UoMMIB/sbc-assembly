@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
 import os
 
 import pandas as pd
@@ -129,7 +130,8 @@ def find(plates, obj):
     return found
 
 
-def add_component(component, plate_id, is_reagent, plates, well_name):
+def add_component(component, plate_id, is_reagent, plates, well_name,
+                  reagent_plate_name):
     '''Add a component to a plate.'''
     for plate in plates.values():
         wells = plate.find(component)
@@ -138,11 +140,11 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
             return wells[0], plate
 
     if is_reagent:
-        if 'reagents' not in plates:
-            plate = Plate('reagents')
-            plates['reagents'] = plate
+        if reagent_plate_name not in plates:
+            plate = Plate(reagent_plate_name)
+            plates[reagent_plate_name] = plate
 
-        plate = plates['reagents']
+        plate = plates[reagent_plate_name]
 
         if well_name:
             return plate.add(component, well_name), plate
@@ -150,7 +152,7 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
             plate.add_line(component)
 
         return add_component(component, plate_id, is_reagent, plates,
-                             well_name)
+                             well_name, reagent_plate_name)
 
     elif plate_id not in plates:
         plate = Plate(plate_id)

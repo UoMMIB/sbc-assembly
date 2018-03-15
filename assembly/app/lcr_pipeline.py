@@ -15,7 +15,7 @@ from assembly.app import part_pcr, part_qc, part_dig, utils
 def main(args):
     '''main method.'''
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    all_parts = ice_helper.get_parts(args[5:])
+    all_parts = ice_helper.get_parts(args[6:])
     parts_ice = {ice_id: part_ice
                  for ice_id, part_ice in all_parts.iteritems()
                  if part_ice.get_parameter('Type') != 'DOMINO'}
@@ -33,7 +33,7 @@ def main(args):
                 plt = plate.from_table(os.path.join(dirpath, filename))
                 input_plates[plt.get_name()] = plt
 
-    pipeline.run(writers, input_plates, parent_out_dir_name=args[4])
+    pipeline.run(writers, args[4], input_plates, parent_out_dir_name=args[5])
 
 
 if __name__ == '__main__':

@@ -6,11 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-import sys
-
 from igraph import Graph
 
-from assembly import utils, worklist
 from synbiochem.utils.graph_utils import add_edge, add_vertex
 
 
@@ -64,22 +61,3 @@ class PartPcrWriter(object):
                     return parent, _BACKBONE_PRIMER[linked_part_ids[0]]
 
         return None, None
-
-
-def main(args):
-    '''main method.'''
-    ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    parts_ice = ice_helper.get_parts(args[3:])
-
-    writer = PartPcrWriter(parts_ice, ice_helper)
-    worklist_gen = worklist.WorklistGenerator(writer.get_graph())
-    wrklst, plates = worklist_gen.get_worklist()
-
-    for plt in plates:
-        plt.to_csv()
-
-    worklist.to_csv(wrklst)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

@@ -41,19 +41,3 @@ class PartQcWriter(object):
             add_edge(graph, bffer, product, {'Volume': 23.0})
 
         return graph
-
-
-def main(args):
-    '''main method.'''
-    writer = PartQcWriter(args)
-    worklist_gen = worklist.WorklistGenerator(writer.get_graph())
-    wrklst, plates = worklist_gen.get_worklist()
-
-    for plt in plates:
-        plt.to_csv()
-
-    worklist.to_csv(wrklst)
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

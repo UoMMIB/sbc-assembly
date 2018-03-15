@@ -179,7 +179,7 @@ def main(args):
     plot_graph(graph, layout_name='tree')
 
     worklist_gen = WorklistGenerator(graph)
-    worklist, plates = worklist_gen.get_worklist()
+    worklist, plates = worklist_gen.get_worklist(args[2])
 
     for plate_id in sorted(plates, reverse=True):
         print 'Plate: ' + str(plate_id)
