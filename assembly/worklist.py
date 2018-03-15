@@ -26,33 +26,38 @@ class WorklistGenerator(object):
     def __init__(self, graph):
         self.__graph = graph
         self.__worklist = None
-        self.__plates = {}
+        self.__input_plates = {}
+        self.__plate_names = {'reagents': 'reagents',
+                              'output': 'output'}
 
-    def get_worklist(self, reagent_plate_name, plates=None):
-        '''Gets worklist and plates.'''
+    def get_worklist(self, input_plates=None, plate_names=None, ):
+        '''Gets worklist and input_plates.'''
         if not self.__worklist:
-            self.__create_worklist(plates, reagent_plate_name)
+            self.__create_worklist(input_plates, plate_names)
 
-        return self.__worklist, self.__plates.values()
+        return self.__worklist, self.__input_plates.values()
 
-    def __create_worklist(self, plates, reagent_plate_name):
+    def __create_worklist(self, input_plates, plate_names):
         '''Creates worklist and plates.'''
         data = []
 
-        if plates:
-            self.__plates.update(plates)
+        if input_plates:
+            self.__input_plates.update(input_plates)
+
+        if plate_names:
+            self.__plate_names.update(plate_names)
 
         for root in get_roots(self.__graph):
             self.__traverse(root, 0, data)
 
         self.__worklist = pd.DataFrame(data)
 
-        self.__write_plates(reagent_plate_name)
+        self.__write_input_plates()
         self.__add_locations()
         self.__rename()
 
-    def __write_plates(self, reagent_plate_name):
-        '''Writes plates from worklist.'''
+    def __write_input_plates(self):
+        '''Writes input_plates from worklist.'''
         # Write input plate:
         if 'src_well' not in self.__worklist:
             self.__worklist['src_well'] = None
@@ -65,8 +70,11 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well']].values
 
         for val in inpt:
-            plate.add_component(val[0], 'input', False, self.__plates, val[1],
-                                reagent_plate_name)
+            plate.add_component(val[0],
+                                'input',
+                                False,
+                                self.__input_plates,
+                                val[1])
 
         # Write reagents plate:
         reags = \
@@ -74,24 +82,31 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well']].values
 
         for val in sorted(reags, key=itemgetter(0)):
-            plate.add_component(val[0], 'MastermixTrough', True, self.__plates,
-                                val[1], reagent_plate_name)
+            plate.add_component(val[0],
+                                self.__plate_names['reagents'],
+                                True,
+                                self.__input_plates,
+                                val[1])
 
         # Write intermediates:
         intrm = self.__worklist[~(self.__worklist['src_is_input']) &
                                 ~(self.__worklist['src_is_reagent'])]
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
-            plate.add_component(row['src_name'], row['level'], False,
-                                self.__plates, row['src_well'],
-                                reagent_plate_name)
+            plate.add_component(row['src_name'],
+                                row['level'],
+                                False,
+                                self.__input_plates,
+                                row['src_well'])
 
         # Write products:
         for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
-                plate.add_component(row['dest_name'], 'output', False,
-                                    self.__plates, row['dest_well'],
-                                    reagent_plate_name)
+                plate.add_component(row['dest_name'],
+                                    self.__plate_names['output'],
+                                    False,
+                                    self.__input_plates,
+                                    row['dest_well'])
 
     def __add_locations(self):
         '''Add locations to worklist.'''
@@ -111,8 +126,8 @@ class WorklistGenerator(object):
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
-        srcs = plate.find(self.__plates, src_name)
-        dests = plate.find(self.__plates, dest_name)
+        srcs = plate.find(self.__input_plates, src_name)
+        dests = plate.find(self.__input_plates, dest_name)
 
         shortest_dist = float('inf')
         optimal_pair = None

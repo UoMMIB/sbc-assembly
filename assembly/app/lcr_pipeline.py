@@ -33,7 +33,7 @@ def main(args):
                 plt = plate.from_table(os.path.join(dirpath, filename))
                 input_plates[plt.get_name()] = plt
 
-    pipeline.run(writers, args[4], input_plates, parent_out_dir_name=args[5])
+    pipeline.run(writers, input_plates, {'reagents': args[4]}, args[5])
 
 
 if __name__ == '__main__':

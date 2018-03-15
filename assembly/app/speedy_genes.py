@@ -9,7 +9,9 @@ All rights reserved.
 # pylint: disable=unsubscriptable-object
 import itertools
 import sys
+
 from igraph import Graph
+
 from assembly.optimiser import Optimiser
 from assembly.worklist import WorklistGenerator
 

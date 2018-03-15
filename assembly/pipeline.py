@@ -11,8 +11,7 @@ import shutil
 from assembly import worklist
 
 
-def run(writers, reagent_plate_name, input_plates=None,
-        parent_out_dir_name='.'):
+def run(writers, input_plates=None, plate_names=None, parent_out_dir_name='.'):
     '''Run pipeline.'''
     parent_out_dir = os.path.abspath(parent_out_dir_name)
 
@@ -24,8 +23,7 @@ def run(writers, reagent_plate_name, input_plates=None,
         os.makedirs(out_dir)
 
         worklist_gen = worklist.WorklistGenerator(writer.get_graph())
-        wrklst, plates = worklist_gen.get_worklist(reagent_plate_name,
-                                                   input_plates)
+        wrklst, plates = worklist_gen.get_worklist(input_plates, plate_names)
 
         for plt in plates:
             plt.to_csv(out_dir)

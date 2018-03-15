@@ -130,8 +130,7 @@ def find(plates, obj):
     return found
 
 
-def add_component(component, plate_id, is_reagent, plates, well_name,
-                  reagent_plate_name):
+def add_component(component, plate_id, is_reagent, plates, well_name):
     '''Add a component to a plate.'''
     for plate in plates.values():
         wells = plate.find(component)
@@ -139,26 +138,19 @@ def add_component(component, plate_id, is_reagent, plates, well_name,
         if wells:
             return wells[0], plate
 
-    if is_reagent:
-        if reagent_plate_name not in plates:
-            plate = Plate(reagent_plate_name)
-            plates[reagent_plate_name] = plate
-
-        plate = plates[reagent_plate_name]
-
-        if well_name:
-            return plate.add(component, well_name), plate
-        else:
-            plate.add_line(component)
-
-        return add_component(component, plate_id, is_reagent, plates,
-                             well_name, reagent_plate_name)
-
-    elif plate_id not in plates:
+    if plate_id not in plates:
         plate = Plate(plate_id)
         plates[plate_id] = plate
     else:
         plate = plates[plate_id]
+
+    if is_reagent:
+        if well_name:
+            return plate.add(component, well_name), plate
+        # else:
+        plate.add_line(component)
+        return add_component(component, plate_id, is_reagent, plates,
+                             well_name)
 
     return plate.add(component, well_name), plate
 

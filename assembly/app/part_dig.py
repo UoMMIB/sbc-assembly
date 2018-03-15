@@ -24,6 +24,6 @@ class PartDigestWriter(object):
         for part_id in self.__part_ids:
             part = add_vertex(graph, part_id, {'is_reagent': False})
             primer_mix = add_vertex(graph, 'mm', {'is_reagent': True})
-            add_edge(graph, primer_mix, part, {'Volume': 150.0})
+            add_edge(graph, primer_mix, part, {'Volume': 75.0})
 
         return graph

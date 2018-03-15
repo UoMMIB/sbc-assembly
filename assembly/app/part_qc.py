@@ -6,11 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-import sys
-
 from igraph import Graph
 
-from assembly import worklist
 from synbiochem.utils.graph_utils import add_edge, add_vertex
 
 
