@@ -20,10 +20,6 @@ def main(args):
                  for _, parts_map in plasmid_parts.iteritems()
                  for ice_id, part_ice in parts_map.iteritems()
                  if part_ice.get_parameter('Type') != 'DOMINO'}
-    dominoes_ice = {ice_id: part_ice
-                    for _, parts_map in plasmid_parts.iteritems()
-                    for ice_id, part_ice in parts_map.iteritems()
-                    if part_ice.get_parameter('Type') == 'DOMINO'}
     part_ids = parts_ice.keys()
 
     writers = [part_pcr.PartPcrWriter(parts_ice, ice_helper),
