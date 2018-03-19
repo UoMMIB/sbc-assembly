@@ -6,6 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+from collections import defaultdict
+
 from synbiochem.utils.ice_utils import ICEClient
 
 
@@ -16,16 +18,16 @@ class ICEHelper(object):
         self.__ice_client = ICEClient(ice_url, ice_username, ice_password)
         self.__ice_entries = {}
 
-    def get_parts(self, plasmid_ids):
+    def get_plasmid_parts(self, plasmid_ids):
         '''Get parts from plasmid ids.'''
-        parts = {}
+        parts = defaultdict(dict)
 
         for plasmid_id in plasmid_ids:
             for part_ice in self.__get_parts(plasmid_id):
                 part_id = part_ice.get_ice_id()
 
                 if part_id not in parts:
-                    parts[part_id] = part_ice
+                    parts[plasmid_id][part_id] = part_ice
 
         return parts
 

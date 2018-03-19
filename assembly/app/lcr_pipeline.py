@@ -15,10 +15,15 @@ from assembly.app import part_pcr, part_qc, part_dig, utils
 def main(args):
     '''main method.'''
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    all_parts = ice_helper.get_parts(args[6:])
+    plasmid_parts = ice_helper.get_plasmid_parts(args[6:])
     parts_ice = {ice_id: part_ice
-                 for ice_id, part_ice in all_parts.iteritems()
+                 for _, parts_map in plasmid_parts.iteritems()
+                 for ice_id, part_ice in parts_map.iteritems()
                  if part_ice.get_parameter('Type') != 'DOMINO'}
+    dominoes_ice = {ice_id: part_ice
+                    for _, parts_map in plasmid_parts.iteritems()
+                    for ice_id, part_ice in parts_map.iteritems()
+                    if part_ice.get_parameter('Type') == 'DOMINO'}
     part_ids = parts_ice.keys()
 
     writers = [part_pcr.PartPcrWriter(parts_ice, ice_helper),
