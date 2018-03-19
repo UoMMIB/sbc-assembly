@@ -36,11 +36,11 @@ class PartPcrWriter(object):
             part_plasmid = add_vertex(graph,
                                       part_plasmid_ice.get_ice_id(),
                                       {'is_reagent': False})
-            master_mix = add_vertex(graph, primer_id, {'is_reagent': True})
+            mm = add_vertex(graph, primer_id, {'is_reagent': True})
             part = add_vertex(graph, part_id, {'is_reagent': False})
 
             add_edge(graph, part_plasmid, part, {'Volume': 1.0})
-            add_edge(graph, master_mix, part, {'Volume': 49.0})
+            add_edge(graph, mm, part, {'Volume': 49.0})
 
         return graph
 

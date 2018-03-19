@@ -9,7 +9,7 @@ import os
 import sys
 
 from assembly import pipeline, plate
-from assembly.app import part_pcr, part_qc, part_dig, utils
+from assembly.app import lcr, part_pcr, part_qc, part_dig, utils
 
 
 def main(args):
@@ -24,7 +24,8 @@ def main(args):
 
     writers = [part_pcr.PartPcrWriter(parts_ice, ice_helper),
                part_dig.PartDigestWriter(part_ids),
-               part_qc.PartQcWriter(part_ids)]
+               [part_qc.PartQcWriter(part_ids),
+                lcr.LcrWriter(plasmid_parts)]]
 
     input_plates = {}
 

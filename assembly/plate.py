@@ -99,7 +99,8 @@ class Plate(object):
     def to_csv(self, out_dir_name='.'):
         '''Export plate to csv.'''
         filepath = os.path.abspath(os.path.join(out_dir_name,
-                                                self.__plate.name + '.csv'))
+                                                str(self.__plate.name) +
+                                                '.csv'))
         self.__plate.to_csv(filepath, encoding='utf-8')
 
     def __set(self, obj, idx):
