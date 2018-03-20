@@ -18,12 +18,13 @@ class PartQcWriter(GraphWriter):
 
     def _initialise(self):
         ladder = self._add_vertex('ladder',
-                                  {'is_reagent': True, 'well': 'H12'})
+                                  {'is_reagent': True, 'well_fixed': 'H12'})
 
         bffer = self._add_vertex('buffer', {'is_reagent': True})
 
         ladder_product = self._add_vertex('ladder_product',
-                                          {'is_reagent': False, 'well': 'H12'})
+                                          {'is_reagent': False,
+                                           'well_fixed': 'H12'})
         self._add_edge(ladder, ladder_product, {'Volume': 2.0})
         self._add_edge(bffer, ladder_product, {'Volume': 22.0})
 

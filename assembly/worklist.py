@@ -54,20 +54,19 @@ class WorklistGenerator(object):
 
         self.__write_input_plates()
         self.__add_locations()
-        self.__rename()
 
     def __write_input_plates(self):
         '''Writes input_plates from worklist.'''
         # Write input plate:
-        if 'src_well' not in self.__worklist:
-            self.__worklist['src_well'] = None
+        if 'src_well_fixed' not in self.__worklist:
+            self.__worklist['src_well_fixed'] = None
 
-        if 'dest_well' not in self.__worklist:
-            self.__worklist['dest_well'] = None
+        if 'dest_well_fixed' not in self.__worklist:
+            self.__worklist['dest_well_fixed'] = None
 
         inpt = \
             self.__worklist.loc[self.__worklist['src_is_input']
-                                ][['src_name', 'src_well']].values
+                                ][['src_name', 'src_well_fixed']].values
 
         for val in inpt:
             plate.add_component(val[0],
@@ -79,7 +78,7 @@ class WorklistGenerator(object):
         # Write reagents plate:
         reags = \
             self.__worklist.loc[self.__worklist['src_is_reagent']
-                                ][['src_name', 'src_well']].values
+                                ][['src_name', 'src_well_fixed']].values
 
         for val in sorted(reags, key=itemgetter(0)):
             plate.add_component(val[0],
@@ -97,7 +96,7 @@ class WorklistGenerator(object):
                                 row['level'],
                                 False,
                                 self.__input_plates,
-                                row['src_well'])
+                                row['src_well_fixed'])
 
         # Write products:
         for _, row in self.__worklist.iterrows():
@@ -106,7 +105,7 @@ class WorklistGenerator(object):
                                     self.__plate_names['output'],
                                     False,
                                     self.__input_plates,
-                                    row['dest_well'])
+                                    row['dest_well_fixed'])
 
     def __add_locations(self):
         '''Add locations to worklist.'''
@@ -115,11 +114,11 @@ class WorklistGenerator(object):
 
         loc_df = locations.apply(pd.Series)
         loc_df.index = self.__worklist.index
-        loc_df.columns = ['SourcePlateBarcode',
-                          'SourcePlateWell',
+        loc_df.columns = ['src_plate',
+                          'src_well',
                           'src_idx',
-                          'DestinationPlateBarcode',
-                          'DestinationPlateWell',
+                          'dest_plate',
+                          'dest_well',
                           'dest_idx']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
@@ -129,8 +128,6 @@ class WorklistGenerator(object):
                                      'src_idx'],
                                     ascending=[False, False, True, True],
                                     inplace=True)
-
-        self.__worklist.reindex(sorted(self.__worklist.columns), axis=1)
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
@@ -178,11 +175,6 @@ class WorklistGenerator(object):
 
             data.append(opr)
             self.__traverse(src, level + 1, data)
-
-    def __rename(self):
-        '''Renames columns appropriately.'''
-        self.__worklist.rename(columns={'src_name': 'ComponentName'},
-                               inplace=True)
 
 
 def to_csv(wrklst, out_dir_name='.'):

@@ -44,6 +44,8 @@ def main(args):
     out_dir_name = os.path.join(args[6], dte + args[3])
     pipeline.run(writers, input_plates, {'reagents': args[5]}, out_dir_name)
 
+    utils.rename_cols(out_dir_name)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
