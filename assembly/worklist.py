@@ -14,10 +14,10 @@ from operator import itemgetter
 import os
 
 from scipy.spatial.distance import cityblock
+from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 import pandas as pd
-from synbiochem.utils.graph_utils import get_roots
 
 
 class WorklistGenerator(object):
@@ -35,7 +35,7 @@ class WorklistGenerator(object):
         if not self.__worklist:
             self.__create_worklist(input_plates, plate_names)
 
-        return self.__worklist, self.__input_plates.values()
+        return self.__worklist, self.__input_plates
 
     def __create_worklist(self, input_plates, plate_names):
         '''Creates worklist and plates.'''
