@@ -10,7 +10,7 @@ import sys
 from igraph import Graph
 from synbiochem.utils.graph_utils import add_edge, add_vertex
 
-from assembly.app import utils
+from assembly.app.lcr import utils
 
 
 class LcrWriter(object):

@@ -9,7 +9,7 @@ import os
 import sys
 
 from assembly import pipeline, plate
-from assembly.app import lcr, part_pcr, part_qc, part_dig, utils
+from assembly.app.lcr import lcr, part_pcr, part_qc, part_dig, utils
 
 
 def main(args):
