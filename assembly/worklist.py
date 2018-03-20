@@ -30,7 +30,7 @@ class WorklistGenerator(object):
         self.__plate_names = {'reagents': 'reagents',
                               'output': 'output'}
 
-    def get_worklist(self, input_plates=None, plate_names=None, ):
+    def get_worklist(self, input_plates=None, plate_names=None):
         '''Gets worklist and input_plates.'''
         if not self.__worklist:
             self.__create_worklist(input_plates, plate_names)

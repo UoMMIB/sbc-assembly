@@ -42,6 +42,7 @@ def _run_writer(writer, name, input_plates, plate_names, parent_out_dir):
     os.makedirs(out_dir)
 
     worklist_gen = worklist.WorklistGenerator(writer.get_graph())
+    plate_names['output'] = writer.get_output_name()
     wrklst, plates = worklist_gen.get_worklist(input_plates, plate_names)
 
     for plt in plates.values():

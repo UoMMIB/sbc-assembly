@@ -103,5 +103,5 @@ ENV/
 /.project
 /.pydevproject
 /out/
-/.DS_Store
+/**/.DS_Store
 /data/

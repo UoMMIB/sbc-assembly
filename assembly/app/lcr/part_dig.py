@@ -6,24 +6,18 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-from igraph import Graph
-
-from synbiochem.utils.graph_utils import add_edge, add_vertex
+from assembly.graph_writer import GraphWriter
 
 
-class PartDigestWriter(object):
+class PartDigestWriter(GraphWriter):
     '''Class for generating Part digest worklist graphs.'''
 
-    def __init__(self, part_ids):
+    def __init__(self, part_ids, output_name='part_dig'):
         self.__part_ids = part_ids
+        GraphWriter.__init__(self, output_name)
 
-    def get_graph(self):
-        '''Get graph.'''
-        graph = Graph(directed=True)
-
+    def _initialise(self):
         for part_id in self.__part_ids:
-            part = add_vertex(graph, part_id, {'is_reagent': False})
-            primer_mix = add_vertex(graph, 'mm', {'is_reagent': True})
-            add_edge(graph, primer_mix, part, {'Volume': 75.0})
-
-        return graph
+            part = self._add_vertex(part_id, {'is_reagent': False})
+            primer_mix = self._add_vertex('mm', {'is_reagent': True})
+            self._add_edge(primer_mix, part, {'Volume': 75.0})
