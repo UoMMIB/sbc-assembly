@@ -22,7 +22,7 @@ class LcrWriter(GraphWriter):
     def _initialise(self):
         water = self._add_vertex('water', {'is_reagent': True})
         ampligase = self._add_vertex('ampligase', {'is_reagent': True})
-        mm = self._add_vertex('mm', {'is_reagent': True})
+        mm = self._add_vertex('mm_lcr', {'is_reagent': True})
 
         domino_vol = 1.75
         mm_vol = 7.0

@@ -115,17 +115,19 @@ class WorklistGenerator(object):
 
         loc_df = locations.apply(pd.Series)
         loc_df.index = self.__worklist.index
-        loc_df.columns = ['SourcePlateBarcode', 'SourcePlateWell',
-                          'DestinationPlateBarcode', 'DestinationPlateWell']
+        loc_df.columns = ['SourcePlateBarcode',
+                          'SourcePlateWell',
+                          'src_idx',
+                          'DestinationPlateBarcode',
+                          'DestinationPlateWell',
+                          'dest_idx']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
         self.__worklist.sort_values(['level',
                                      'src_is_reagent',
-                                     'Volume',
-                                     'DestinationPlateWell',
-                                     'SourcePlateWell'],
-                                    ascending=[False, False, False, True,
-                                               True],
+                                     'dest_idx',
+                                     'src_idx'],
+                                    ascending=[False, False, True, True],
                                     inplace=True)
 
         self.__worklist.reindex(sorted(self.__worklist.columns), axis=1)
@@ -138,17 +140,23 @@ class WorklistGenerator(object):
         shortest_dist = float('inf')
         optimal_pair = None
 
-        for src_plate, src_wells in srcs.iteritems():
-            for dest_plate, dest_wells in dests.iteritems():
+        for src_plt, src_wells in srcs.iteritems():
+            for dest_plt, dest_wells in dests.iteritems():
                 for src_well in src_wells:
                     for dest_well in dest_wells:
-                        dist = cityblock(plate.get_indices(src_well),
-                                         plate.get_indices(dest_well))
+                        src_ind = plate.get_indices(src_well)
+                        dest_ind = plate.get_indices(dest_well)
+                        dist = cityblock(src_ind, dest_ind)
 
                         if dist < shortest_dist:
+                            src_idx = \
+                                self.__input_plates[src_plt].get_idx(*src_ind)
+                            dest_idx = \
+                                self.__input_plates[dest_plt].get_idx(
+                                    *dest_ind)
                             shortest_dist = dist
-                            optimal_pair = [src_plate, src_well,
-                                            dest_plate, dest_well]
+                            optimal_pair = [src_plt, src_well, src_idx,
+                                            dest_plt, dest_well, dest_idx]
         return optimal_pair
 
     def __traverse(self, dest, level, data):

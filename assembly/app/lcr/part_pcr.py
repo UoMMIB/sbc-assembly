@@ -9,7 +9,7 @@ All rights reserved.
 from assembly.graph_writer import GraphWriter
 
 
-_REAGENTS = {'water': 23.0, 'mm': 25.0}
+_REAGENTS = {'water': 23.0, 'mm_pcr': 25.0}
 
 _BACKBONE_PRIMER = {4613: 'E2cprim',
                     4614: 'A1kprim',
