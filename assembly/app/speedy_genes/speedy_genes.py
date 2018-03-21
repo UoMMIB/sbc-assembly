@@ -11,6 +11,7 @@ import itertools
 import sys
 
 from igraph import Graph
+
 from assembly.optimiser import Optimiser
 from assembly.worklist import WorklistGenerator
 
@@ -175,9 +176,6 @@ def main(args):
     # Convert ingredients to graph:
     optim = Optimiser(ingredients)
     graph = _get_graph(optim.get_matrix(), optim.get_reagents())
-
-    from synbiochem.utils.graph_utils import plot_graph
-    plot_graph(graph, layout_name='tree')
 
     worklist_gen = WorklistGenerator(graph)
     worklist, plates = worklist_gen.get_worklist(args[2])

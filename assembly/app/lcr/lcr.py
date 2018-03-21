@@ -6,9 +6,6 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-import sys
-
-from assembly.app.lcr import utils
 from assembly.graph_writer import GraphWriter
 
 
@@ -24,7 +21,7 @@ class LcrWriter(GraphWriter):
         ampligase = self._add_vertex('ampligase', {'is_reagent': True})
         mm = self._add_vertex('mm_lcr', {'is_reagent': True})
 
-        domino_vol = 1.75
+        domino_vol = 1.4
         mm_vol = 7.0
         ampligase_vol = 1.5
         domino_pool_vol = 1.0
@@ -32,7 +29,7 @@ class LcrWriter(GraphWriter):
 
         for plasmid_id, parts_map in self.__plasmid_parts.iteritems():
             # Make domino pools:
-            dom_pool_water_vol = 250
+            dom_pool_water_vol = 200
             plasmid_water_vol = 25
 
             domino_pool = self._add_vertex(plasmid_id + '_dominoes',
@@ -64,18 +61,3 @@ class LcrWriter(GraphWriter):
                     plasmid_water_vol -= part_vol
 
             self._add_edge(water, plasmid, {'Volume': plasmid_water_vol})
-
-
-def main(args):
-    '''main method.'''
-    ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    plasmid_parts = ice_helper.get_plasmid_parts(args[3:])
-    writer = LcrWriter(plasmid_parts)
-    graph = writer.get_graph()
-
-    from synbiochem.utils.graph_utils import plot_graph
-    plot_graph(graph, layout_name='tree')
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])
