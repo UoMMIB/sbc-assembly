@@ -90,10 +90,13 @@ def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
     if not reagent_vols:
         reagent_vols = _DEFAULT_REAG_VOLS
 
+    max_block_size = max([len(design) for design in designs[0]])
+
     for design in designs:
         ingredients = [_get_block_ingredients(block,
                                               oligo_vols['block'],
-                                              reagent_vols['block'])
+                                              reagent_vols['block'],
+                                              max_block_size)
                        for block in design]
 
         ingredients = [design[0][0]] + ingredients + [design[-1][-1]]
@@ -106,18 +109,22 @@ def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
     return tuple((all_ingredients, 0.0, False))
 
 
-def _get_block_ingredients(design, des_vols, reagents):
+def _get_block_ingredients(design, des_vols, reagents, max_block_size):
     '''Gets sub ingredients.'''
     vols = [des_vols['primer'], des_vols['oligo_pool'], des_vols['primer']]
-    components = [design[0], _get_oligo_pool(design), design[-1]]
+    components = [design[0],
+                  _get_oligo_pool(design, max_block_size),
+                  design[-1]]
     return tuple([(reag, vol, True)
                   for reag, vol in reagents.iteritems()] +
                  zip(components, vols, [False] * len(components)))
 
 
-def _get_oligo_pool(design, oligo_pool_vol=10.0):
+def _get_oligo_pool(design, max_block_size, oligo_pool_vol=10.0):
     '''Get oligo pool.'''
-    return tuple([(oligo, oligo_pool_vol, False) for oligo in design[1:-1]])
+    h2o_vol = (max_block_size - len(design)) * oligo_pool_vol
+    return tuple([(oligo, oligo_pool_vol, False) for oligo in design[1:-1]] +
+                 [('h2o', h2o_vol, True)])
 
 
 def _get_gene_ingredients(design, des_vols, reagents):
