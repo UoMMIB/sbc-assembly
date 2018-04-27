@@ -22,18 +22,9 @@ _DEFAULT_OLIGO_VOLS = {
         'oligo_pool': 0.75
     },
     'gene': {
-        'primer': 3,
+        'primer': 3.0,
         'inner': 0.75
     }}
-
-_DEFAULT_REAG_VOLS = {
-    'block': {
-        'mm': 50.0
-    },
-    'gene': {
-        'mm': 45.0
-    }}
-
 
 def combine(oligos, n_mutated=0, mutant_oligos=None, n_blocks=1):
     '''Design combinatorial assembly.'''
@@ -80,43 +71,40 @@ def _combine(oligos, n_mutated, mutant_oligos, n_blocks):
     return designs
 
 
-def _get_ingredients(designs, oligo_vols=None, reagent_vols=None):
+def _get_ingredients(designs, oligo_vols=None):
     '''Gets ingredients.'''
     all_ingredients = []
 
     if not oligo_vols:
         oligo_vols = _DEFAULT_OLIGO_VOLS
 
-    if not reagent_vols:
-        reagent_vols = _DEFAULT_REAG_VOLS
-
     max_block_size = max([len(design) for design in designs[0]])
 
     for design in designs:
         ingredients = [_get_block_ingredients(block,
                                               oligo_vols['block'],
-                                              reagent_vols['block'],
                                               max_block_size)
                        for block in design]
 
         ingredients = [design[0][0]] + ingredients + [design[-1][-1]]
 
         all_ingredients.append((_get_gene_ingredients(ingredients,
-                                                      oligo_vols['gene'],
-                                                      reagent_vols['gene']),
+                                                      oligo_vols['gene']),
                                 0.0, False))
 
     return tuple((all_ingredients, 0.0, False))
 
 
-def _get_block_ingredients(design, des_vols, reagents, max_block_size):
+def _get_block_ingredients(design, des_vols, max_block_size):
     '''Gets sub ingredients.'''
     vols = [des_vols['primer'], des_vols['oligo_pool'], des_vols['primer']]
+    mm_vol = 50.0 - sum(vols)
+
     components = [design[0],
                   _get_oligo_pool(design, max_block_size),
                   design[-1]]
-    return tuple([(reag, vol, True)
-                  for reag, vol in reagents.iteritems()] +
+
+    return tuple([('mm', mm_vol, True)] +
                  zip(components, vols, [False] * len(components)))
 
 
@@ -127,13 +115,14 @@ def _get_oligo_pool(design, max_block_size, oligo_pool_vol=10.0):
                  [('h2o', h2o_vol, True)])
 
 
-def _get_gene_ingredients(design, des_vols, reagents):
+def _get_gene_ingredients(design, des_vols):
     '''Gets sub ingredients.'''
     vols = [des_vols['inner']] * len(design)
     vols[0] = des_vols['primer']
     vols[-1] = des_vols['primer']
-    return tuple([(reag, vol, True)
-                  for reag, vol in reagents.iteritems()] +
+    mm_vol = 50.0 - sum(vols)
+
+    return tuple([('mm', mm_vol, True)] +
                  zip(design, vols, [False] * len(design)))
 
 
