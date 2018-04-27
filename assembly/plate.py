@@ -50,8 +50,10 @@ class Plate(object):
         if well_name:
             row, col = get_indices(well_name)
             self.__plate[col + 1][row] = obj
-        else:
-            return self.__set(obj, self.__next)
+            return None
+
+        # else:
+        return self.__set(obj, self.__next)
 
     def add_line(self, obj):
         '''Adds a line of objects (row or col) in next empty line.'''

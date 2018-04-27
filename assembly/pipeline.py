@@ -11,14 +11,14 @@ import shutil
 from assembly import worklist
 
 
-def run(writers, input_plates=None, plate_names=None, parent_out_dir_name='.'):
+def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):
     '''Run pipeline.'''
     parent_out_dir = os.path.abspath(parent_out_dir_name)
 
     if os.path.exists(parent_out_dir):
         shutil.rmtree(parent_out_dir)
 
-    for idx, writers in enumerate(writers):
+    for idx, writers in enumerate(wrtrs):
         if isinstance(writers, list):
             next_input_plates = [_run_writer(writer,
                                              str(idx + 1) + '_' +

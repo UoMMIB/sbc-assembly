@@ -8,8 +8,10 @@ All rights reserved.
 # pylint: disable=not-an-iterable
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-locals
 # pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
+# pylint: disable=wrong-import-order
 from operator import itemgetter
 import os
 

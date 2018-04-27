@@ -12,8 +12,8 @@ import sys
 
 from igraph import Graph
 
+from assembly import worklist
 from assembly.optimiser import Optimiser
-from assembly.worklist import WorklistGenerator
 
 
 _DEFAULT_OLIGO_VOLS = {
@@ -162,30 +162,31 @@ def _drop(df):
     return df[(df.T != 0).any()]
 
 
-def _test(n_mutated, n_blocks):
+def _test(n_oligos, n_mutated, n_blocks):
     '''Test method.'''
-    oligos = [str(val) for val in range(1, 29)]
+    oligos = [str(val + 1) for val in range(0, n_oligos)]
     mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
     return combine(oligos, n_mutated, mutant_oligos, n_blocks)
 
 
 def main(args):
     '''main method.'''
-    ingredients = _test(int(args[0]), int(args[1]))
+    ingredients = _test(int(args[0]), int(args[1]), int(args[2]))
 
     # Convert ingredients to graph:
     optim = Optimiser(ingredients)
     graph = _get_graph(optim.get_matrix(), optim.get_reagents())
 
-    worklist_gen = WorklistGenerator(graph)
-    worklist, plates = worklist_gen.get_worklist(args[2])
+    worklist_gen = worklist.WorklistGenerator(graph)
+    wrklst, plates = worklist_gen.get_worklist(args[4]
+                                               if len(args) > 4 else None)
 
-    for plate_id in sorted(plates, reverse=True):
-        print 'Plate: ' + str(plate_id)
-        print plates[plate_id]
-        print
+    out_dir = args[3]
 
-    print worklist
+    for plt in sorted(plates.values(), reverse=True):
+        plt.to_csv(out_dir)
+
+    worklist.to_csv(wrklst, out_dir)
 
 
 if __name__ == '__main__':
