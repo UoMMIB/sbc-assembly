@@ -26,6 +26,7 @@ _DEFAULT_OLIGO_VOLS = {
         'inner': 0.75
     }}
 
+
 def combine(oligos, n_mutated=0, mutant_oligos=None, n_blocks=1):
     '''Design combinatorial assembly.'''
     designs = _combine(oligos, n_mutated, mutant_oligos, n_blocks)
