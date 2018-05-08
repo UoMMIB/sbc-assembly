@@ -120,6 +120,11 @@ def get_indices(well_name):
     return ord(well_name[0]) - ord('A'), int(well_name[1:]) - 1
 
 
+def get_well_name(row, col):
+    '''Get well name from indices.'''
+    return str(unichr(row + ord('A'))) + str(col + 1)
+
+
 def find(plates, obj):
     '''Find object in plates.'''
     found = {}
