@@ -58,33 +58,42 @@ def _apply_restricts(dna, restr_enz):
 def main(args):
     '''main method.'''
     ice_details = dict(zip(['url', 'username', 'password'], args[:3]))
-    primers = get_primers(ice_details, args[6:], args[3].split(','),
+
+    plates = [plate.from_table(filename) for filename in args[6:]]
+    part_ids = [part_id
+                for sublist in [plt.get_all() for plt in plates]
+                for part_id in sublist]
+
+    primers = get_primers(ice_details, part_ids, args[3].split(','),
                           float(args[4]), float(args[5]))
     plt = plate.Plate(name='plt')
 
-    nonphospho_data = []
-    phospho_data = []
+    primer_plates = defaultdict(list)
 
-    for idx, part_id in enumerate(sorted(primers)):
-        primer_pair = primers[part_id]
-        row, col = plt.get_row_col(idx)
-        row_col = plate.get_well_name(row, col)
-        nonphospho_data.append([row_col, part_id + '_F', primer_pair[0][0]])
-        nonphospho_data.append([row_col, part_id + '_R', primer_pair[1][0]])
-        phospho_data.append(
-            [row_col, part_id + '_F', '/5Phos/' + primer_pair[0][0]])
-        phospho_data.append(
-            [row_col, part_id + '_R', '/5Phos/' + primer_pair[1][0]])
+    for part_id, primer_pair in primers.iteritems():
+        part_locs = plate.find(plates, part_id)
+        plate_id = part_locs.keys()[0]
+        row_col = part_locs.values()[0][0]
+        row, col = plate.get_indices(row_col)
 
-    columns = ['Well Position', 'Sequence Name', 'Sequence']
+        nonphospho = primer_plates[plate_id + '_primer_nonphospho']
+        phospho = primer_plates[plate_id + '_primer_phospho']
+        nonphospho.append(
+            [row_col, part_id + '_F', primer_pair[0][0], row, col])
+        nonphospho.append(
+            [row_col, part_id + '_R', primer_pair[1][0], row, col])
+        phospho.append(
+            [row_col, part_id + '_F', '/5Phos/' + primer_pair[0][0], row, col])
+        phospho.append(
+            [row_col, part_id + '_R', '/5Phos/' + primer_pair[1][0], row, col])
 
-    pd.DataFrame(nonphospho_data, columns=columns).to_csv('non_phospho.csv',
-                                                          index=False,
-                                                          encoding='utf-8')
+    columns = ['Well Position', 'Sequence Name', 'Sequence', 'row', 'column']
 
-    pd.DataFrame(phospho_data, columns=columns).to_csv('phospho.csv',
-                                                       index=False,
-                                                       encoding='utf-8')
+    for plate_id, plt in primer_plates.iteritems():
+        df = pd.DataFrame(plt, columns=columns)
+        df.sort_values(['row', 'column'], inplace=True)
+        df.drop(['row', 'column'], axis=1, inplace=True)
+        df.to_csv(plate_id + '.csv', index=False, encoding='utf-8')
 
 
 if __name__ == '__main__':

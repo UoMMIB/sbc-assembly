@@ -7,6 +7,7 @@ All rights reserved.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
+import math
 import os
 
 import pandas as pd
@@ -39,6 +40,11 @@ class Plate(object):
     def get(self, row, col):
         '''Get object at a given row, col.'''
         return self.__plate[col + 1][row]
+
+    def get_all(self):
+        '''Get all objects.'''
+        return [val for row in self.__plate.values for val in row
+                if not isinstance(val, float) or not math.isnan(val)]
 
     def get_by_well(self, well_name):
         '''Get by well, e.g. by C12.'''
@@ -129,11 +135,11 @@ def find(plates, obj):
     '''Find object in plates.'''
     found = {}
 
-    for plate_id, plt in plates.iteritems():
+    for plt in plates:
         wells = plt.find(obj)
 
         if wells:
-            found[plate_id] = wells
+            found[plt.get_name()] = wells
 
     return found
 
