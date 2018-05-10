@@ -18,11 +18,11 @@ def main(args):
     assert len(args[3]) < 4
 
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    plasmid_parts = ice_helper.get_plasmid_parts(args[7:])
+    plasmid_parts = ice_helper.get_plasmid_parts(args[7:],
+                                                 type_filter='^(?!DOMINO).*$')
     parts_ice = {ice_id: part_ice
                  for _, parts_map in plasmid_parts.iteritems()
-                 for ice_id, part_ice in parts_map.iteritems()
-                 if part_ice.get_parameter('Type') != 'DOMINO'}
+                 for ice_id, part_ice in parts_map.iteritems()}
     part_ids = parts_ice.keys()
 
     dte = strftime("%y%m%d", gmtime())
