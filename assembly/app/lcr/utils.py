@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
 # pylint: disable=wrong-import-order
 from collections import defaultdict
