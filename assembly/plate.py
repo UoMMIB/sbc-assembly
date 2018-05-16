@@ -135,7 +135,7 @@ def find(plates, obj):
     '''Find object in plates.'''
     found = {}
 
-    for plt in plates:
+    for plt in plates.values():
         wells = plt.find(obj)
 
         if wells:

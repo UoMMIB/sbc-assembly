@@ -18,17 +18,17 @@ def main(args):
     assert len(args[3]) < 4
 
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    plasmid_parts = ice_helper.get_plasmid_parts(args[7:],
-                                                 type_filter='^(?!DOMINO).*$')
+    plasmid_parts = ice_helper.get_plasmid_parts(args[7:])
     parts_ice = {ice_id: part_ice
                  for _, parts_map in plasmid_parts.iteritems()
-                 for ice_id, part_ice in parts_map.iteritems()}
+                 for ice_id, part_ice in parts_map.iteritems()
+                 if part_ice.get_parameter('Type') != 'DOMINO'}
     part_ids = parts_ice.keys()
 
     dte = strftime("%y%m%d", gmtime())
 
-    writers = [part_pcr.PartPcrWriter(parts_ice, ice_helper,
-                                      dte + 'PCR' + args[3]),
+    writers = [part_pcr.SpecificPartPcrWriter(parts_ice, ice_helper,
+                                              dte + 'PCR' + args[3]),
                part_dig.PartDigestWriter(part_ids, dte + 'DIG' + args[3]),
                [part_qc.PartQcWriter(part_ids, dte + 'FPT' + args[3]),
                 lcr.LcrWriter(plasmid_parts, dte + 'LCR' + args[3])]]
