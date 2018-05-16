@@ -75,7 +75,9 @@ class GenericPartPcrWriter(PartPcrWriter):
 class SpecificPartPcrWriter(PartPcrWriter):
     '''Class for generating Part PCR worklist graphs.'''
 
-    def __init__(self, parts_ice, ice_helper, output_name='part_pcr'):
+    def __init__(self, parts_ice, ice_helper, output_name='part_pcr',
+                 phospho=True):
+        self.__phospho = phospho
         PartPcrWriter.__init__(self, parts_ice, ice_helper, output_name)
 
     def _initialise(self):
@@ -105,6 +107,7 @@ class SpecificPartPcrWriter(PartPcrWriter):
                 if len(linked_parts) == 2:
                     for linked_part in linked_parts:
                         if linked_part['type'] == 'PART':
-                            return parent, parent.get_ice_id() + '_P_F'
+                            return parent, parent.get_ice_id() + \
+                                '_P' if self.__phospho else '_NP'
 
         return None, None
