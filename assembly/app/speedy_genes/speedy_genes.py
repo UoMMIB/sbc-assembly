@@ -12,9 +12,8 @@ import sys
 
 from igraph import Graph
 
-from assembly import worklist
+from assembly import worklist, utils
 from assembly.optimiser import Optimiser
-
 
 _DEFAULT_OLIGO_VOLS = {
     'block': {
@@ -184,6 +183,8 @@ def main(args):
         plt.to_csv(out_dir)
 
     worklist.to_csv(wrklst, out_dir)
+
+    utils.rename_cols(out_dir)
 
 
 if __name__ == '__main__':

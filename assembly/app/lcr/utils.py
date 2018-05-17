@@ -9,12 +9,9 @@ All rights reserved.
 # pylint: disable=too-few-public-methods
 # pylint: disable=wrong-import-order
 from collections import defaultdict
-import os
 import re
 
 from synbiochem.utils.ice_utils import ICEClient
-
-import pandas as pd
 
 
 class ICEHelper(object):
@@ -59,20 +56,3 @@ class ICEHelper(object):
                     for part in ice_entry.get_metadata()['linkedParts']]
 
         return [self.get_ice_entry(part_id) for part_id in part_ids]
-
-
-def rename_cols(dir_name):
-    '''Rename columns to SYNBIOCHEM-specific headers.'''
-    columns = {'src_name': 'ComponentName',
-               'src_plate': 'SourcePlateBarcode',
-               'src_well': 'SourcePlateWell',
-               'dest_plate': 'DestinationPlateBarcode',
-               'dest_well': 'DestinationPlateWell'}
-
-    for(dirpath, _, filenames) in os.walk(dir_name):
-        for filename in filenames:
-            if filename == 'worklist.csv':
-                filepath = os.path.join(dirpath, filename)
-                df = pd.read_csv(filepath)
-                df.rename(columns=columns, inplace=True)
-                df.to_csv(filepath, encoding='utf-8', index=False)
