@@ -126,9 +126,10 @@ class WorklistGenerator(object):
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
         self.__worklist.sort_values(['level',
                                      'src_is_reagent',
-                                     'dest_idx',
-                                     'src_idx'],
-                                    ascending=[False, False, True, True],
+                                     'src_plate',
+                                     'src_idx',
+                                     'dest_idx'],
+                                    ascending=[False, False, True, True, True],
                                     inplace=True)
 
     def __get_location(self, src_name, dest_name):
