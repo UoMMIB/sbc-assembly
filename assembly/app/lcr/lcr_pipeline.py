@@ -9,8 +9,7 @@ import os
 import sys
 from time import gmtime, strftime
 
-from assembly import pipeline, plate
-from assembly import utils as assembly_utils
+from assembly import pipeline, plate, worklist
 from assembly.app.lcr import lcr, part_pcr, part_qc, part_dig, utils
 
 
@@ -45,7 +44,7 @@ def main(args):
     out_dir_name = os.path.join(args[6], dte + args[3])
     pipeline.run(writers, input_plates, {'reagents': args[5]}, out_dir_name)
 
-    assembly_utils.rename_cols(out_dir_name)
+    worklist.format_worklist(out_dir_name)
 
 
 if __name__ == '__main__':

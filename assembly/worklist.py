@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=not-an-iterable
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-instance-attributes
@@ -20,6 +21,22 @@ from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 import pandas as pd
+
+_VALUES_RENAME = {('src_plate', 'dest_plate'):
+                  {('reagents'): 'MastermixTrough'}}
+
+_COLUMNS_RENAME = {'src_name': 'ComponentName',
+                   'src_plate': 'SourcePlateBarcode',
+                   'src_well': 'SourcePlateWell',
+                   'dest_plate': 'DestinationPlateBarcode',
+                   'dest_well': 'DestinationPlateWell'}
+
+_COLUMNS_ORDER = ['Volume',
+                  'SourcePlateBarcode',
+                  'SourcePlateWell',
+                  'DestinationPlateBarcode',
+                  'DestinationPlateWell',
+                  'ComponentName']
 
 
 class WorklistGenerator(object):
@@ -185,3 +202,37 @@ def to_csv(wrklst, out_dir_name='.'):
     filepath = os.path.abspath(os.path.join(out_dir_name,
                                             'worklist.csv'))
     wrklst.to_csv(filepath, encoding='utf-8', index=False)
+
+
+def format_worklist(dir_name):
+    '''Rename columns to SYNBIOCHEM-specific headers.'''
+
+    for(dirpath, _, filenames) in os.walk(dir_name):
+        for filename in filenames:
+            if filename == 'worklist.csv':
+                filepath = os.path.join(dirpath, filename)
+                df = pd.read_csv(filepath)
+                _rename_values(df)
+                _rename_cols(df)
+                df = _reorder_cols(df)
+                df.to_csv(filepath, encoding='utf-8', index=False)
+
+
+def _rename_values(df):
+    '''Rename values.'''
+    for columns, replacement in _VALUES_RENAME.iteritems():
+        for to_replace, value in replacement.iteritems():
+            df[list(columns)] = df[list(columns)].replace(to_replace, value)
+
+
+def _rename_cols(df):
+    '''Rename cols.'''
+    df.rename(columns=_COLUMNS_RENAME, inplace=True)
+
+
+def _reorder_cols(df):
+    '''Reorder cols.'''
+    columns = _COLUMNS_ORDER + \
+        sorted([col for col in df.columns if col not in _COLUMNS_ORDER])
+
+    return df.reindex(columns, axis=1)
