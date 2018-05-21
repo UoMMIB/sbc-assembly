@@ -29,7 +29,7 @@ class LcrWriter(GraphWriter):
         domino_pool_vol = 1.0
         part_vol = 1.0
 
-        for plasmid_id, parts_map in self.__plasmid_parts.iteritems():
+        for plasmid_id, parts_map in self.__plasmid_parts.items():
             # Make domino pools:
             dom_pool_water_vol = 200
             plasmid_water_vol = 25
@@ -37,7 +37,7 @@ class LcrWriter(GraphWriter):
             domino_pool = self._add_vertex(plasmid_id + '_dominoes',
                                            {'is_reagent': False})
 
-            for ice_id, part_ice in parts_map.iteritems():
+            for ice_id, part_ice in parts_map.items():
                 if part_ice.get_parameter('Type') == 'DOMINO':
                     domino = self._add_vertex(ice_id, {'is_reagent': False})
 
@@ -56,7 +56,7 @@ class LcrWriter(GraphWriter):
 
             plasmid_water_vol -= (mm_vol + ampligase_vol + domino_pool_vol)
 
-            for ice_id, part_ice in parts_map.iteritems():
+            for ice_id, part_ice in parts_map.items():
                 if part_ice.get_parameter('Type') != 'DOMINO':
                     part = self._add_vertex(ice_id, {'is_reagent': False})
                     self._add_edge(part, plasmid, {'Volume': part_vol})

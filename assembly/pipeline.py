@@ -8,7 +8,20 @@ All rights reserved.
 import os
 import shutil
 
-from assembly import worklist
+from assembly import plate, worklist
+
+
+def get_input_plates(dir_name):
+    '''Get input plates.'''
+    input_plates = {}
+
+    for(dirpath, _, filenames) in os.walk(dir_name):
+        for filename in filenames:
+            if filename[-4:] == '.csv':
+                plt = plate.from_table(os.path.join(dirpath, filename))
+                input_plates[plt.get_name()] = plt
+
+    return input_plates
 
 
 def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):

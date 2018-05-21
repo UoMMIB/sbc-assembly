@@ -42,7 +42,7 @@ class GenericPartPcrWriter(PartPcrWriter):
         PartPcrWriter.__init__(self, parts_ice, ice_helper, output_name)
 
     def _initialise(self):
-        for part_id, part_ice in self._parts_ice.iteritems():
+        for part_id, part_ice in self._parts_ice.items():
             part_plasmid_ice, primer_id = self._get_plasmid_primer(part_ice)
 
             part_plasmid = self._add_vertex(part_plasmid_ice.get_ice_id(),
@@ -83,7 +83,7 @@ class SpecificPartPcrWriter(PartPcrWriter):
     def _initialise(self):
         mm = self._add_vertex('mm', {'is_reagent': True})
 
-        for part_id, part_ice in self._parts_ice.iteritems():
+        for part_id, part_ice in self._parts_ice.items():
             part_plasmid_ice, primer_id = self._get_plasmid_primer(part_ice)
 
             part_plasmid = self._add_vertex(part_plasmid_ice.get_ice_id(),

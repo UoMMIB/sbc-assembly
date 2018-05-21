@@ -61,7 +61,7 @@ def _get_plates(plasmid_primers, plates):
     '''Map primers to plates.'''
     primer_plates = defaultdict(list)
 
-    for plasmid_id, primer_pair in plasmid_primers.iteritems():
+    for plasmid_id, primer_pair in plasmid_primers.items():
         part_locs = plate.find(plates, plasmid_id)
         plate_id = part_locs.keys()[0]
         col_row = part_locs.values()[0][0]
@@ -117,7 +117,7 @@ def main(args):
                                          args[3].split(','),
                                          float(args[4]), float(args[5]))
 
-    for plate_id, plt in primer_plates.iteritems():
+    for plate_id, plt in primer_plates.items():
         plt.to_csv(plate_id + '.csv', index=False, encoding='utf-8')
 
 
