@@ -15,6 +15,7 @@ from igraph import Graph
 from assembly import worklist
 from assembly.optimiser import Optimiser
 
+
 _DEFAULT_OLIGO_VOLS = {
     'block': {
         'primer': 3.0,

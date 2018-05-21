@@ -91,9 +91,9 @@ class Plate(object):
         rows, cols = self.__plate.shape
 
         if self.__col_ord:
-            return (idx / cols), (idx % cols)
+            return int(idx / cols), int(idx % cols)
 
-        return (idx % rows), (idx / rows)
+        return int(idx % rows), int(idx / rows)
 
     def get_idx(self, row, col):
         '''Map idx to well, column ordered.'''

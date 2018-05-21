@@ -13,11 +13,11 @@ from collections import defaultdict
 import sys
 
 from Bio.Seq import Seq
-from synbiochem.utils import dna_utils, seq_utils
 
 from assembly import plate
 from assembly.app.lcr import utils
 import pandas as pd
+from synbiochem.utils import dna_utils, seq_utils
 
 
 class PrimerDesigner(object):

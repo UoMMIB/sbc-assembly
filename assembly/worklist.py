@@ -17,10 +17,11 @@ from operator import itemgetter
 import os
 
 from scipy.spatial.distance import cityblock
-from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 import pandas as pd
+from synbiochem.utils.graph_utils import get_roots
+
 
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
                   {('reagents'): 'MastermixTrough'}}
