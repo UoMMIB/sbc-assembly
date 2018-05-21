@@ -158,8 +158,8 @@ class WorklistGenerator(object):
         shortest_dist = float('inf')
         optimal_pair = None
 
-        for src_plt, src_wells in srcs.iteritems():
-            for dest_plt, dest_wells in dests.iteritems():
+        for src_plt, src_wells in srcs.items():
+            for dest_plt, dest_wells in dests.items():
                 for src_well in src_wells:
                     for dest_well in dest_wells:
                         src_ind = plate.get_indices(src_well)
@@ -185,10 +185,10 @@ class WorklistGenerator(object):
 
             opr = edge.attributes()
 
-            for key, val in src.attributes().iteritems():
+            for key, val in src.attributes().items():
                 opr['src_' + key] = val
 
-            for key, val in dest.attributes().iteritems():
+            for key, val in dest.attributes().items():
                 opr['dest_' + key] = val
 
             opr['level'] = level
@@ -221,8 +221,8 @@ def format_worklist(dir_name):
 
 def _rename_values(df):
     '''Rename values.'''
-    for columns, replacement in _VALUES_RENAME.iteritems():
-        for to_replace, value in replacement.iteritems():
+    for columns, replacement in _VALUES_RENAME.items():
+        for to_replace, value in replacement.items():
             df[list(columns)] = df[list(columns)].replace(to_replace, value)
 
 

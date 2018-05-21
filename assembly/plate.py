@@ -68,7 +68,7 @@ class Plate(object):
         else:
             line_len = len(self.__plate.index)
 
-        start = ((self.__next + line_len - 1) / line_len) * line_len
+        start = ((self.__next + line_len - 1) // line_len) * line_len
 
         for idx in range(start, start + line_len):
             row, col = self.get_row_col(idx)

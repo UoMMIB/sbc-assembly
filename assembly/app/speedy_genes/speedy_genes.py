@@ -106,7 +106,7 @@ def _get_block_ingredients(design, des_vols, max_block_size):
                   design[-1]]
 
     return tuple([('mm', mm_vol, True)] +
-                 zip(components, vols, [False] * len(components)))
+                 list(zip(components, vols, [False] * len(components))))
 
 
 def _get_oligo_pool(design, max_block_size, oligo_pool_vol=10.0):
@@ -124,7 +124,7 @@ def _get_gene_ingredients(design, des_vols):
     mm_vol = 50.0 - sum(vols)
 
     return tuple([('mm', mm_vol, True)] +
-                 zip(design, vols, [False] * len(design)))
+                 list(zip(design, vols, [False] * len(design))))
 
 
 def _get_graph(df, reagents):
@@ -180,7 +180,7 @@ def main(args):
 
     out_dir = args[3]
 
-    for plt in sorted(plates.values(), reverse=True):
+    for plt in plates.values():
         plt.to_csv(out_dir)
 
     worklist.to_csv(wrklst, out_dir)
