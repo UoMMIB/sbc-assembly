@@ -113,7 +113,7 @@ def _get_oligo_pool(design, max_block_size, oligo_pool_vol=10.0):
     '''Get oligo pool.'''
     h2o_vol = (max_block_size - len(design)) * oligo_pool_vol
     return tuple([(oligo, oligo_pool_vol, False) for oligo in design[1:-1]] +
-                 [('h2o', h2o_vol, True)])
+                 [('h2o', h2o_vol, False)])
 
 
 def _get_gene_ingredients(design, des_vols):
