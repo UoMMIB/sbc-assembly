@@ -8,11 +8,11 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=unsubscriptable-object
 import itertools
+import os
 import sys
 
-from igraph import Graph
-
-from assembly import worklist
+from assembly import pipeline
+from assembly.graph_writer import GraphWriter
 from assembly.optimiser import Optimiser
 
 
@@ -27,49 +27,82 @@ _DEFAULT_OLIGO_VOLS = {
     }}
 
 
-def combine(oligos, n_mutated=0, mutant_oligos=None, n_blocks=1):
-    '''Design combinatorial assembly.'''
-    designs = _combine(oligos, n_mutated, mutant_oligos, n_blocks)
-    return _get_ingredients(designs)
+class SpeedyGenesWriter(GraphWriter):
+    '''Class for generating Part digest worklist graphs.'''
 
+    def __init__(self, oligos, n_mutated=0, mutant_oligos=None, n_blocks=1,
+                 output_name='speedy_genes'):
+        self.__oligos = oligos
+        self.__n_mutated = n_mutated
+        self.__mutant_oligos = mutant_oligos
+        self.__n_blocks = n_blocks
+        GraphWriter.__init__(self, output_name)
 
-def _combine(oligos, n_mutated, mutant_oligos, n_blocks):
-    '''Design combinatorial assembly.'''
+    def _initialise(self):
+        designs = self.__combine()
+        ingredients = _get_ingredients(designs)
+        optim = Optimiser(ingredients)
+        self.__form_graph(optim.get_matrix(), optim.get_reagents())
 
-    # Assertion sanity checks:
-    assert len(oligos) % 2 == 0
-    assert len(oligos) / n_blocks >= 2
-    assert mutant_oligos if n_mutated > 0 else True
+    def __combine(self):
+        '''Design combinatorial assembly.'''
 
-    designs = []
+        # Assertion sanity checks:
+        assert len(self.__oligos) % 2 == 0
+        assert len(self.__oligos) / self.__n_blocks >= 2
+        assert self.__mutant_oligos if self.__n_mutated > 0 else True
 
-    # Get combinations:
-    combis = itertools.combinations(mutant_oligos, n_mutated)
+        designs = []
 
-    for combi in combis:
-        design = list(oligos)
+        # Get combinations:
+        combis = itertools.combinations(self.__mutant_oligos,
+                                        self.__n_mutated)
 
-        for var in combi:
-            design[design.index(var[0])] = var[1]
+        for combi in combis:
+            design = list(self.__oligos)
 
-        block_lengths = [0] * n_blocks
+            for var in combi:
+                design[design.index(var[0])] = var[1]
 
-        for idx in itertools.cycle(range(0, n_blocks)):
-            block_lengths[idx] = block_lengths[idx] + 2
+            block_lengths = [0] * self.__n_blocks
 
-            if sum(block_lengths) == len(design):
-                break
+            for idx in itertools.cycle(range(0, self.__n_blocks)):
+                block_lengths[idx] = block_lengths[idx] + 2
 
-        idx = 0
-        blocks = []
+                if sum(block_lengths) == len(design):
+                    break
 
-        for val in block_lengths:
-            blocks.append(design[idx: idx + val])
-            idx = idx + val
+            idx = 0
+            blocks = []
 
-        designs.append(blocks)
+            for val in block_lengths:
+                blocks.append(design[idx: idx + val])
+                idx = idx + val
 
-    return designs
+            designs.append(blocks)
+
+        return designs
+
+    def __form_graph(self, df, reagents):
+        '''Convert a Dataframe (matrix) to a graph.'''
+        df = _drop(df)
+
+        roots = sorted(list(set(list(df.columns.values)) -
+                            set(df.index.values)))
+
+        indices = list(df.index.values)
+        vertix_names = sorted(list(roots) + indices)
+        vertices = {vertix_name:
+                    self._add_vertex(vertix_name,
+                                     {'is_reagent': vertix_name in reagents})
+                    for vertix_name in vertix_names}
+
+        for col in df.columns:
+            for idx, coeff in enumerate(df[col]):
+                if coeff > 0:
+                    self._add_edge(vertices[indices[idx]],
+                                   vertices[col],
+                                   {'Volume': coeff})
 
 
 def _get_ingredients(designs, oligo_vols=None):
@@ -127,64 +160,23 @@ def _get_gene_ingredients(design, des_vols):
                  list(zip(design, vols, [False] * len(design))))
 
 
-def _get_graph(df, reagents):
-    '''Convert a Dataframe (matrix) to a graph.'''
-    graph = Graph(directed=True)
-
-    df = _drop(df)
-
-    roots = sorted(list(set(list(df.columns.values)) -
-                        set(df.index.values)))
-
-    indices = list(df.index.values)
-    vertices = sorted(list(roots) + indices)
-
-    for vertex in vertices:
-        graph.add_vertex(vertex)
-        graph.vs[graph.vcount() - 1]['is_reagent'] = vertex in reagents
-
-    for col in df.columns:
-        for idx, coeff in enumerate(df[col]):
-            if coeff > 0:
-                graph.add_edge(vertices.index(indices[idx]),
-                               vertices.index(col))
-                graph.es[graph.ecount() - 1]['Volume'] = coeff
-
-    return graph
-
-
 def _drop(df):
     '''Drop empty columns and rows.'''
     df = df[df.columns[(df != 0).any()]]
     return df[(df.T != 0).any()]
 
 
-def _test(n_oligos, n_mutated, n_blocks):
-    '''Test method.'''
-    oligos = [str(val + 1) for val in range(0, n_oligos)]
-    mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
-    return combine(oligos, n_mutated, mutant_oligos, n_blocks)
-
-
 def main(args):
     '''main method.'''
-    ingredients = _test(int(args[0]), int(args[1]), int(args[2]))
+    oligos = [str(val + 1) for val in range(0, int(args[0]))]
+    mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
 
-    # Convert ingredients to graph:
-    optim = Optimiser(ingredients)
-    graph = _get_graph(optim.get_matrix(), optim.get_reagents())
+    writers = [SpeedyGenesWriter(oligos, int(args[1]), mutant_oligos,
+                                 int(args[2]))]
 
-    worklist_gen = worklist.WorklistGenerator(graph)
-    wrklst, plates = worklist_gen.get_worklist(args[4]
-                                               if len(args) > 4 else None)
-
-    out_dir = args[3]
-
-    for plt in plates.values():
-        plt.to_csv(out_dir)
-
-    worklist.to_csv(wrklst, out_dir)
-    worklist.format_worklist(out_dir)
+    input_plates = pipeline.get_input_plates(args[4])
+    out_dir_name = os.path.join(args[3], 'speedy_genes')
+    pipeline.run(writers, input_plates, {}, out_dir_name)
 
 
 if __name__ == '__main__':
