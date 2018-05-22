@@ -31,11 +31,12 @@ class SpeedyGenesWriter(GraphWriter):
     '''Class for generating Part digest worklist graphs.'''
 
     def __init__(self, oligos, n_mutated=0, mutant_oligos=None, n_blocks=1,
-                 output_name='output'):
+                 output_name='output', graph_filename=None):
         self.__oligos = oligos
         self.__n_mutated = n_mutated
         self.__mutant_oligos = mutant_oligos
         self.__n_blocks = n_blocks
+        self.__graph_filename = graph_filename
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -43,7 +44,9 @@ class SpeedyGenesWriter(GraphWriter):
         ingredients = _get_ingredients(designs)
         optim = Optimiser(ingredients)
         self.__form_graph(optim.get_matrix(), optim.get_reagents())
-        self.plot_graph()
+
+        if self.__graph_filename:
+            self.plot_graph(outfile=self.__graph_filename)
 
     def __combine(self):
         '''Design combinatorial assembly.'''

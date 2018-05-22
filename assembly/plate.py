@@ -128,7 +128,7 @@ def get_indices(well_name):
 
 def get_well_name(row, col):
     '''Get well name from indices.'''
-    return str(unichr(row + ord('A'))) + str(col + 1)
+    return str(chr(row + ord('A'))) + str(col + 1)
 
 
 def find(plates, obj):
