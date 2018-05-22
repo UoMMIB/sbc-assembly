@@ -29,6 +29,10 @@ class GraphWriter(object):
 
         return self.__graph
 
+    def plot_graph(self, outfile=None, layout_name='tree'):
+        '''Plot graph.'''
+        plot_graph(self.__graph, outfile, layout_name)
+
     def get_output_name(self):
         '''Gets output name.'''
         return self.__output_name

@@ -11,7 +11,7 @@ import itertools
 import os
 import sys
 
-from assembly import pipeline
+from assembly import pipeline, worklist
 from assembly.graph_writer import GraphWriter
 from assembly.optimiser import Optimiser
 
@@ -31,7 +31,7 @@ class SpeedyGenesWriter(GraphWriter):
     '''Class for generating Part digest worklist graphs.'''
 
     def __init__(self, oligos, n_mutated=0, mutant_oligos=None, n_blocks=1,
-                 output_name='speedy_genes'):
+                 output_name='output'):
         self.__oligos = oligos
         self.__n_mutated = n_mutated
         self.__mutant_oligos = mutant_oligos
@@ -43,6 +43,7 @@ class SpeedyGenesWriter(GraphWriter):
         ingredients = _get_ingredients(designs)
         optim = Optimiser(ingredients)
         self.__form_graph(optim.get_matrix(), optim.get_reagents())
+        self.plot_graph()
 
     def __combine(self):
         '''Design combinatorial assembly.'''
@@ -177,6 +178,8 @@ def main(args):
     input_plates = pipeline.get_input_plates(args[4])
     out_dir_name = os.path.join(args[3], 'speedy_genes')
     pipeline.run(writers, input_plates, {}, out_dir_name)
+
+    worklist.format_worklist(out_dir_name)
 
 
 if __name__ == '__main__':
