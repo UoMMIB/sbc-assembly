@@ -27,8 +27,8 @@ class TestPlate(unittest.TestCase):
 
     def test_add_col(self):
         '''Tests add method.'''
-        obj1 = 'OBJ1'
-        obj2 = 'OBJ2'
+        obj1 = {'id': 'OBJ1'}
+        obj2 = {'id': 'OBJ2'}
         row = 3
         col = 5
 
@@ -38,8 +38,8 @@ class TestPlate(unittest.TestCase):
 
     def test_add_row(self):
         '''Tests add method.'''
-        obj1 = 'OBJ1'
-        obj2 = 'OBJ2'
+        obj1 = {'id': 'OBJ1'}
+        obj2 = {'id': 'OBJ2'}
         row = 3
         col = 5
 
@@ -59,17 +59,17 @@ class TestPlate(unittest.TestCase):
 
     def __test_get_set(self, plate):
         '''Tests get, set and get by well methods.'''
-        val = 'OBJ'
+        obj = {'id': 'OBJ1'}
         row = 3
         col = 5
 
-        plate.set(val, row, col)
-        self.assertEqual(val, plate.get(row, col))
-        self.assertEqual(val, plate.get_by_well('D6'))
+        plate.set(obj, row, col)
+        self.assertEqual(obj, plate.get(row, col))
+        self.assertEqual(obj, plate.get_by_well('D6'))
 
     def __test_find(self, plate):
         '''Tests find method.'''
-        obj = 'OBJ'
+        obj = {'id': 'OBJ1'}
         plate.set(obj, 3, 5)
         plate.set(obj, 6, 10)
         self.assertEqual(['D6', 'G11'], self.__plate_col.find(obj))

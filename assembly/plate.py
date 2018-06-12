@@ -7,7 +7,7 @@ All rights reserved.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
-import math
+import itertools
 import os
 
 import pandas as pd
@@ -16,10 +16,19 @@ import pandas as pd
 class Plate(object):
     '''Class to represent a well plate.'''
 
-    def __init__(self, name, rows=8, cols=12, col_ord=False):
+    def __init__(self, name, rows=8, cols=12, col_ord=False, properties=None):
+
+        if not properties:
+            properties = ['id']
+
+        assert 'id' in properties
+
+        perms = list(itertools.product(properties, list(range(1, cols + 1))))
+        columns = pd.MultiIndex.from_tuples(perms)
+
         self.__plate = pd.DataFrame(index=[chr(r + ord('A'))
                                            for r in range(0, rows)],
-                                    columns=range(1, cols + 1))
+                                    columns=columns)
         self.__plate.name = name
         self.__col_ord = col_ord
         self.__next = 0
@@ -30,21 +39,27 @@ class Plate(object):
 
     def shape(self):
         '''Get plate shape.'''
-        return self.__plate.shape
+        return self.__plate['id'].shape
 
     def set(self, obj, row, col):
         '''Set object at a given row, col.'''
         self.__next = max(self.__next, self.get_idx(row, col) + 1)
-        self.__plate[col + 1][row] = obj
+
+        for key, val in obj.items():
+            self.__plate.loc[:, (key, col + 1)][row] = val
 
     def get(self, row, col):
         '''Get object at a given row, col.'''
-        return self.__plate[col + 1][row]
+        keys = list(self._Plate__plate.columns.levels[0])
+
+        return {key: self._Plate__plate.loc[:, (key, col + 1)][row]
+                for key in keys}
 
     def get_all(self):
         '''Get all objects.'''
-        return [val for row in self.__plate.values for val in row
-                if not isinstance(val, float) or not math.isnan(val)]
+        rows, cols = self.shape()
+        return {get_well_name(row, col): self.get(row, col)
+                for row in range(rows) for col in range(cols)}
 
     def get_by_well(self, well_name):
         '''Get by well, e.g. by C12.'''
@@ -55,7 +70,9 @@ class Plate(object):
         '''Adds an object to the next well.'''
         if well_name:
             row, col = get_indices(well_name)
-            self.__plate[col + 1][row] = obj
+
+            for key, val in obj.items():
+                self.__plate.loc[:, (key, col + 1)][row] = val
             return None
 
         # else:
@@ -74,17 +91,11 @@ class Plate(object):
             row, col = self.get_row_col(idx)
             self.set(obj, row, col)
 
-    def find(self, obj):
+    def find(self, src_terms):
         '''Finds an object.'''
-        wells = []
-
-        for col in self.__plate:
-            resp = self.__plate[col][self.__plate[col] == obj]
-
-            for row in resp.index.values:
-                wells.append(row + str(col))
-
-        return wells
+        return [well
+                for well, plate_obj in self.get_all().items()
+                if _match(src_terms, plate_obj)]
 
     def get_row_col(self, idx):
         '''Map idx to well.'''
@@ -115,7 +126,7 @@ class Plate(object):
         '''Sets an object in the given well.'''
         row, col = self.get_row_col(idx)
         self.set(obj, row, col)
-        return self.__plate[col + 1].index[row] + str(col + 1)
+        return get_well_name(row, col)
 
     def __repr__(self):
         return self.__plate.__repr__()
@@ -173,7 +184,7 @@ def from_table(filename):
     '''Generate Plate from tabular data.'''
     _, name = os.path.split(filename)
     df = pd.read_csv(filename)
-    df['name'] = df['name'].astype(str)
+    df['id'] = df['id'].astype(str)
 
     # 96 or 384?
     if len(df) > 96:
@@ -181,9 +192,19 @@ def from_table(filename):
     else:
         rows, cols = 8, 12
 
-    plt = Plate(name.split('.')[0], rows=rows, cols=cols)
+    props = list(df.columns[df.columns != 'well'])
+
+    plt = Plate(name.split('.')[0], rows=rows, cols=cols, properties=props)
 
     for _, row in df.iterrows():
-        plt.add(row['name'], row['well'])
+        dct = row.to_dict()
+        well = dct.pop('well')
+        plt.add(dct, well)
 
     return plt
+
+
+def _match(src_terms, obj):
+    '''Match object by search terms.'''
+    return all([obj.get(key, None) == src_terms[key]
+                for key in obj])
