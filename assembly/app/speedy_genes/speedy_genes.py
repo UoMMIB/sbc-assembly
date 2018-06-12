@@ -30,11 +30,16 @@ _DEFAULT_OLIGO_VOLS = {
 class SpeedyGenesWriter(GraphWriter):
     '''Class for generating Part digest worklist graphs.'''
 
-    def __init__(self, oligos, n_mutated=0, mutant_oligos=None, n_blocks=1,
-                 output_name='output', graph_filename=None):
-        self.__oligos = oligos
+    def __init__(self,
+                 input_plates,
+                 n_mutated=0,
+                 n_blocks=1,
+                 output_name='output',
+                 graph_filename=None):
+        self.__plates = []
+        self.__oligos, self.__mutant_oligos = \
+            self.__read_plates(input_plates)
         self.__n_mutated = n_mutated
-        self.__mutant_oligos = mutant_oligos
         self.__n_blocks = n_blocks
         self.__graph_filename = graph_filename
         GraphWriter.__init__(self, output_name)
@@ -47,6 +52,12 @@ class SpeedyGenesWriter(GraphWriter):
 
         if self.__graph_filename:
             self.plot_graph(outfile=self.__graph_filename)
+
+    def __read_plates(self, input_plates):
+        '''Read plates.'''
+        oligos = [str(val) for val in sorted(input_plates['wt'].get_all())]
+        mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+        return oligos, mutant_oligos
 
     def __combine(self):
         '''Design combinatorial assembly.'''
@@ -172,13 +183,14 @@ def _drop(df):
 
 def main(args):
     '''main method.'''
-    oligos = [str(val + 1) for val in range(0, int(args[0]))]
-    mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+    # oligos = [str(val + 1) for val in range(0, int(args[0]))]
+    # mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+    input_plates = pipeline.get_input_plates(args[0])
 
-    writers = [SpeedyGenesWriter(oligos, int(args[1]), mutant_oligos,
+    writers = [SpeedyGenesWriter(input_plates,
+                                 int(args[1]),
                                  int(args[2]))]
 
-    input_plates = pipeline.get_input_plates(args[4])
     out_dir_name = os.path.join(args[3], 'speedy_genes')
     pipeline.run(writers, input_plates, {}, out_dir_name)
 

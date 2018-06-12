@@ -172,9 +172,15 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
 def from_table(filename):
     '''Generate Plate from tabular data.'''
     _, name = os.path.split(filename)
-    plt = Plate(name.split('.')[0])
-
     df = pd.read_csv(filename)
+
+    # 96 or 384?
+    if len(df) > 96:
+        rows, cols = 16, 24
+    else:
+        rows, cols = 8, 12
+
+    plt = Plate(name.split('.')[0], rows=rows, cols=cols)
 
     for _, row in df.iterrows():
         plt.add(row['name'], row['well'])
