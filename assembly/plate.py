@@ -173,6 +173,7 @@ def from_table(filename):
     '''Generate Plate from tabular data.'''
     _, name = os.path.split(filename)
     df = pd.read_csv(filename)
+    df['name'] = df['name'].astype(str)
 
     # 96 or 384?
     if len(df) > 96:
