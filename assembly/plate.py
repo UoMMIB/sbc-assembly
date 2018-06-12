@@ -8,6 +8,7 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
 import itertools
+import math
 import os
 
 import pandas as pd
@@ -53,13 +54,15 @@ class Plate(object):
         keys = list(self._Plate__plate.columns.levels[0])
 
         return {key: self._Plate__plate.loc[:, (key, col + 1)][row]
-                for key in keys}
+                for key in keys
+                if _is_value(self._Plate__plate.loc[:, (key, col + 1)][row])}
 
     def get_all(self):
         '''Get all objects.'''
         rows, cols = self.shape()
         return {get_well_name(row, col): self.get(row, col)
-                for row in range(rows) for col in range(cols)}
+                for row in range(rows) for col in range(cols)
+                if self.get(row, col)}
 
     def get_by_well(self, well_name):
         '''Get by well, e.g. by C12.'''
@@ -202,6 +205,11 @@ def from_table(filename):
         plt.add(dct, well)
 
     return plt
+
+
+def _is_value(val):
+    '''Return boolean depending on whether value is None or NaN.'''
+    return bool(val and not (isinstance(val, float) and math.isnan(val)))
 
 
 def _match(src_terms, obj):
