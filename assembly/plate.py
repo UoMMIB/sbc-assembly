@@ -215,4 +215,4 @@ def _is_value(val):
 def _match(src_terms, obj):
     '''Match object by search terms.'''
     return all([obj.get(key, None) == src_terms[key]
-                for key in obj])
+                for key in src_terms])
