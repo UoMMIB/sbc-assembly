@@ -11,6 +11,8 @@ import itertools
 import os
 import sys
 
+from synbiochem import utils
+
 from assembly import pipeline, worklist
 from assembly.graph_writer import GraphWriter
 from assembly.optimiser import Optimiser
@@ -55,8 +57,8 @@ class SpeedyGenesWriter(GraphWriter):
 
     def __read_plates(self, input_plates):
         '''Read plates.'''
-        oligos = sorted([obj['id']
-                         for obj in input_plates['wt'].get_all().values()])
+        oligos = utils.sort([obj['id']
+                             for obj in input_plates['wt'].get_all().values()])
         mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
         return oligos, mutant_oligos
 
@@ -145,6 +147,16 @@ def _get_ingredients(designs, oligo_vols=None):
     return tuple((all_ingredients, 0.0, False))
 
 
+def _get_prepooled_oligo(oligo_id, wt=True):
+    '''Get pre-pooled oligo.'''
+    all_ingredients = []
+
+    if wt:
+        all_ingredients = ((oligo_id, 10, False), ('h2o', 190, True))
+
+    return all_ingredients
+
+
 def _get_block_ingredients(design, des_vols, max_block_size):
     '''Gets sub ingredients.'''
     vols = [des_vols['primer'], des_vols['oligo_pool'], des_vols['primer']]
@@ -162,7 +174,7 @@ def _get_oligo_pool(design, max_block_size, oligo_pool_vol=10.0):
     '''Get oligo pool.'''
     h2o_vol = (max_block_size - len(design)) * oligo_pool_vol
     return tuple([(oligo, oligo_pool_vol, False) for oligo in design[1:-1]] +
-                 [('h2o', h2o_vol, False)])
+                 [('h2o', h2o_vol, True)])
 
 
 def _get_gene_ingredients(design, des_vols):
