@@ -214,14 +214,3 @@ def from_table(filename):
 def _is_value(val):
     '''Return boolean depending on whether value is None or NaN.'''
     return bool(val and not (isinstance(val, float) and math.isnan(val)))
-
-
-def _match(src_terms, obj):
-    '''Match object by search terms.'''
-    print (str(src_terms) + '\t' + str(obj))
-
-    try:
-        return all([obj.get(key, None) == src_terms[key]
-                    for key in src_terms])
-    except TypeError:
-        print (str(src_terms) + '\t' + str(obj))

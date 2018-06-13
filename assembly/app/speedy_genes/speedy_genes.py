@@ -55,7 +55,8 @@ class SpeedyGenesWriter(GraphWriter):
 
     def __read_plates(self, input_plates):
         '''Read plates.'''
-        oligos = sorted(input_plates['wt'].get_all())
+        oligos = sorted([obj['id']
+                         for obj in input_plates['wt'].get_all().values()])
         mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
         return oligos, mutant_oligos
 

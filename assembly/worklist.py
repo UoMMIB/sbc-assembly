@@ -17,10 +17,10 @@ from operator import itemgetter
 import os
 
 from scipy.spatial.distance import cityblock
+from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 import pandas as pd
-from synbiochem.utils.graph_utils import get_roots
 
 
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
@@ -89,7 +89,7 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well_fixed']].values
 
         for val in inpt:
-            plate.add_component(val[0],
+            plate.add_component({'id': val[0]},
                                 'input',
                                 False,
                                 self.__input_plates,
@@ -101,7 +101,7 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well_fixed']].values
 
         for val in sorted(reags, key=itemgetter(0)):
-            plate.add_component(val[0],
+            plate.add_component({'id': val[0]},
                                 self.__plate_names['reagents'],
                                 True,
                                 self.__input_plates,
@@ -112,7 +112,7 @@ class WorklistGenerator(object):
                                 ~(self.__worklist['src_is_reagent'])]
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
-            plate.add_component(row['src_name'],
+            plate.add_component({'id': row['src_name']},
                                 row['level'],
                                 False,
                                 self.__input_plates,
@@ -121,7 +121,7 @@ class WorklistGenerator(object):
         # Write products:
         for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
-                plate.add_component(row['dest_name'],
+                plate.add_component({'id': row['dest_name']},
                                     self.__plate_names['output'],
                                     False,
                                     self.__input_plates,
@@ -152,8 +152,8 @@ class WorklistGenerator(object):
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
-        srcs = plate.find(self.__input_plates, src_name)
-        dests = plate.find(self.__input_plates, dest_name)
+        srcs = plate.find(self.__input_plates, {'id': src_name})
+        dests = plate.find(self.__input_plates, {'id': dest_name})
 
         shortest_dist = float('inf')
         optimal_pair = None
