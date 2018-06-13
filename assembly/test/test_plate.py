@@ -72,7 +72,8 @@ class TestPlate(unittest.TestCase):
         obj = {'id': 'OBJ1'}
         plate.set(obj, 3, 5)
         plate.set(obj, 6, 10)
-        self.assertEqual(['D6', 'G11'], self.__plate_col.find(obj))
+        self.assertEqual(sorted(['D6', 'G11']),
+                         sorted(self.__plate_col.find(obj)))
 
     def __test_idx_row_col(self, plate):
         '''Tests get_idx and get_row_col methods.'''

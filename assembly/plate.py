@@ -96,9 +96,13 @@ class Plate(object):
 
     def find(self, src_terms):
         '''Finds an object.'''
-        return [well
-                for well, plate_obj in self.get_all().items()
-                if _match(src_terms, plate_obj)]
+        wells = [[str(row) + str(col)
+                  for col in self.__plate[key].columns
+                  for row in self.__plate[key].index[
+            self.__plate[key][col] == val]]
+            for key, val in src_terms.items()]
+
+        return list(set(wells[0]).intersection(*wells))
 
     def get_row_col(self, idx):
         '''Map idx to well.'''
@@ -214,5 +218,10 @@ def _is_value(val):
 
 def _match(src_terms, obj):
     '''Match object by search terms.'''
-    return all([obj.get(key, None) == src_terms[key]
-                for key in src_terms])
+    print (str(src_terms) + '\t' + str(obj))
+
+    try:
+        return all([obj.get(key, None) == src_terms[key]
+                    for key in src_terms])
+    except TypeError:
+        print (str(src_terms) + '\t' + str(obj))
