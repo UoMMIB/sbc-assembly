@@ -26,6 +26,9 @@ def get_input_plates(dir_name):
 
 def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):
     '''Run pipeline.'''
+    if not plate_names:
+        plate_names = {}
+
     parent_out_dir = os.path.abspath(parent_out_dir_name)
 
     if os.path.exists(parent_out_dir):
