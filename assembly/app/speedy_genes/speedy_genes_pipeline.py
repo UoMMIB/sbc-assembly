@@ -15,6 +15,7 @@ from synbiochem import utils
 
 from assembly import pipeline, worklist
 from assembly.app.speedy_genes.dilution import OligoDilutionWriter
+from assembly.app.speedy_genes.inner_block import InnerBlockWriter
 from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
@@ -80,7 +81,8 @@ def main(args):
     designs = _combine(oligos, mutant_oligos, int(args[1]), int(args[2]))
 
     writers = [[OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
-                WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled')]]
+                WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
+                InnerBlockWriter(designs, 5, 'pooled_templates')]]
 
     out_dir_name = os.path.join(args[3], dte + args[4])
 
