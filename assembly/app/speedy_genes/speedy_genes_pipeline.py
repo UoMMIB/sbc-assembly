@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+from collections import defaultdict
 import itertools
 import os
 import sys
@@ -13,14 +14,20 @@ from time import gmtime, strftime
 from synbiochem import utils
 
 from assembly import pipeline, worklist
-from assembly.app.speedy_genes.dilution import WtOligoDilutionWriter
+from assembly.app.speedy_genes.dilution import OligoDilutionWriter
+from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
 def _read_plates(input_plates):
     '''Read plates.'''
-    oligos = utils.sort([obj['id']
-                         for obj in input_plates['wt'].get_all().values()])
-    mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+    oligos = utils.sort(
+        [obj['id'] for obj in input_plates['wt'].get_all().values()])
+
+    mutant_oligos = defaultdict(list)
+
+    for obj in input_plates['mut'].get_all().values():
+        mutant_oligos[obj['pos']].append(obj['id'])
+
     return oligos, mutant_oligos
 
 
@@ -72,7 +79,9 @@ def main(args):
     oligos, mutant_oligos = _read_plates(input_plates)
     designs = _combine(oligos, mutant_oligos, int(args[1]), int(args[2]))
 
-    writers = [WtOligoDilutionWriter(oligos)]
+    writers = [[OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
+                WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled')]]
+
     out_dir_name = os.path.join(args[3], dte + args[4])
 
     pipeline.run(writers, input_plates, parent_out_dir_name=out_dir_name)

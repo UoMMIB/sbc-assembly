@@ -102,7 +102,9 @@ class Plate(object):
             self.__plate[key][col] == val]]
             for key, val in src_terms.items()]
 
-        return list(set(wells[0]).intersection(*wells))
+        wells = list(set(wells[0]).intersection(*wells))
+
+        return {well: self.get_by_well(well) for well in wells}
 
     def get_row_col(self, idx):
         '''Map idx to well.'''
@@ -168,7 +170,7 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
         wells = plate.find(component)
 
         if wells:
-            return wells[0], plate
+            return list(wells.keys())[0], plate
 
     if plate_id not in plates:
         plate = Plate(plate_id)

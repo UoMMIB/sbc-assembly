@@ -36,20 +36,19 @@ def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):
 
     for idx, writers in enumerate(wrtrs):
         if isinstance(writers, list):
-            next_input_plates = [_run_writer(writer,
-                                             str(idx + 1) + '_' +
-                                             str(wrt_idx + 1),
-                                             input_plates,
-                                             plate_names,
-                                             parent_out_dir)
-                                 for wrt_idx, writer in enumerate(writers)]
-
-            input_plates = [plate
-                            for plates in next_input_plates
-                            for plate in plates]
+            for wrt_idx, writer in enumerate(writers):
+                input_plates.update(_run_writer(writer,
+                                                str(idx + 1) + '_' +
+                                                str(wrt_idx + 1),
+                                                input_plates,
+                                                plate_names,
+                                                parent_out_dir))
         else:
-            input_plates = _run_writer(writers, str(idx + 1), input_plates,
-                                       plate_names, parent_out_dir)
+            input_plates.update(_run_writer(writers,
+                                            str(idx + 1),
+                                            input_plates,
+                                            plate_names,
+                                            parent_out_dir))
 
 
 def _run_writer(writer, name, input_plates, plate_names, parent_out_dir):
