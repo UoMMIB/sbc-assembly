@@ -47,8 +47,8 @@ class BlockPcrWriter(PcrWriter):
         for design_idx, design in enumerate(self.__designs):
             for block_idx, block in enumerate(design):
                 base_id = str(design_idx + 1) + '.' + str(block_idx + 1)
-                pcr_comps_id = base_id + '.ib'
+                pcr_comps_ids = [base_id + '.ib']
                 pcr_id = base_id + '.b'
                 primer_ids = [block[idx] for idx in [0, -1]]
 
-                self._add_pcr(pcr_id, pcr_comps_id, primer_ids)
+                self._add_pcr(pcr_id, pcr_comps_ids, primer_ids)

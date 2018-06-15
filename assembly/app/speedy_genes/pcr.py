@@ -18,17 +18,18 @@ class PcrWriter(GraphWriter):
         self.__mm_vol = mm_vol
         GraphWriter.__init__(self, output_name)
 
-    def _add_pcr(self, pcr_id, pcr_comps_id, primer_ids):
+    def _add_pcr(self, pcr_id, pcr_comps_ids, primer_ids):
         '''Add PCR reaction to worklist graph.'''
         pcr = self._add_vertex(pcr_id, {'is_reagent': False})
 
         mm = self._add_vertex('mm', {'is_reagent': True})
         self._add_edge(mm, pcr, {'Volume': self.__mm_vol})
 
-        pcr_comps = self._add_vertex(pcr_comps_id,
-                                     {'is_reagent': False})
+        for pcr_comps_id in pcr_comps_ids:
+            pcr_comps = self._add_vertex(pcr_comps_id,
+                                         {'is_reagent': False})
 
-        self._add_edge(pcr_comps, pcr, {'Volume': self._comps_vol})
+            self._add_edge(pcr_comps, pcr, {'Volume': self._comps_vol})
 
         # Add outer oligos:
         for primer_ids in primer_ids:
