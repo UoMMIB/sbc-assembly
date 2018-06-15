@@ -14,9 +14,9 @@ from time import gmtime, strftime
 from synbiochem import utils
 
 from assembly import pipeline, worklist
+from assembly.app.speedy_genes.block import InnerBlockPoolWriter, \
+    BlockPcrWriter
 from assembly.app.speedy_genes.dilution import OligoDilutionWriter
-from assembly.app.speedy_genes.inner_block import InnerBlockPoolWriter, \
-    InnerBlockWriter
 from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
@@ -81,7 +81,7 @@ def main(args):
     writers = [[OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
                 WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
                 InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
-                InnerBlockWriter(designs, 1.2, 3, 22.8, 'pcr1')]]
+                BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1')]]
 
     out_dir_name = os.path.join(args[3], dte + args[4])
 
