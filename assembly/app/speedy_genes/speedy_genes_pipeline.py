@@ -79,11 +79,11 @@ def main(args):
     oligos, mutant_oligos = _read_plates(input_plates)
     designs = _combine(oligos, mutant_oligos, int(args[1]), int(args[2]))
 
-    writers = [[OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
-                WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
-                InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
-                BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
-                GenePcrWriter(designs, 1.5, 3, 14.5, 'pcr2')]]
+    writers = [OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
+               WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
+               InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
+               BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
+               GenePcrWriter(designs, 1.5, 3, 14.5, 'pcr2')]
 
     out_dir_name = os.path.join(args[3], dte + args[4])
 
