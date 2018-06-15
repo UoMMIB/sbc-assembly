@@ -27,7 +27,7 @@ def _read_plates(input_plates):
     mutant_oligos = defaultdict(list)
 
     for obj in input_plates['mut'].get_all().values():
-        mutant_oligos[obj['pos']].append(obj['id'])
+        mutant_oligos[obj['parent']].append(obj['id'])
 
     return oligos, mutant_oligos
 
@@ -43,14 +43,11 @@ def _combine(oligos, mutant_oligos, n_mutated, n_blocks):
     designs = []
 
     # Get combinations:
-    combis = itertools.combinations(mutant_oligos,
-                                    n_mutated)
-
-    for combi in combis:
+    for combi in itertools.combinations(list(mutant_oligos), n_mutated):
         design = list(oligos)
 
-        for var in combi:
-            design[design.index(var[0])] = var[1]
+        for wt_id in combi:
+            design[design.index(wt_id)] = wt_id + 'm'
 
         block_lengths = [0] * n_blocks
 
