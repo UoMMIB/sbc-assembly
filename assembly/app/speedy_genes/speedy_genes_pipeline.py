@@ -21,13 +21,13 @@ from assembly.app.speedy_genes.gene import GenePcrWriter
 from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
-def run(plate_dir, n_mutated, n_blocks, out_dir_parent, exp_name):
+def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
     '''run method.'''
     dte = strftime("%y%m%d", gmtime())
 
     input_plates = pipeline.get_input_plates(plate_dir)
     oligos, mutant_oligos = _read_plates(input_plates)
-    designs = _combine(oligos, mutant_oligos, n_mutated, n_blocks)
+    designs = _combine(oligos, mutant_oligos, max_mutated, n_blocks)
 
     writers = [
         OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
@@ -57,17 +57,27 @@ def _read_plates(input_plates):
     return oligos, mutant_oligos
 
 
-def _combine(oligos, mutant_oligos, n_mutated, n_blocks):
+def _combine(oligos, mutant_oligos, max_mutated, n_blocks):
     '''Design combinatorial assembly.'''
 
     # Assertion sanity checks:
     assert len(oligos) % 2 == 0
     assert len(oligos) / n_blocks >= 2
-    assert mutant_oligos if n_mutated > 0 else True
+    assert mutant_oligos if max_mutated > 0 else True
 
     designs = []
 
     # Get combinations:
+    for n_mutated in range(max_mutated + 1):
+        designs.extend(_get_combis(oligos, mutant_oligos, n_mutated, n_blocks))
+
+    return designs
+
+
+def _get_combis(oligos, mutant_oligos, n_mutated, n_blocks):
+    '''Get combinations.'''
+    designs = []
+
     for combi in itertools.combinations(list(mutant_oligos), n_mutated):
         design = list(oligos)
 
