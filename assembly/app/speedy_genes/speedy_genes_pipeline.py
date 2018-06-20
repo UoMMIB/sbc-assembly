@@ -21,6 +21,29 @@ from assembly.app.speedy_genes.gene import GenePcrWriter
 from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
+def run(plate_dir, n_mutated, n_blocks, out_dir_parent, exp_name):
+    '''run method.'''
+    dte = strftime("%y%m%d", gmtime())
+
+    input_plates = pipeline.get_input_plates(plate_dir)
+    oligos, mutant_oligos = _read_plates(input_plates)
+    designs = _combine(oligos, mutant_oligos, n_mutated, n_blocks)
+
+    writers = [
+        OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
+        WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
+        InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
+        BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
+        GenePcrWriter(designs, 1.5, 3, 14.5, 'pcr2')
+    ]
+
+    out_dir_name = os.path.join(out_dir_parent, dte + exp_name)
+
+    pipeline.run(writers, input_plates, parent_out_dir_name=out_dir_name)
+
+    worklist.format_worklist(out_dir_name)
+
+
 def _read_plates(input_plates):
     '''Read plates.'''
     oligos = utils.sort(
@@ -73,23 +96,16 @@ def _combine(oligos, mutant_oligos, n_mutated, n_blocks):
 
 def main(args):
     '''main method.'''
-    dte = strftime("%y%m%d", gmtime())
+    import cProfile
 
-    input_plates = pipeline.get_input_plates(args[0])
-    oligos, mutant_oligos = _read_plates(input_plates)
-    designs = _combine(oligos, mutant_oligos, int(args[1]), int(args[2]))
+    pr = cProfile.Profile()
+    pr.enable()
 
-    writers = [OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
-               WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
-               InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
-               BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
-               GenePcrWriter(designs, 1.5, 3, 14.5, 'pcr2')]
+    run(args[0], int(args[1]), int(args[2]), args[3], args[4])
 
-    out_dir_name = os.path.join(args[3], dte + args[4])
+    pr.disable()
 
-    pipeline.run(writers, input_plates, parent_out_dir_name=out_dir_name)
-
-    worklist.format_worklist(out_dir_name)
+    pr.print_stats(sort='cumtime')
 
 
 if __name__ == '__main__':

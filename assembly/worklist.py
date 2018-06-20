@@ -49,6 +49,7 @@ class WorklistGenerator(object):
         self.__input_plates = {}
         self.__plate_names = {'reagents': 'reagents',
                               'output': 'output'}
+        self.__added_comps = {}
 
     def get_worklist(self, input_plates=None, plate_names=None):
         '''Gets worklist and input_plates.'''
@@ -89,11 +90,10 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well_fixed']].values
 
         for val in inpt:
-            plate.add_component({'id': val[0]},
-                                'input',
-                                False,
-                                self.__input_plates,
-                                val[1])
+            self.__add_component(val[0],
+                                 'input',
+                                 False,
+                                 val[1])
 
         # Write reagents plate:
         reags = \
@@ -101,31 +101,28 @@ class WorklistGenerator(object):
                                 ][['src_name', 'src_well_fixed']].values
 
         for val in sorted(reags, key=itemgetter(0)):
-            plate.add_component({'id': val[0]},
-                                self.__plate_names['reagents'],
-                                True,
-                                self.__input_plates,
-                                val[1])
+            self.__add_component(val[0],
+                                 self.__plate_names['reagents'],
+                                 True,
+                                 val[1])
 
         # Write intermediates:
         intrm = self.__worklist[~(self.__worklist['src_is_input']) &
                                 ~(self.__worklist['src_is_reagent'])]
 
         for _, row in intrm.sort_values('level', ascending=False).iterrows():
-            plate.add_component({'id': row['src_name']},
-                                row['level'],
-                                False,
-                                self.__input_plates,
-                                row['src_well_fixed'])
+            self.__add_component(row['src_name'],
+                                 row['level'],
+                                 False,
+                                 row['src_well_fixed'])
 
         # Write products:
         for _, row in self.__worklist.iterrows():
             if row['level'] == 0:
-                plate.add_component({'id': row['dest_name']},
-                                    self.__plate_names['output'],
-                                    False,
-                                    self.__input_plates,
-                                    row['dest_well_fixed'])
+                self.__add_component(row['dest_name'],
+                                     self.__plate_names['output'],
+                                     False,
+                                     row['dest_well_fixed'])
 
     def __add_locations(self):
         '''Add locations to worklist.'''
@@ -152,8 +149,8 @@ class WorklistGenerator(object):
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
-        srcs = plate.find(self.__input_plates, {'id': src_name})
-        dests = plate.find(self.__input_plates, {'id': dest_name})
+        srcs = self.__added_comps[src_name]
+        dests = self.__added_comps[dest_name]
 
         shortest_dist = float('inf')
         optimal_pair = None
@@ -196,6 +193,17 @@ class WorklistGenerator(object):
 
             data.append(opr)
             self.__traverse(src, level + 1, data)
+
+    def __add_component(self, component, plate_id, is_reagent, well_name):
+        '''Add component.'''
+        if component not in self.__added_comps:
+            (well, plt) = plate.add_component({'id': component},
+                                              plate_id,
+                                              is_reagent,
+                                              self.__input_plates,
+                                              well_name)
+
+            self.__added_comps[component] = {plt.get_name(): [well]}
 
 
 def to_csv(wrklst, out_dir_name='.'):
