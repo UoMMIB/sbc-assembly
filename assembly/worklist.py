@@ -15,6 +15,7 @@ All rights reserved.
 # pylint: disable=wrong-import-order
 from operator import itemgetter
 import os
+import re
 
 from scipy.spatial.distance import cityblock
 from synbiochem.utils.graph_utils import get_roots
@@ -197,13 +198,44 @@ class WorklistGenerator(object):
     def __add_component(self, component, plate_id, is_reagent, well_name):
         '''Add component.'''
         if component not in self.__added_comps:
-            (well, plt) = plate.add_component({'id': component},
-                                              plate_id,
-                                              is_reagent,
-                                              self.__input_plates,
-                                              well_name)
+            try:
+                (well, plt) = plate.add_component({'id': component},
+                                                  plate_id,
+                                                  is_reagent,
+                                                  self.__input_plates,
+                                                  well_name)
+            except KeyError:
+                # Occurs when plate is full:
+                return self.__add_component(component,
+                                            self.__get_next_plate_id(
+                                                plate_id),
+                                            is_reagent,
+                                            well_name)
 
             self.__added_comps[component] = {plt.get_name(): [well]}
+
+    def __get_next_plate_id(self, full_plate_id):
+        '''Get next plate id.'''
+        grps = re.match('(.*)~(\d+)', full_plate_id)
+
+        if grps:
+            new_plate_id = grps[1] + '~' + str(int(grps[2]) + 1)
+        else:
+            new_plate_id = full_plate_id + '~2'
+
+        if new_plate_id not in self.__input_plates:
+            # Add new plate:
+            full_plate = self.__input_plates[full_plate_id]
+            rows, cols = full_plate.shape()
+
+            new_plate = plate.Plate(new_plate_id,
+                                    rows=rows, cols=cols,
+                                    col_ord=full_plate.get_col_order(),
+                                    properties=full_plate.get_properties())
+
+            self.__input_plates[new_plate_id] = new_plate
+
+        return new_plate_id
 
 
 def to_csv(wrklst, out_dir_name='.'):

@@ -38,6 +38,14 @@ class Plate(object):
         '''Get name.'''
         return self.__plate.name
 
+    def get_col_order(self):
+        '''Get column order.'''
+        return self.__col_ord
+
+    def get_properties(self):
+        '''Get properties.'''
+        return list(self._Plate__plate.columns.levels[0])
+
     def shape(self):
         '''Get plate shape.'''
         return self.__plate['id'].shape
@@ -51,7 +59,7 @@ class Plate(object):
 
     def get(self, row, col):
         '''Get object at a given row, col.'''
-        keys = list(self._Plate__plate.columns.levels[0])
+        keys = self.get_properties()
 
         return {key: self._Plate__plate.loc[:, (key, col + 1)][row]
                 for key in keys
