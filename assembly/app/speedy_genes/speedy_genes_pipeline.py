@@ -26,16 +26,17 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
     dte = strftime("%y%m%d", gmtime())
 
     input_plates = pipeline.get_input_plates(plate_dir)
-    oligos, mutant_oligos = _read_plates(input_plates)
+    oligos, mutant_oligos, primers = _read_plates(input_plates)
     designs = _combine(oligos, mutant_oligos, max_mutated, n_blocks)
 
     writers = [
-        OligoDilutionWriter(oligos, 10, 190, 'wt_5'),
+        OligoDilutionWriter(oligos + primers, 10, 190, 'wt_5'),
         WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
         InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
         BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
         BlockPoolWriter(designs, 4.5, 'pooled_blocks'),
-        CombiGenePcrWriter(designs, 4, 1.5, 3, 14.5, 'pcr2')
+        CombiGenePcrWriter(designs, 4, 1.5, 3, 14.5, ['5-primer_dil', '28'],
+                           'pcr2')
     ]
 
     out_dir_name = os.path.join(out_dir_parent, dte + exp_name)
@@ -48,14 +49,18 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
 def _read_plates(input_plates):
     '''Read plates.'''
     oligos = utils.sort(
-        [obj['id'] for obj in input_plates['wt'].get_all().values()])
+        [obj['id'] for obj in input_plates['wt'].get_all().values()
+         if obj['id'].isdigit()])
+
+    primers = [obj['id'] for obj in input_plates['wt'].get_all().values()
+               if not obj['id'].isdigit()]
 
     mutant_oligos = defaultdict(list)
 
     for obj in input_plates['mut'].get_all().values():
         mutant_oligos[obj['parent']].append(obj['id'])
 
-    return oligos, mutant_oligos
+    return oligos, mutant_oligos, primers
 
 
 def _combine(oligos, mutant_oligos, max_mutated, n_blocks):

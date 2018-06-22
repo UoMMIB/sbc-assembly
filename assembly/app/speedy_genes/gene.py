@@ -37,8 +37,9 @@ class CombiGenePcrWriter(PcrWriter):
     '''Class for generating combinatorial gene PCR worklist graphs.'''
 
     def __init__(self, designs, max_muts, comps_vol, primer_vol, mm_vol,
-                 output_name):
+                 primer_ids, output_name):
         self.__designs = designs
+        self.__primer_ids = primer_ids
         self.__max_muts = max_muts
         PcrWriter.__init__(self, comps_vol, primer_vol, mm_vol, output_name)
 
@@ -55,9 +56,6 @@ class CombiGenePcrWriter(PcrWriter):
         combis = [combi for combi in itertools.product(*combis)
                   if sum(combi) <= self.__max_muts]
 
-        primer_ids = [get_dil_oligo_id(self.__designs[0][0][0]),
-                      get_dil_oligo_id(self.__designs[0][-1][-1])]
-
         for combi in combis:
             pcr_comps_ids = []
 
@@ -69,4 +67,4 @@ class CombiGenePcrWriter(PcrWriter):
 
             self._add_pcr('-'.join([pcr_comps_id[:-2]
                                     for pcr_comps_id in pcr_comps_ids]),
-                          pcr_comps_ids, primer_ids)
+                          pcr_comps_ids, self.__primer_ids)
