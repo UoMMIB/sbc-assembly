@@ -6,7 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
-from assembly.app.speedy_genes import get_dil_oligo_id, get_block_id
+from assembly.app.speedy_genes import get_dil_oligo_id, get_block_id, \
+    get_pos_muts
 from assembly.app.speedy_genes.pcr import PcrWriter
 from assembly.graph_writer import GraphWriter
 
@@ -83,8 +84,8 @@ class BlockPoolWriter(GraphWriter):
             for block_idx, block in enumerate(design):
                 block_id = get_block_id(block_idx, block)
                 pcr_id = block_id + '_b'
-                pool_id = '_'.join([str(val)
-                                    for val in _get_pos_muts(block_id)]) + '_p'
+                pool_id = '_'.join([str(val) if val > 0 else 'wt'
+                                    for val in get_pos_muts(block_id)]) + '_p'
 
                 pool_steps[pcr_id] = pool_id
 
@@ -93,10 +94,3 @@ class BlockPoolWriter(GraphWriter):
             pool = self._add_vertex(pool_id, {'is_reagent': False})
 
             self._add_edge(pcr, pool, {'Volume': self.__pool_vol})
-
-
-def _get_pos_muts(block_id):
-    '''Parse block id to get position and number of mutations.'''
-    tokens = block_id.split('_')
-    return int(tokens[0]), \
-        'wt' if tokens[1] == 'wt' else (tokens[1].count('&') + 1)

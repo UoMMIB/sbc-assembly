@@ -24,3 +24,10 @@ def get_design_id(design):
     '''Get design id.'''
     return '-'.join([get_block_id(block_idx, block)
                      for block_idx, block in enumerate(design)])
+
+
+def get_pos_muts(block_id):
+    '''Parse block id to get position and number of mutations.'''
+    tokens = block_id.split('_')
+    return int(tokens[0]), \
+        0 if tokens[1] == 'wt' else (tokens[1].count('&') + 1)

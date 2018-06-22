@@ -15,9 +15,9 @@ from synbiochem import utils
 
 from assembly import pipeline, worklist
 from assembly.app.speedy_genes.block import InnerBlockPoolWriter, \
-    BlockPcrWriter
+    BlockPcrWriter, BlockPoolWriter
 from assembly.app.speedy_genes.dilution import OligoDilutionWriter
-from assembly.app.speedy_genes.gene import GenePcrWriter
+from assembly.app.speedy_genes.gene import CombiGenePcrWriter
 from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 
@@ -34,7 +34,8 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
         WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
         InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
         BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
-        GenePcrWriter(designs, 1.5, 3, 14.5, 'pcr2')
+        BlockPoolWriter(designs, 4.5, 'pooled_blocks'),
+        CombiGenePcrWriter(designs, 4, 1.5, 3, 14.5, 'pcr2')
     ]
 
     out_dir_name = os.path.join(out_dir_parent, dte + exp_name)
