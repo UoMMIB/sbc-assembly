@@ -66,3 +66,37 @@ class BlockPcrWriter(PcrWriter):
                     self._add_pcr(pcr_id, pcr_comps_ids, primer_ids)
 
                 block_ids.append(block_id)
+
+
+class BlockPoolWriter(GraphWriter):
+    '''Class for generating pooled block worklist graphs.'''
+
+    def __init__(self, designs, pool_vol, output_name):
+        self.__designs = designs
+        self.__pool_vol = pool_vol
+        GraphWriter.__init__(self, output_name)
+
+    def _initialise(self):
+        pool_steps = {}
+
+        for design in self.__designs:
+            for block_idx, block in enumerate(design):
+                block_id = get_block_id(block_idx, block)
+                pcr_id = block_id + '_b'
+                pool_id = '_'.join([str(val)
+                                    for val in _get_pos_muts(block_id)]) + '_p'
+
+                pool_steps[pcr_id] = pool_id
+
+        for pcr_id, pool_id in pool_steps.items():
+            pcr = self._add_vertex(pcr_id, {'is_reagent': False})
+            pool = self._add_vertex(pool_id, {'is_reagent': False})
+
+            self._add_edge(pcr, pool, {'Volume': self.__pool_vol})
+
+
+def _get_pos_muts(block_id):
+    '''Parse block id to get position and number of mutations.'''
+    tokens = block_id.split('_')
+    return int(tokens[0]), \
+        'wt' if tokens[1] == 'wt' else (tokens[1].count('&') + 1)
