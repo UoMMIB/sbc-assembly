@@ -50,6 +50,11 @@ class Plate(object):
         '''Get plate shape.'''
         return self.__plate['id'].shape
 
+    def size(self):
+        '''Get plate size.'''
+        rows, cols = self.shape()
+        return rows * cols
+
     def set(self, obj, row, col):
         '''Set object at a given row, col.'''
         self.__next = max(self.__next, self.get_idx(row, col) + 1)

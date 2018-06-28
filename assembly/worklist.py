@@ -137,15 +137,18 @@ class WorklistGenerator(object):
                           'src_idx',
                           'dest_plate',
                           'dest_well',
-                          'dest_idx']
+                          'dest_idx',
+                          'pipette_idx']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
         self.__worklist.sort_values(['level',
                                      'src_is_reagent',
                                      'src_plate',
+                                     'pipette_idx',
                                      'src_idx',
                                      'dest_idx'],
-                                    ascending=[False, False, True, True, True],
+                                    ascending=[False, False, True, True, True,
+                                               True],
                                     inplace=True)
 
     def __get_location(self, src_name, dest_name):
@@ -172,8 +175,15 @@ class WorklistGenerator(object):
                                     *dest_ind)
                             shortest_dist = dist
                             optimal_pair = [src_plt, src_well, src_idx,
-                                            dest_plt, dest_well, dest_idx]
+                                            dest_plt, dest_well, dest_idx,
+                                            self.__get_pipette_idx(src_plt,
+                                                                   src_idx)]
         return optimal_pair
+
+    def __get_pipette_idx(self, src_plt, src_idx):
+        '''Get pipetting index (supporting 96 and 384 well plates.'''
+        plt = self.__input_plates[src_plt]
+        return src_idx % 2 if plt.size() == 384 else 0
 
     def __traverse(self, dest, level, data):
         '''Traverse tree.'''
