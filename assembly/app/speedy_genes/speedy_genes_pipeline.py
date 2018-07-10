@@ -23,6 +23,8 @@ from assembly.app.speedy_genes.pool import WtOligoPoolWriter
 
 def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
     '''run method.'''
+    assert len(exp_name) < 6
+
     dte = strftime("%y%m%d", gmtime())
 
     input_plates = pipeline.get_input_plates(plate_dir)
@@ -30,13 +32,13 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
     designs = _combine(oligos, mutant_oligos, max_mutated, n_blocks)
 
     writers = [
-        OligoDilutionWriter(oligos + primers, 10, 190, 'wt_5'),
-        WtOligoPoolWriter(mutant_oligos, 10, 'nnk_5_pooled'),
-        InnerBlockPoolWriter(designs, 5, 'pooled_templates'),
-        BlockPcrWriter(designs, 1.2, 3, 22.8, 'pcr1'),
-        BlockPoolWriter(designs, 4.5, 'pooled_blocks'),
+        OligoDilutionWriter(oligos + primers, 10, 190, exp_name + '-wt-dil'),
+        WtOligoPoolWriter(mutant_oligos, 10, exp_name + '-mut-pl'),
+        InnerBlockPoolWriter(designs, 5, exp_name + '-templ'),
+        BlockPcrWriter(designs, 1.2, 3, 22.8, exp_name + '-pcr1'),
+        BlockPoolWriter(designs, 4.5, exp_name + '-blcks'),
         CombiGenePcrWriter(designs, 4, 1.5, 3, 14.5, ['5-primer_dil', '28'],
-                           'pcr2')
+                           exp_name + '-pcr2')
     ]
 
     out_dir_name = os.path.join(out_dir_parent, dte + exp_name)
