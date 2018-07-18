@@ -89,7 +89,7 @@ class Plate(object):
 
             for key, val in obj.items():
                 self.__plate.loc[:, (key, col + 1)][row] = val
-            return None
+            return well_name
 
         # else:
         return self.__set(obj, self.__next)
