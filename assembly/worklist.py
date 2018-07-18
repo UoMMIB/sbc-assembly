@@ -209,11 +209,11 @@ class WorklistGenerator(object):
         '''Add component.'''
         if component not in self.__added_comps:
             try:
-                (well, plt) = plate.add_component({'id': component},
-                                                  plate_id,
-                                                  is_reagent,
-                                                  self.__input_plates,
-                                                  well_name)
+                (wells, plt) = plate.add_component({'id': component},
+                                                   plate_id,
+                                                   is_reagent,
+                                                   self.__input_plates,
+                                                   well_name)
             except KeyError:
                 # Occurs when plate is full:
                 return self.__add_component(component,
@@ -222,7 +222,7 @@ class WorklistGenerator(object):
                                             is_reagent,
                                             well_name)
 
-            self.__added_comps[component] = {plt.get_name(): [well]}
+            self.__added_comps[component] = {plt.get_name(): wells}
 
     def __get_next_plate_id(self, full_plate_id):
         '''Get next plate id.'''

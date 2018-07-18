@@ -186,7 +186,7 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
         wells = plate.find(component)
 
         if wells:
-            return wells[0], plate
+            return wells, plate
 
     if plate_id not in plates:
         plate = Plate(plate_id)
@@ -196,13 +196,13 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
 
     if is_reagent:
         if well_name:
-            return plate.add(component, well_name), plate
+            return [plate.add(component, well_name)], plate
         # else:
         plate.add_line(component)
         return add_component(component, plate_id, is_reagent, plates,
                              well_name)
 
-    return plate.add(component, well_name), plate
+    return [plate.add(component, well_name)], plate
 
 
 def from_table(filename):
