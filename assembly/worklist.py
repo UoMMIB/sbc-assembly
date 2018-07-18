@@ -207,6 +207,8 @@ class WorklistGenerator(object):
 
     def __add_component(self, component, plate_id, is_reagent, well_name):
         '''Add component.'''
+        print(component)
+
         if component not in self.__added_comps:
             try:
                 (well, plt) = plate.add_component({'id': component},
