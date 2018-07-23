@@ -63,6 +63,6 @@ def _run_writer(writer, name, input_plates, plate_names, parent_out_dir):
     for plt in plates.values():
         plt.to_csv(out_dir)
 
-    worklist.to_csv(wrklst, out_dir)
+    worklist.to_csv(wrklst, writer.get_output_name(), out_dir)
 
     return plates

@@ -125,7 +125,7 @@ class WorklistGenerator(object):
                                      False,
                                      row['dest_well_fixed'])
 
-    def __add_locations(self):
+    def __add_locations(self, sort_src=False):
         '''Add locations to worklist.'''
         locations = self.__worklist.apply(lambda row: self.__get_location(
             row['src_name'], row['dest_name']), axis=1)
@@ -141,12 +141,22 @@ class WorklistGenerator(object):
                           'pipette_idx']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
-        self.__worklist.sort_values(['level',
-                                     'src_is_reagent',
-                                     'src_plate',
-                                     'pipette_idx',
-                                     'src_idx',
-                                     'dest_idx'],
+
+        sort_order = ['level',
+                      'src_is_reagent',
+                      'src_plate',
+                      'pipette_idx',
+                      'src_idx',
+                      'dest_idx'] \
+            if sort_src else \
+            ['level',
+             'src_is_reagent',
+             'src_plate',
+             'pipette_idx',
+             'dest_idx',
+             'src_idx']
+
+        self.__worklist.sort_values(sort_order,
                                     ascending=[False, False, True, True, True,
                                                True],
                                     inplace=True)
@@ -248,10 +258,10 @@ class WorklistGenerator(object):
         return new_plate_id
 
 
-def to_csv(wrklst, out_dir_name='.'):
+def to_csv(wrklst, name, out_dir_name='.'):
     '''Export worklist as csv file.'''
     filepath = os.path.abspath(os.path.join(out_dir_name,
-                                            'worklist.csv'))
+                                            name + '_worklist.csv'))
     wrklst.to_csv(filepath, encoding='utf-8', index=False)
 
 
@@ -260,7 +270,7 @@ def format_worklist(dir_name):
 
     for(dirpath, _, filenames) in os.walk(dir_name):
         for filename in filenames:
-            if filename == 'worklist.csv':
+            if filename.endswith('worklist.csv'):
                 filepath = os.path.join(dirpath, filename)
                 df = pd.read_csv(filepath)
                 _rename_values(df)
