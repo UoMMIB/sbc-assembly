@@ -104,7 +104,10 @@ class SpecificPartPcrWriter(PartPcrWriter):
                 parent = self._ice_helper.get_ice_entry(parent['id'])
                 linked_parts = parent.get_metadata()['linkedParts']
 
-                if len(linked_parts) == 2:
+                # Ideally, should have two linked_parts: the part and the
+                # vector backbone.
+                # Unfortunately some legacy entries are missing a backbone.
+                if len(linked_parts) < 3:
                     for linked_part in linked_parts:
                         if linked_part['type'] == 'PART':
                             return parent, parent.get_ice_id() + \
