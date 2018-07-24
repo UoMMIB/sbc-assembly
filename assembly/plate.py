@@ -17,7 +17,8 @@ import pandas as pd
 class Plate(object):
     '''Class to represent a well plate.'''
 
-    def __init__(self, name, rows=8, cols=12, col_ord=False, properties=None):
+    def __init__(self, name, rows=8, cols=12, col_ord=False, properties=None,
+                 plate=None):
 
         if not properties:
             properties = ['id']
@@ -27,9 +28,12 @@ class Plate(object):
         perms = list(itertools.product(properties, list(range(1, cols + 1))))
         columns = pd.MultiIndex.from_tuples(perms)
 
-        self.__plate = pd.DataFrame(index=[chr(r + ord('A'))
-                                           for r in range(0, rows)],
-                                    columns=columns)
+        if plate is not None:
+            self.__plate = plate
+        else:
+            self.__plate = pd.DataFrame(index=[chr(r + ord('A'))
+                                               for r in range(0, rows)],
+                                        columns=columns)
         self.__plate.name = name
         self.__col_ord = col_ord
         self.__next = 0
@@ -205,10 +209,13 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
     return [plate.add(component, well_name)], plate
 
 
-def from_table(filename):
+def from_table(df, name):
     '''Generate Plate from tabular data.'''
-    _, name = os.path.split(filename)
-    df = pd.read_csv(filename, dtype={'id': object, 'parent': object})
+    # df = pd.read_csv(filename, dtype={'id': object, 'parent': object})
+    df['id'] = df['id'].astype(object)
+
+    if 'parent' in df.columns.values:
+        df['parent'] = df['parent'].astype(object)
 
     # 96 or 384?
     if len(df) > 96:
@@ -226,6 +233,14 @@ def from_table(filename):
         plt.add(dct, well)
 
     return plt
+
+
+def from_plate(df, name):
+    '''Generate Plate from tabular data.'''
+    df = df.astype(object)
+    df.set_index('Unnamed: 0', inplace=True)
+    df.columns = pd.MultiIndex.from_product([['id'], df.columns.astype(int)])
+    return Plate(name.split('.')[0], plate=df)
 
 
 def _is_value(val):

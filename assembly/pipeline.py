@@ -9,6 +9,7 @@ import os
 import shutil
 
 from assembly import plate, worklist
+import pandas as pd
 
 
 def get_input_plates(dir_name):
@@ -18,7 +19,15 @@ def get_input_plates(dir_name):
     for(dirpath, _, filenames) in os.walk(dir_name):
         for filename in filenames:
             if filename[-4:] == '.csv':
-                plt = plate.from_table(os.path.join(dirpath, filename))
+                df = pd.read_csv(os.path.join(dirpath, filename))
+                _, name = os.path.split(filename)
+
+                if 'well' in df.columns.values:
+                    plt = plate.from_table(df, name)
+
+                else:
+                    plt = plate.from_plate(df, name)
+
                 input_plates[plt.get_name()] = plt
 
     return input_plates
