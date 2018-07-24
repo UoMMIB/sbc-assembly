@@ -9,8 +9,8 @@ All rights reserved.
 from assembly.graph_writer import GraphWriter
 
 
-class WtOligoPoolWriter(GraphWriter):
-    '''Class for generating oligo dilution worklist graphs.'''
+class MutOligoPoolWriter(GraphWriter):
+    '''Class for generating mutant oligo dilution worklist graphs.'''
 
     def __init__(self, wt_mut, oligo_vol, output_name):
         self.__wt_mut = wt_mut
@@ -23,4 +23,4 @@ class WtOligoPoolWriter(GraphWriter):
 
             for mut_id in mut_ids:
                 oligo = self._add_vertex(mut_id, {'is_reagent': False})
-                self._add_edge(oligo, pool, {'Volume': 10.0})
+                self._add_edge(oligo, pool, {'Volume': self.__oligo_vol})

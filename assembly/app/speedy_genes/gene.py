@@ -27,8 +27,8 @@ class GenePcrWriter(PcrWriter):
             pcr_comps_ids = [get_block_id(block_idx, block) + '_b'
                              for block_idx, block in enumerate(design)]
 
-            primer_ids = [get_dil_oligo_id(design[0][0]),
-                          get_dil_oligo_id(design[-1][-1])]
+            primer_ids = [get_dil_oligo_id(design[0][0])[0],
+                          get_dil_oligo_id(design[-1][-1])[0]]
 
             self._add_pcr(get_design_id(design), pcr_comps_ids, primer_ids)
 

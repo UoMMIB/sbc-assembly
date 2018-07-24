@@ -212,10 +212,10 @@ def add_component(component, plate_id, is_reagent, plates, well_name):
 def from_table(df, name):
     '''Generate Plate from tabular data.'''
     # df = pd.read_csv(filename, dtype={'id': object, 'parent': object})
-    df['id'] = df['id'].astype(object)
+    df['id'] = df['id'].astype(str)
 
     if 'parent' in df.columns.values:
-        df['parent'] = df['parent'].astype(object)
+        df['parent'] = df['parent'].astype(str)
 
     # 96 or 384?
     if len(df) > 96:

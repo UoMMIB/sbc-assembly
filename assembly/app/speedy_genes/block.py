@@ -35,7 +35,7 @@ class InnerBlockPoolWriter(GraphWriter):
 
                     # Pool *inner* oligos:
                     for oligo_id in block[1:-1]:
-                        oligo = self._add_vertex(get_dil_oligo_id(oligo_id),
+                        oligo = self._add_vertex(get_dil_oligo_id(oligo_id)[0],
                                                  {'is_reagent': False})
 
                         self._add_edge(oligo, inner_pool,
@@ -61,7 +61,7 @@ class BlockPcrWriter(PcrWriter):
                 if block_id not in block_ids:
                     pcr_comps_ids = [block_id + '_ib']
                     pcr_id = block_id + '_b'
-                    primer_ids = [get_dil_oligo_id(block[idx])
+                    primer_ids = [get_dil_oligo_id(block[idx])[0]
                                   for idx in [0, -1]]
 
                     self._add_pcr(pcr_id, pcr_comps_ids, primer_ids)

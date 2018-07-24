@@ -9,7 +9,8 @@ All rights reserved.
 
 def get_dil_oligo_id(oligo_id):
     '''Get diluted oligo id.'''
-    return oligo_id if oligo_id[-1] == 'm' else oligo_id + '_dil'
+    is_mut = oligo_id[-1] == 'm'
+    return oligo_id if is_mut else oligo_id + '_dil', is_mut
 
 
 def get_block_id(block_idx, block):
@@ -31,3 +32,12 @@ def get_pos_muts(block_id):
     tokens = block_id.split('_')
     return int(tokens[0]), \
         0 if tokens[1] == 'wt' else (tokens[1].count('&') + 1)
+
+
+def get_primers(designs):
+    '''Get primers.'''
+    primers = [[block[0], block[-1]]
+               for design in designs
+               for block in design]
+
+    return list(set([primer for pair in primers for primer in pair]))
