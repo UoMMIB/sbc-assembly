@@ -44,7 +44,8 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
 
     out_dir_name = os.path.join(out_dir_parent, dte + exp_name)
 
-    pipeline.run(writers, input_plates, parent_out_dir_name=out_dir_name)
+    pipeline.run(writers, True, input_plates,
+                 parent_out_dir_name=out_dir_name)
 
     worklist.format_worklist(out_dir_name)
 

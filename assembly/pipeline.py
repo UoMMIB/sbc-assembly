@@ -33,7 +33,8 @@ def get_input_plates(dir_name):
     return input_plates
 
 
-def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):
+def run(wrtrs, sort_src, input_plates=None, plate_names=None,
+        parent_out_dir_name='.'):
     '''Run pipeline.'''
     if not plate_names:
         plate_names = {}
@@ -49,25 +50,28 @@ def run(wrtrs, input_plates=None, plate_names=None, parent_out_dir_name='.'):
                 input_plates.update(_run_writer(writer,
                                                 str(idx + 1) + '_' +
                                                 str(wrt_idx + 1),
+                                                sort_src,
                                                 input_plates,
                                                 plate_names,
                                                 parent_out_dir))
         else:
             input_plates.update(_run_writer(writers,
                                             str(idx + 1),
+                                            sort_src,
                                             input_plates,
                                             plate_names,
                                             parent_out_dir))
 
 
-def _run_writer(writer, name, input_plates, plate_names, parent_out_dir):
+def _run_writer(writer, name, sort_src, input_plates, plate_names, parent_out_dir):
     '''Run a writer.'''
     out_dir = os.path.join(parent_out_dir, name)
     os.makedirs(out_dir)
 
     worklist_gen = worklist.WorklistGenerator(writer.get_graph())
     plate_names['output'] = writer.get_output_name()
-    wrklst, plates = worklist_gen.get_worklist(input_plates, plate_names)
+    wrklst, plates = worklist_gen.get_worklist(sort_src,
+                                               input_plates, plate_names)
 
     for plt in plates.values():
         plt.to_csv(out_dir)

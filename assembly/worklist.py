@@ -52,14 +52,14 @@ class WorklistGenerator(object):
                               'output': 'output'}
         self.__added_comps = {}
 
-    def get_worklist(self, input_plates=None, plate_names=None):
+    def get_worklist(self, sort_src, input_plates=None, plate_names=None):
         '''Gets worklist and input_plates.'''
         if not self.__worklist:
-            self.__create_worklist(input_plates, plate_names)
+            self.__create_worklist(input_plates, plate_names, sort_src)
 
         return self.__worklist, self.__input_plates
 
-    def __create_worklist(self, input_plates, plate_names):
+    def __create_worklist(self, input_plates, plate_names, sort_src):
         '''Creates worklist and plates.'''
         data = []
 
@@ -75,7 +75,7 @@ class WorklistGenerator(object):
         self.__worklist = pd.DataFrame(data)
 
         self.__write_input_plates()
-        self.__add_locations()
+        self.__add_locations(sort_src)
 
     def __write_input_plates(self):
         '''Writes input_plates from worklist.'''
@@ -125,7 +125,7 @@ class WorklistGenerator(object):
                                      False,
                                      row['dest_well_fixed'])
 
-    def __add_locations(self, sort_src=False):
+    def __add_locations(self, sort_src):
         '''Add locations to worklist.'''
         locations = self.__worklist.apply(lambda row: self.__get_location(
             row['src_name'], row['dest_name']), axis=1)
