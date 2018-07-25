@@ -145,12 +145,14 @@ class WorklistGenerator(object):
         sort_order = ['level',
                       'src_is_reagent',
                       'src_plate',
+                      'dest_plate',
                       'pipette_idx',
                       'src_idx',
                       'dest_idx'] \
             if sort_src else \
             ['level',
              'src_is_reagent',
+             'dest_plate',
              'src_plate',
              'pipette_idx',
              'dest_idx',
@@ -158,7 +160,7 @@ class WorklistGenerator(object):
 
         self.__worklist.sort_values(sort_order,
                                     ascending=[False, False, True, True, True,
-                                               True],
+                                               True, True],
                                     inplace=True)
 
     def __get_location(self, src_name, dest_name):
