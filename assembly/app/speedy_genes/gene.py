@@ -36,12 +36,14 @@ class GenePcrWriter(PcrWriter):
 class CombiGenePcrWriter(PcrWriter):
     '''Class for generating combinatorial gene PCR worklist graphs.'''
 
-    def __init__(self, designs, max_muts, comps_vol, primer_vol, mm_vol,
+    def __init__(self, designs, max_muts, comps_vol, wt_primer_vol,
+                 mut_primer_vol, mm_vol,
                  primer_ids, output_name):
         self.__designs = designs
         self.__primer_ids = primer_ids
         self.__max_muts = max_muts
-        PcrWriter.__init__(self, comps_vol, primer_vol, mm_vol, output_name)
+        PcrWriter.__init__(self, comps_vol, wt_primer_vol, mut_primer_vol,
+                           mm_vol, output_name)
 
     def _initialise(self):
         pos_muts = defaultdict(set)

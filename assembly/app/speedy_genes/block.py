@@ -47,9 +47,11 @@ class InnerBlockPoolWriter(GraphWriter):
 class BlockPcrWriter(PcrWriter):
     '''Class for generating block PCR worklist graphs.'''
 
-    def __init__(self, designs, comps_vol, primer_vol, mm_vol, output_name):
+    def __init__(self, designs, comps_vol, wt_primer_vol, mut_primer_vol,
+                 mm_vol, output_name):
         self.__designs = designs
-        PcrWriter.__init__(self, comps_vol, primer_vol, mm_vol, output_name)
+        PcrWriter.__init__(self, comps_vol, wt_primer_vol, mut_primer_vol,
+                           mm_vol, output_name)
 
     def _initialise(self):
         block_ids = []
@@ -61,7 +63,7 @@ class BlockPcrWriter(PcrWriter):
                 if block_id not in block_ids:
                     pcr_comps_ids = [block_id + '_ib']
                     pcr_id = block_id + '_b'
-                    primer_ids = [get_dil_oligo_id(block[idx])[0]
+                    primer_ids = [get_dil_oligo_id(block[idx])
                                   for idx in [0, -1]]
 
                     self._add_pcr(pcr_id, pcr_comps_ids, primer_ids)

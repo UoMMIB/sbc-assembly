@@ -12,9 +12,11 @@ from assembly.graph_writer import GraphWriter
 class PcrWriter(GraphWriter):
     '''Class for generating PCR worklist graphs.'''
 
-    def __init__(self, comps_vol, primer_vol, mm_vol, output_name):
+    def __init__(self, comps_vol, wt_primer_vol, mut_primer_vol, mm_vol,
+                 output_name):
         self._comps_vol = comps_vol
-        self._primer_vol = primer_vol
+        self.__wt_primer_vol = wt_primer_vol
+        self.__mut_primer_vol = mut_primer_vol
         self.__mm_vol = mm_vol
         GraphWriter.__init__(self, output_name)
 
@@ -32,9 +34,10 @@ class PcrWriter(GraphWriter):
             self._add_edge(pcr_comps, pcr, {'Volume': self._comps_vol})
 
         # Add outer oligos:
-        for primer_ids in primer_ids:
-            primer = self._add_vertex(primer_ids,
+        for primer_id in primer_ids:
+            primer = self._add_vertex(primer_id[0],
                                       {'is_reagent': False})
 
             self._add_edge(primer, pcr,
-                           {'Volume': self._primer_vol})
+                           {'Volume': self.__mut_primer_vol if primer_id[1]
+                            else self.__wt_primer_vol})
