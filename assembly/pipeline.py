@@ -63,19 +63,21 @@ def run(wrtrs, sort_src, input_plates=None, plate_names=None,
                                             parent_out_dir))
 
 
-def _run_writer(writer, name, sort_src, input_plates, plate_names, parent_out_dir):
+def _run_writer(writer, name, sort_src, input_plates, plate_names,
+                parent_out_dir):
     '''Run a writer.'''
     out_dir = os.path.join(parent_out_dir, name)
     os.makedirs(out_dir)
 
     worklist_gen = worklist.WorklistGenerator(writer.get_graph())
     plate_names['output'] = writer.get_output_name()
-    wrklst, plates = worklist_gen.get_worklist(sort_src,
-                                               input_plates, plate_names)
+    wrklsts, plates = worklist_gen.get_worklist(sort_src,
+                                                input_plates, plate_names)
 
     for plt in plates.values():
         plt.to_csv(out_dir)
 
-    worklist.to_csv(wrklst, writer.get_output_name(), out_dir)
+    for wrklst in wrklsts:
+        worklist.to_csv(wrklst, out_dir)
 
     return plates

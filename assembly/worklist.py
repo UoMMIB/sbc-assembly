@@ -57,7 +57,13 @@ class WorklistGenerator(object):
         if not self.__worklist:
             self.__create_worklist(input_plates, plate_names, sort_src)
 
-        return self.__worklist, self.__input_plates
+        worklists = []
+
+        for dest_plate, worklist in self.__worklist.groupby('dest_plate'):
+            worklist.name = dest_plate
+            worklists.append(worklist)
+
+        return worklists, self.__input_plates
 
     def __create_worklist(self, input_plates, plate_names, sort_src):
         '''Creates worklist and plates.'''
@@ -260,10 +266,10 @@ class WorklistGenerator(object):
         return new_plate_id
 
 
-def to_csv(wrklst, name, out_dir_name='.'):
+def to_csv(wrklst, out_dir_name='.'):
     '''Export worklist as csv file.'''
     filepath = os.path.abspath(os.path.join(out_dir_name,
-                                            name + '_worklist.csv'))
+                                            wrklst.name + '_worklist.csv'))
     wrklst.to_csv(filepath, encoding='utf-8', index=False)
 
 
