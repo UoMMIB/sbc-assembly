@@ -48,10 +48,10 @@ class BlockPcrWriter(PcrWriter):
     '''Class for generating block PCR worklist graphs.'''
 
     def __init__(self, designs, comps_vol, wt_primer_vol, mut_primer_vol,
-                 mm_vol, output_name):
+                 total_vol, output_name):
         self.__designs = designs
         PcrWriter.__init__(self, comps_vol, wt_primer_vol, mut_primer_vol,
-                           mm_vol, output_name)
+                           total_vol, output_name)
 
     def _initialise(self):
         block_ids = []
