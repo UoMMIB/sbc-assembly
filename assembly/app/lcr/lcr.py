@@ -11,29 +11,19 @@ All rights reserved.
 from assembly.graph_writer import GraphWriter
 
 
-class LcrWriter(GraphWriter):
+class DominoPoolWriter(GraphWriter):
     '''Class for generating LCR worklist graphs.'''
 
-    def __init__(self, plasmid_parts, output_name='lcr'):
+    def __init__(self, plasmid_parts, output_name='dom'):
         self.__plasmid_parts = plasmid_parts
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
         water = self._add_vertex('water', {'is_reagent': True})
-        ampligase = self._add_vertex('ampligase', {'is_reagent': True,
-                                                   'well_fixed': 'G12'})
-        mm = self._add_vertex('mm_lcr', {'is_reagent': True})
-
         domino_vol = 1.5
-        mm_vol = 7.0
-        ampligase_vol = 1.5
-        domino_pool_vol = 1.0
-        part_vol = 1.0
 
         for plasmid_id, parts_map in self.__plasmid_parts.items():
-            # Make domino pools:
             dom_pool_water_vol = 200
-            plasmid_water_vol = 25
 
             domino_pool = self._add_vertex(plasmid_id + '_dominoes',
                                            {'is_reagent': False})
@@ -47,6 +37,31 @@ class LcrWriter(GraphWriter):
                     dom_pool_water_vol -= domino_vol
 
             self._add_edge(water, domino_pool, {'Volume': dom_pool_water_vol})
+
+
+class LcrWriter(GraphWriter):
+    '''Class for generating LCR worklist graphs.'''
+
+    def __init__(self, plasmid_parts, output_name='lcr'):
+        self.__plasmid_parts = plasmid_parts
+        GraphWriter.__init__(self, output_name)
+
+    def _initialise(self):
+        water = self._add_vertex('water', {'is_reagent': True})
+        ampligase = self._add_vertex('ampligase', {'is_reagent': True,
+                                                   'well_fixed': 'G12'})
+        mm = self._add_vertex('mm_lcr', {'is_reagent': True})
+
+        mm_vol = 7.0
+        ampligase_vol = 1.5
+        domino_pool_vol = 1.0
+        part_vol = 1.0
+
+        for plasmid_id, parts_map in self.__plasmid_parts.items():
+            plasmid_water_vol = 25
+
+            domino_pool = self._add_vertex(plasmid_id + '_dominoes',
+                                           {'is_reagent': False})
 
             # Make lcr plate:
             plasmid = self._add_vertex(plasmid_id, {'is_reagent': False})
