@@ -30,8 +30,8 @@ def main(args):
     writers = [part_pcr.SpecificPartPcrWriter(parts_ice, ice_helper,
                                               dte + 'PCR' + args[3]),
                part_dig.PartDigestWriter(part_ids, dte + 'DIG' + args[3]),
-               [part_qc.PartQcWriter(part_ids, dte + 'FPT' + args[3]),
-                lcr.LcrWriter(plasmid_parts, dte + 'LCR' + args[3])]]
+               part_qc.PartQcWriter(part_ids, dte + 'FPT' + args[3]),
+               lcr.LcrWriter(plasmid_parts, dte + 'LCR' + args[3])]
 
     input_plates = pipeline.get_input_plates(args[4])
     out_dir_name = os.path.join(args[6], dte + args[3])

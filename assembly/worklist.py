@@ -268,9 +268,9 @@ class WorklistGenerator(object):
 
 def to_csv(wrklst, out_dir_name='.'):
     '''Export worklist as csv file.'''
-    filepath = os.path.abspath(os.path.join(out_dir_name,
-                                            wrklst.name + '_worklist.csv'))
-    wrklst.to_csv(filepath, encoding='utf-8', index=False)
+    path = os.path.abspath(os.path.join(out_dir_name,
+                                        str(wrklst.name) + '_worklist.csv'))
+    wrklst.to_csv(path, encoding='utf-8', index=False)
 
 
 def format_worklist(dir_name):
