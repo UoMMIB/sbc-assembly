@@ -10,27 +10,73 @@ import math
 import random
 import sys
 
+from synbiochem.optimisation.sim_ann import SimulatedAnnealer
+
 from assembly import plate
 import pandas as pd
 
 
+class WorklistSolution(object):
+    '''Class to represent a Worklist for simulated annealing optimisation.'''
+
+    def __init__(self, df):
+        self.__orig_df = df
+        self.__df = df.copy()
+        self.__mut_df = df.copy()
+
+    def init(self):
+        '''init.'''
+        pass
+
+    def get_query(self):
+        '''Get query.'''
+        return self.__orig_df
+
+    def get_result(self):
+        '''Get result.'''
+        return self.__df
+
+    def get_values(self):
+        '''Get values.'''
+        return [self.get_energy()]
+
+    def get_energy(self):
+        '''Get energy.'''
+        return _score(self.__df)
+
+    def mutate(self):
+        '''Mutate.'''
+        self.__mut_df = _shuffle(self.__df, 1)
+        return _score(self.__mut_df)
+
+    def accept(self):
+        '''Accept.'''
+        self.__df = self.__mut_df
+
+    def reject(self):
+        '''Reject.'''
+        pass
+
+
+class WorklistThread(SimulatedAnnealer):
+    '''Wraps a Worlist optimisation job into a thread.'''
+
+    def __init__(self, solution, verbose=True):
+        SimulatedAnnealer.__init__(
+            self, solution, r_temp=0.0005, verbose=verbose)
+
+
 def optimise(df):
     '''Optimise.'''
-    df.sort_values(['src_col', 'src_row', 'dest_col', 'dest_row'],
-                   inplace=True)
-    best_df = df
-    best_score = math.inf
+    # df.sort_values(['src_col', 'src_row', 'dest_col', 'dest_row'],
+    #               inplace=True)
 
-    for _ in range(0, 10000):
-        new_df = _shuffle(best_df)
-        score = _score(new_df)
+    solution = WorklistSolution(df)
+    thread = WorklistThread(solution)
+    thread.start()
+    thread.join()
 
-        if score < best_score:
-            best_score = score
-            best_df = new_df
-            print(score)
-
-    return best_df
+    return solution.get_result()
 
 
 def _get_shuffled_wklst(num_wells):
@@ -66,12 +112,15 @@ def _get_well_details(well_idx):
     return [plate.get_well_name(row, col), well_idx, row, col]
 
 
-def _shuffle(df):
+def _shuffle(df, num_shuffs=1):
     '''Shuffle worklist.'''
     new_index = df.index.values
-    val = random.choice(new_index)
-    new_index = [i for i in new_index if i != val]
-    new_index.insert(random.randrange(len(new_index) + 1), val)
+
+    for _ in range(0, num_shuffs):
+        val = random.choice(new_index)
+        new_index = [i for i in new_index if i != val]
+        new_index.insert(random.randrange(len(new_index) + 1), val)
+
     return df.reindex(new_index)
 
 
