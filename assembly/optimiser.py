@@ -16,20 +16,42 @@ import pandas as pd
 
 def optimise(df):
     '''Optimise.'''
-    # df.sort_values(['src_col', 'src_row', 'dest_col', 'dest_row'],
-    #               inplace=True)
+    df.sort_values(['src_col', 'src_row', 'dest_col', 'dest_row'],
+                   inplace=True)
+    best_df = df
+    best_score = math.inf
 
-    df = _shuffle(df)
+    for _ in range(0, 10000):
+        new_df = _shuffle(best_df)
+        score = _score(new_df)
 
-    return df
+        if score < best_score:
+            best_score = score
+            best_df = new_df
+            print(score)
+
+    return best_df
+
+
+def _get_shuffled_wklst(num_wells):
+    '''Get shuffled worklist.'''
+    idx = list(range(0, num_wells))
+    random.shuffle(idx)
+    return _get_wklst(idx, idx)
 
 
 def _get_random_wklst(num_wells, plate_size=96):
     '''Get random worklist.'''
+    src_idxs = random.sample(range(0, plate_size), num_wells)
+    dest_idxs = random.sample(range(0, plate_size), num_wells)
+    return _get_wklst(src_idxs, dest_idxs)
+
+
+def _get_wklst(src_idxs, dest_idxs):
+    '''Get worklist.'''
     data = []
 
-    for src, dest in zip(random.sample(range(0, plate_size), num_wells),
-                         random.sample(range(0, plate_size), num_wells)):
+    for src, dest in zip(src_idxs, dest_idxs):
         data.append(_get_well_details(src) + _get_well_details(dest))
 
     cols = ['SourcePlateWell', 'src_idx', 'src_row', 'src_col',
@@ -60,15 +82,21 @@ def _score(df, channels=8):
                                         columns=df.columns))
               for rows in _grouper(channels, df.values)]
 
-    print(scores)
+    return sum(scores)
 
 
 def _score_group(group_df):
     '''Score group.'''
+    return _score_cols(group_df, ['src_row', 'src_col']) + \
+        _score_cols(group_df, ['dest_row', 'dest_col'])
+
+
+def _score_cols(group_df, columns):
+    '''Score group by either src or dest (specified by columns).'''
     score = 0
     head_col = 0
     head_pos = [[row, head_col] for row in range(0, 8)]
-    curr_pos = [list(pos) for pos in group_df[['src_row', 'src_col']].values]
+    curr_pos = [list(pos) for pos in group_df[columns].values]
 
     while True:
         # Eliminate wells in correct position (i.e. pick up or dispense:
@@ -76,7 +104,6 @@ def _score_group(group_df):
                      if (pair[0] != pair[1]) or (pair[1] == [-1, -1])
                      else [pair[0], [-1, -1]]
                      for pair in zip(head_pos, curr_pos)]
-        print(head_curr)
 
         # If all wells have been picked up / dispensed:
         next_idx = float('NaN')
@@ -98,7 +125,6 @@ def _score_group(group_df):
         score += abs(head_row_offset)
         head_pos = [[row + head_row_offset, head_col] for row, _ in head_pos]
         curr_pos[next_idx] = [-1, -1]
-        print(score)
 
     return score
 
@@ -112,9 +138,9 @@ def _grouper(n, iterable, fillvalue=None):
 
 def main(args):
     '''main method.'''
-    df = _get_random_wklst(int(args[0]), int(args[1]))
+    # df = _get_random_wklst(int(args[0]), int(args[1]))
+    df = _get_shuffled_wklst(int(args[0]))
     df = optimise(df)
-    _score(df)
     df.to_csv(args[2])
 
 
