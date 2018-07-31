@@ -128,12 +128,7 @@ class Plate(object):
 
     def get_row_col(self, idx):
         '''Map idx to well.'''
-        rows, cols = self.__plate.shape
-
-        if self.__col_ord:
-            return int(idx / cols), int(idx % cols)
-
-        return int(idx % rows), int(idx / rows)
+        return get_row_col(idx, self.__plate.shape, self.__col_ord)
 
     def get_idx(self, row, col):
         '''Map idx to well, column ordered.'''
@@ -159,6 +154,16 @@ class Plate(object):
 
     def __repr__(self):
         return self.__plate.__repr__()
+
+
+def get_row_col(idx, shape=(8, 12), col_ord=False):
+    '''Map idx to well.'''
+    rows, cols = shape
+
+    if col_ord:
+        return int(idx / cols), int(idx % cols)
+
+    return int(idx % rows), int(idx / rows)
 
 
 def get_indices(well_name):
