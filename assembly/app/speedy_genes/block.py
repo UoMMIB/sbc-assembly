@@ -6,6 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+from collections import Counter
+
 from assembly.app.speedy_genes import get_dil_oligo_id, get_block_id, \
     get_pos_muts
 from assembly.app.speedy_genes.pcr import PcrWriter
@@ -74,9 +76,9 @@ class BlockPcrWriter(PcrWriter):
 class BlockPoolWriter(GraphWriter):
     '''Class for generating pooled block worklist graphs.'''
 
-    def __init__(self, designs, pool_vol, output_name):
+    def __init__(self, designs, min_vol, output_name):
         self.__designs = designs
-        self.__pool_vol = pool_vol
+        self.__min_vol = min_vol
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -91,8 +93,13 @@ class BlockPoolWriter(GraphWriter):
 
                 pool_steps[pcr_id] = pool_id
 
+        pool_counter = Counter(list(pool_steps.values()))
+        max_pool_vol = pool_counter.most_common(1)[0][1] * self.__min_vol
+
         for pcr_id, pool_id in pool_steps.items():
             pcr = self._add_vertex(pcr_id, {'is_reagent': False})
             pool = self._add_vertex(pool_id, {'is_reagent': False})
 
-            self._add_edge(pcr, pool, {'Volume': self.__pool_vol})
+            self._add_edge(pcr, pool, {'Volume':
+                                       (1 / pool_counter[pool_id] *
+                                        max_pool_vol)})

@@ -141,9 +141,13 @@ class WorklistGenerator(object):
         loc_df.columns = ['src_plate',
                           'src_well',
                           'src_idx',
+                          'src_col',
+                          'src_row',
                           'dest_plate',
                           'dest_well',
                           'dest_idx',
+                          'dest_col',
+                          'dest_row',
                           'pipette_idx']
 
         self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
@@ -175,7 +179,7 @@ class WorklistGenerator(object):
         dests = self.__added_comps[dest_name]
 
         shortest_dist = float('inf')
-        optimal_pair = None
+        opt_pair = None
 
         for src_plt, src_wells in srcs.items():
             for dest_plt, dest_wells in dests.items():
@@ -186,17 +190,19 @@ class WorklistGenerator(object):
                         dist = cityblock(src_ind, dest_ind)
 
                         if dist < shortest_dist:
-                            src_idx = \
-                                self.__input_plates[src_plt].get_idx(*src_ind)
-                            dest_idx = \
-                                self.__input_plates[dest_plt].get_idx(
-                                    *dest_ind)
+                            src_idx = self.__input_plates[src_plt].get_idx(
+                                *src_ind)
+                            dest_idx = self.__input_plates[dest_plt].get_idx(
+                                *dest_ind)
+
                             shortest_dist = dist
-                            optimal_pair = [src_plt, src_well, src_idx,
-                                            dest_plt, dest_well, dest_idx,
-                                            self.__get_pipette_idx(src_plt,
-                                                                   src_idx)]
-        return optimal_pair
+                            opt_pair = [src_plt, src_well, src_idx,
+                                        *plate.get_indices(src_well),
+                                        dest_plt, dest_well, dest_idx,
+                                        *plate.get_indices(dest_well),
+                                        self.__get_pipette_idx(src_plt,
+                                                               src_idx)]
+        return opt_pair
 
     def __get_pipette_idx(self, src_plt, src_idx):
         '''Get pipetting index (supporting 96 and 384 well plates.'''
