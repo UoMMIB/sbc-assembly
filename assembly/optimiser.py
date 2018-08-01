@@ -67,7 +67,7 @@ class WorklistThread(SimulatedAnnealer):
 
     def __init__(self, solution, verbose=True):
         SimulatedAnnealer.__init__(
-            self, solution, r_temp=500, cooling_rate=0.001, verbose=verbose)
+            self, solution, r_temp=2.5, cooling_rate=0.00025, verbose=verbose)
 
 
 def optimise(df):
