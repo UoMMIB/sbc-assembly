@@ -59,7 +59,7 @@ class WorklistSolution(object):
         pass
 
     def __repr__(self):
-        return str(list(self.__df.index))
+        return str(list(self.__df['SourcePlateWell']))
 
 
 class WorklistThread(SimulatedAnnealer):
@@ -72,8 +72,8 @@ class WorklistThread(SimulatedAnnealer):
 
 def optimise(df):
     '''Optimise.'''
-    # df.sort_values(['src_col', 'src_row', 'dest_col', 'dest_row'],
-    #               inplace=True)
+    df.sort_values(['src_col', 'dest_col', 'src_row', 'dest_row'],
+                   inplace=True)
 
     solution = WorklistSolution(df)
     thread = WorklistThread(solution)
@@ -88,6 +88,12 @@ def _get_shuffled_wklst(num_wells):
     idx = list(range(0, num_wells))
     df = _get_wklst(idx, idx)
     return df.sample(frac=1)
+
+
+def _get_semirandom_wklst(num_wells, plate_size=96):
+    '''Get semi-random worklist.'''
+    idxs = random.sample(range(0, plate_size), num_wells)
+    return _get_wklst(idxs, idxs)
 
 
 def _get_random_wklst(num_wells, plate_size=96):
@@ -190,8 +196,8 @@ def _grouper(n, iterable, fillvalue=None):
 
 def main(args):
     '''main method.'''
-    # df = _get_random_wklst(int(args[0]), int(args[1]))
-    df = _get_shuffled_wklst(int(args[0]))
+    df = _get_semirandom_wklst(int(args[0]), int(args[1]))
+    # df = _get_shuffled_wklst(int(args[0]))
     df = optimise(df)
     df.to_csv(args[2])
 
