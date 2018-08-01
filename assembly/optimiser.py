@@ -23,6 +23,7 @@ class WorklistSolution(object):
         self.__orig_df = df
         self.__df = df.copy()
         self.__mut_df = df.copy()
+        self.__min_score = math.ceil(len(df.index) / 8) * 2
 
     def init(self):
         '''init.'''
@@ -42,12 +43,12 @@ class WorklistSolution(object):
 
     def get_energy(self):
         '''Get energy.'''
-        return _score(self.__df)
+        return _score(self.__df) - self.__min_score
 
     def mutate(self):
         '''Mutate.'''
         self.__mut_df = _shuffle(self.__df, 1)
-        return _score(self.__mut_df)
+        return _score(self.__mut_df) - self.__min_score
 
     def accept(self):
         '''Accept.'''
@@ -57,13 +58,16 @@ class WorklistSolution(object):
         '''Reject.'''
         pass
 
+    def __repr__(self):
+        return str(list(self.__df.index))
+
 
 class WorklistThread(SimulatedAnnealer):
     '''Wraps a Worlist optimisation job into a thread.'''
 
     def __init__(self, solution, verbose=True):
         SimulatedAnnealer.__init__(
-            self, solution, r_temp=0.0005, verbose=verbose)
+            self, solution, r_temp=500, cooling_rate=0.001, verbose=verbose)
 
 
 def optimise(df):
@@ -82,8 +86,8 @@ def optimise(df):
 def _get_shuffled_wklst(num_wells):
     '''Get shuffled worklist.'''
     idx = list(range(0, num_wells))
-    random.shuffle(idx)
-    return _get_wklst(idx, idx)
+    df = _get_wklst(idx, idx)
+    return df.sample(frac=1)
 
 
 def _get_random_wklst(num_wells, plate_size=96):
@@ -114,12 +118,11 @@ def _get_well_details(well_idx):
 
 def _shuffle(df, num_shuffs=1):
     '''Shuffle worklist.'''
-    new_index = df.index.values
+    new_index = list(df.index)
 
     for _ in range(0, num_shuffs):
-        val = random.choice(new_index)
-        new_index = [i for i in new_index if i != val]
-        new_index.insert(random.randrange(len(new_index) + 1), val)
+        idx1, idx2 = random.sample(new_index, 2)
+        new_index[idx1], new_index[idx2] = new_index[idx2], new_index[idx1]
 
     return df.reindex(new_index)
 
