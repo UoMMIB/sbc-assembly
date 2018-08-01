@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 from assembly.app.speedy_genes import get_primers
 from assembly.graph_writer import GraphWriter
 

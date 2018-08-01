@@ -14,7 +14,7 @@ import os
 import pandas as pd
 
 
-class Plate(object):
+class Plate():
     '''Class to represent a well plate.'''
 
     def __init__(self, name, rows=8, cols=12, col_ord=False, properties=None,

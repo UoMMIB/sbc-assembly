@@ -9,7 +9,7 @@ All rights reserved.
 import pandas as pd
 
 
-class Optimiser(object):
+class Optimiser():
     '''Recipes optimiser.'''
 
     def __init__(self, ingredients):

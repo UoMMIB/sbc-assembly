@@ -20,7 +20,7 @@ from assembly.app.lcr import utils
 import pandas as pd
 
 
-class PrimerDesigner(object):
+class PrimerDesigner():
     '''Class to design primers.'''
 
     def __init__(self, ice_details):
@@ -111,7 +111,8 @@ def main(args):
     ice_details = dict(zip(['url', 'username', 'password'], args[:3]))
     designer = PrimerDesigner(ice_details)
 
-    plates = [plate.from_table(filename) for filename in args[6].split(',')]
+    plates = [plate.from_table(pd.read_csv(filename), filename)
+              for filename in args[6].split(',')]
 
     primer_plates = designer.get_primers(args[7:], plates,
                                          args[3].split(','),

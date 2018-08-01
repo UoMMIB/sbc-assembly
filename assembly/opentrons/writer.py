@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=wrong-import-order
 import math
 import sys
 
@@ -51,8 +52,7 @@ def _add_tip_racks(deck, len_worklist, typ='tiprack-200ul'):
 def _add_plate(deck, typ, name):
     '''Add plate to deck.'''
     pos = deck.add(name)
-    plate = containers.load(typ, pos, name)
-    return plate
+    return containers.load(typ, pos, name)
 
 
 def main(args):

@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 from collections import defaultdict
 import itertools
 
@@ -18,9 +19,11 @@ from assembly.app.speedy_genes.pcr import PcrWriter
 class GenePcrWriter(PcrWriter):
     '''Class for generating gene PCR worklist graphs.'''
 
-    def __init__(self, designs, comps_vol, primer_vol, mm_vol, output_name):
+    def __init__(self, designs, comps_vol, wt_primer_vol,
+                 mut_primer_vol, total_vol, output_name):
         self.__designs = designs
-        PcrWriter.__init__(self, comps_vol, primer_vol, mm_vol, output_name)
+        PcrWriter.__init__(self, comps_vol, wt_primer_vol, mut_primer_vol,
+                           total_vol, output_name)
 
     def _initialise(self):
         for design in self.__designs:

@@ -118,14 +118,14 @@ def main(args):
     '''main method.'''
     import cProfile
 
-    pr = cProfile.Profile()
-    pr.enable()
+    prf = cProfile.Profile()
+    prf.enable()
 
     run(args[0], int(args[1]), int(args[2]), args[3], args[4])
 
-    pr.disable()
+    prf.disable()
 
-    pr.print_stats(sort='cumtime')
+    prf.print_stats(sort='cumtime')
 
 
 if __name__ == '__main__':

@@ -13,7 +13,7 @@ from synbiochem.utils.graph_utils import add_edge, add_vertex, get_roots
 import matplotlib.pyplot as plt
 
 
-class GraphWriter(object):
+class GraphWriter():
     '''GraphWriter base class.'''
 
     def __init__(self, output_name):

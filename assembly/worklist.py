@@ -41,7 +41,7 @@ _COLUMNS_ORDER = ['Volume',
                   'ComponentName']
 
 
-class WorklistGenerator(object):
+class WorklistGenerator():
     '''Class to generate worklists.'''
 
     def __init__(self, graph):
@@ -238,19 +238,19 @@ class WorklistGenerator(object):
                                                    is_reagent,
                                                    self.__input_plates,
                                                    well_name)
+
+                self.__added_comps[component] = {plt.get_name(): wells}
             except KeyError:
                 # Occurs when plate is full:
-                return self.__add_component(component,
-                                            self.__get_next_plate_id(
-                                                plate_id),
-                                            is_reagent,
-                                            well_name)
-
-            self.__added_comps[component] = {plt.get_name(): wells}
+                self.__add_component(component,
+                                     self.__get_next_plate_id(
+                                         plate_id),
+                                     is_reagent,
+                                     well_name)
 
     def __get_next_plate_id(self, full_plate_id):
         '''Get next plate id.'''
-        grps = re.match('(.*)~(\d+)', full_plate_id)
+        grps = re.match(r'(.*)~(\d+)', full_plate_id)
 
         if grps:
             new_plate_id = grps[1] + '-' + str(int(grps[2]) + 1)

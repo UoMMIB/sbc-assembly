@@ -5,6 +5,8 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=wrong-import-order
 from itertools import zip_longest
 import math
 import random
@@ -16,7 +18,7 @@ from assembly import plate
 import pandas as pd
 
 
-class WorklistSolution(object):
+class WorklistSolution():
     '''Class to represent a Worklist for simulated annealing optimisation.'''
 
     def __init__(self, df):

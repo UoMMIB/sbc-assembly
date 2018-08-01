@@ -5,7 +5,9 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 from assembly.graph_writer import GraphWriter
 
 

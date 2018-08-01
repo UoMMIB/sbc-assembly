@@ -40,4 +40,4 @@ def get_primers(designs):
                for design in designs
                for block in design]
 
-    return list(set([primer for pair in primers for primer in pair]))
+    return list({primer for pair in primers for primer in pair})

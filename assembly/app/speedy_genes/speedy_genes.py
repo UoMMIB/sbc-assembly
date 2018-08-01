@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
 # pylint: disable=unsubscriptable-object
 import itertools
 import os
@@ -15,7 +16,7 @@ from synbiochem import utils
 
 from assembly import pipeline, worklist
 from assembly.graph_writer import GraphWriter
-from assembly.optimiser import Optimiser
+from assembly.optimiser_old import Optimiser
 
 
 _DEFAULT_OLIGO_VOLS = {
@@ -39,8 +40,7 @@ class SpeedyGenesWriter(GraphWriter):
                  output_name='output',
                  graph_filename=None):
         self.__plates = []
-        self.__oligos, self.__mutant_oligos = \
-            self.__read_plates(input_plates)
+        self.__oligos, self.__mutant_oligos = _read_plates(input_plates)
         self.__n_mutated = n_mutated
         self.__n_blocks = n_blocks
         self.__graph_filename = graph_filename
@@ -54,13 +54,6 @@ class SpeedyGenesWriter(GraphWriter):
 
         if self.__graph_filename:
             self.plot_graph(outfile=self.__graph_filename)
-
-    def __read_plates(self, input_plates):
-        '''Read plates.'''
-        oligos = utils.sort([obj['id']
-                             for obj in input_plates['wt'].get_all().values()])
-        mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
-        return oligos, mutant_oligos
 
     def __combine(self):
         '''Design combinatorial assembly.'''
@@ -121,6 +114,14 @@ class SpeedyGenesWriter(GraphWriter):
                     self._add_edge(vertices[indices[idx]],
                                    vertices[col],
                                    {'Volume': coeff})
+
+
+def _read_plates(input_plates):
+    '''Read plates.'''
+    oligos = utils.sort([obj['id']
+                         for obj in input_plates['wt'].get_all().values()])
+    mutant_oligos = ((oligo, oligo + 'm') for oligo in oligos)
+    return oligos, mutant_oligos
 
 
 def _get_ingredients(designs, oligo_vols=None):
