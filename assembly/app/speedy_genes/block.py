@@ -18,9 +18,10 @@ from assembly.graph_writer import GraphWriter
 class InnerBlockPoolWriter(GraphWriter):
     '''Class for generating pooled inner block worklist graphs.'''
 
-    def __init__(self, designs, oligo_vol, output_name):
+    def __init__(self, designs, wt_oligo_vol, mut_oligo_vol, output_name):
         self.__designs = designs
-        self.__oligo_vol = oligo_vol
+        self.__wt_oligo_vol = wt_oligo_vol
+        self.__mut_oligo_vol = mut_oligo_vol
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -38,11 +39,13 @@ class InnerBlockPoolWriter(GraphWriter):
 
                     # Pool *inner* oligos:
                     for oligo_id in block[1:-1]:
-                        oligo = self._add_vertex(get_dil_oligo_id(oligo_id)[0],
+                        dil_id, is_mut = get_dil_oligo_id(oligo_id)
+                        oligo = self._add_vertex(dil_id,
                                                  {'is_reagent': False})
 
                         self._add_edge(oligo, inner_pool,
-                                       {'Volume': self.__oligo_vol})
+                                       {'Volume': self.__mut_oligo_vol
+                                        if is_mut else self.__wt_oligo_vol})
 
                     block_ids.append(block_id)
 
@@ -77,9 +80,10 @@ class BlockPcrWriter(PcrWriter):
 class BlockPoolWriter(GraphWriter):
     '''Class for generating pooled block worklist graphs.'''
 
-    def __init__(self, designs, min_vol, output_name):
+    def __init__(self, designs, min_vol, max_vol, output_name):
         self.__designs = designs
         self.__min_vol = min_vol
+        self.__max_vol = max_vol
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -100,7 +104,6 @@ class BlockPoolWriter(GraphWriter):
         for pcr_id, pool_id in pool_steps.items():
             pcr = self._add_vertex(pcr_id, {'is_reagent': False})
             pool = self._add_vertex(pool_id, {'is_reagent': False})
-
-            self._add_edge(pcr, pool, {'Volume':
-                                       (1 / pool_counter[pool_id] *
-                                        max_pool_vol)})
+            vol = min(self.__max_vol,
+                      (1 / pool_counter[pool_id] * max_pool_vol))
+            self._add_edge(pcr, pool, {'Volume': vol})
