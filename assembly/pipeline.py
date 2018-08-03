@@ -9,7 +9,7 @@ import os
 import shutil
 
 from assembly import plate, worklist
-from assembly.optimiser import score
+from assembly.optimise import score
 import pandas as pd
 
 
