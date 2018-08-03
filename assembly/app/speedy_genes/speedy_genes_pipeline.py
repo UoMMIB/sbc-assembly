@@ -37,9 +37,12 @@ def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):
         MutOligoPoolWriter(mutant_oligos, 10, exp_name + '-mut-pl'),
         InnerBlockPoolWriter(designs, 2.5, 5, exp_name + '-templ'),
         BlockPcrWriter(designs, 1.2, 1.5, 3, 25, exp_name + '-pcr1'),
-        BlockPoolWriter(designs, 2, 25, exp_name + '-blcks'),
+        BlockPoolWriter(designs, 2, 25, False, exp_name + '-wt-bk'),
+        BlockPoolWriter(designs, 2, 25, True, exp_name + '-mut-bk'),
         CombiGenePcrWriter(designs, 4, 1.5, 1.5, 3, 25,
-                           ['5-primer_dil', '28'], exp_name + '-pcr2')
+                           [['5-primer_dil', False], ['28_dil', False]],
+                           exp_name + '-pcr2')
+
     ]
 
     out_dir_name = os.path.join(out_dir_parent, dte + exp_name)

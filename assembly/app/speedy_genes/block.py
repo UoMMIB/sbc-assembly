@@ -80,10 +80,11 @@ class BlockPcrWriter(PcrWriter):
 class BlockPoolWriter(GraphWriter):
     '''Class for generating pooled block worklist graphs.'''
 
-    def __init__(self, designs, min_vol, max_vol, output_name):
+    def __init__(self, designs, min_vol, max_vol, is_mut, output_name):
         self.__designs = designs
         self.__min_vol = min_vol
         self.__max_vol = max_vol
+        self.__is_mut = is_mut
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -102,8 +103,10 @@ class BlockPoolWriter(GraphWriter):
         max_pool_vol = pool_counter.most_common(1)[0][1] * self.__min_vol
 
         for pcr_id, pool_id in pool_steps.items():
-            pcr = self._add_vertex(pcr_id, {'is_reagent': False})
-            pool = self._add_vertex(pool_id, {'is_reagent': False})
-            vol = min(self.__max_vol,
-                      (1 / pool_counter[pool_id] * max_pool_vol))
-            self._add_edge(pcr, pool, {'Volume': vol})
+            if (self.__is_mut and 'wt' not in pool_id) \
+                    or (not self.__is_mut and 'wt' in pool_id):
+                pcr = self._add_vertex(pcr_id, {'is_reagent': False})
+                pool = self._add_vertex(pool_id, {'is_reagent': False})
+                vol = min(self.__max_vol,
+                          (1 / pool_counter[pool_id] * max_pool_vol))
+                self._add_edge(pcr, pool, {'Volume': vol})
