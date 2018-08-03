@@ -9,6 +9,7 @@ import os
 import shutil
 
 from assembly import plate, worklist
+from assembly.optimiser import score
 import pandas as pd
 
 
@@ -78,6 +79,7 @@ def _run_writer(writer, name, sort_src, input_plates, plate_names,
         plt.to_csv(out_dir)
 
     for wrklst in wrklsts:
+        print(wrklst.name + '\t' + str(score(wrklst)))
         worklist.to_csv(wrklst, out_dir)
 
     return plates

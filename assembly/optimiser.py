@@ -25,7 +25,6 @@ class WorklistSolution():
         self.__orig_df = df
         self.__df = df.copy()
         self.__mut_df = df.copy()
-        self.__min_score = math.ceil(len(df.index) / 8) * 2
 
     def init(self):
         '''init.'''
@@ -45,12 +44,12 @@ class WorklistSolution():
 
     def get_energy(self):
         '''Get energy.'''
-        return _score(self.__df) - self.__min_score
+        return score(self.__df)
 
     def mutate(self):
         '''Mutate.'''
         self.__mut_df = _shuffle(self.__df, 1)
-        return _score(self.__mut_df) - self.__min_score
+        return score(self.__mut_df)
 
     def accept(self):
         '''Accept.'''
@@ -61,7 +60,7 @@ class WorklistSolution():
         pass
 
     def __repr__(self):
-        return str(list(self.__df['SourcePlateWell']))
+        return str(list(self.__df['src_well']))
 
 
 class WorklistThread(SimulatedAnnealer):
@@ -70,6 +69,18 @@ class WorklistThread(SimulatedAnnealer):
     def __init__(self, solution, verbose=True):
         SimulatedAnnealer.__init__(
             self, solution, r_temp=2.5, cooling_rate=0.00025, verbose=verbose)
+
+
+def score(df, channels=8):
+    '''Score.'''
+    min_score = math.ceil(len(df.index) / 8) * 2
+
+    scores = [_score_group(pd.DataFrame([list(row) for row in rows
+                                         if row is not None],
+                                        columns=df.columns))
+              for rows in _grouper(channels, df.values)]
+
+    return sum(scores) - min_score
 
 
 def optimise(df):
@@ -112,8 +123,8 @@ def _get_wklst(src_idxs, dest_idxs):
     for src, dest in zip(src_idxs, dest_idxs):
         data.append(_get_well_details(src) + _get_well_details(dest))
 
-    cols = ['SourcePlateWell', 'src_idx', 'src_row', 'src_col',
-            'DestinationPlateWell', 'dest_idx', 'dest_row', 'dest_col']
+    cols = ['src_well', 'src_idx', 'src_row', 'src_col',
+            'dest_well', 'dest_idx', 'dest_row', 'dest_col']
 
     return pd.DataFrame(data, columns=cols)
 
@@ -133,16 +144,6 @@ def _shuffle(df, num_shuffs=1):
         new_index[idx1], new_index[idx2] = new_index[idx2], new_index[idx1]
 
     return df.reindex(new_index)
-
-
-def _score(df, channels=8):
-    '''Score.'''
-    scores = [_score_group(pd.DataFrame([list(row) for row in rows
-                                         if row is not None],
-                                        columns=df.columns))
-              for rows in _grouper(channels, df.values)]
-
-    return sum(scores)
 
 
 def _score_group(group_df):
