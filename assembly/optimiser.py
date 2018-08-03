@@ -36,6 +36,7 @@ class WorklistSolution():
 
     def get_result(self):
         '''Get result.'''
+        self.__df.name = self.__orig_df.name
         return self.__df
 
     def get_values(self):
