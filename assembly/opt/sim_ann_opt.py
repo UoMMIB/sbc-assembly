@@ -13,7 +13,7 @@ import sys
 
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
 
-from assembly import optimise
+from assembly import opt
 
 
 class WorklistSolution():
@@ -43,12 +43,12 @@ class WorklistSolution():
 
     def get_energy(self):
         '''Get energy.'''
-        return optimise.score(self.__df)
+        return opt.score(self.__df)
 
     def mutate(self):
         '''Mutate.'''
         self.__mut_df = _shuffle(self.__df, 1)
-        return optimise.score(self.__mut_df)
+        return opt.score(self.__mut_df)
 
     def accept(self):
         '''Accept.'''
