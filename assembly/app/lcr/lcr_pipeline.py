@@ -36,7 +36,7 @@ def main(args):
 
     input_plates = pipeline.get_input_plates(args[4])
     out_dir_name = os.path.join(args[6], dte + args[3])
-    pipeline.run(writers, False, input_plates,
+    pipeline.run(writers, input_plates,
                  {'reagents': args[5]}, out_dir_name)
 
     worklist.format_worklist(out_dir_name)

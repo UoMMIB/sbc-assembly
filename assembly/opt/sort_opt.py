@@ -8,6 +8,7 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
 
+from operator import itemgetter
 import sys
 
 from assembly import opt
@@ -15,19 +16,27 @@ from assembly import opt
 
 def optimise(df):
     '''Optimise.'''
-    src_df = df.sort_values(['src_col', 'src_row'])
-    dest_df = df.sort_values(['dest_col', 'dest_row'])
+    strategies = [['src_col', 'src_row'],
+                  ['dest_col', 'dest_row'],
+                  ['src_idx'],
+                  ['dest_idx']]
 
-    if opt.score(src_df) < opt.score(dest_df):
-        return src_df
+    dfs = [_sort(df, strt) for strt in strategies]
+    dfs.sort(key=itemgetter(0))
 
-    return dest_df
+    return dfs[0][1]
+
+
+def _sort(df, order):
+    '''Sort.'''
+    sorted_df = df.sort_values(order)
+    return opt.score(sorted_df), sorted_df
 
 
 def main(args):
     '''main method.'''
-    df = optimise.get_semirandom_wklst(int(args[0]), int(args[1]))
-    # df = optimise.get_shuffled_wklst(int(args[0]))
+    df = opt.get_semirandom_wklst(int(args[0]), int(args[1]))
+    # df = opt.get_shuffled_wklst(int(args[0]))
     df = optimise(df)
     df.to_csv(args[2])
 

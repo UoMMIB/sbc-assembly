@@ -21,6 +21,7 @@ from scipy.spatial.distance import cityblock
 from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
+from assembly.opt import sort_opt
 import pandas as pd
 
 
@@ -52,10 +53,10 @@ class WorklistGenerator():
                               'output': 'output'}
         self.__added_comps = {}
 
-    def get_worklist(self, sort_src, input_plates=None, plate_names=None):
+    def get_worklist(self, input_plates=None, plate_names=None):
         '''Gets worklist and input_plates.'''
         if not self.__worklist:
-            self.__create_worklist(input_plates, plate_names, sort_src)
+            self.__create_worklist(input_plates, plate_names)
 
         worklists = []
 
@@ -65,7 +66,7 @@ class WorklistGenerator():
 
         return worklists, self.__input_plates
 
-    def __create_worklist(self, input_plates, plate_names, sort_src):
+    def __create_worklist(self, input_plates, plate_names):
         '''Creates worklist and plates.'''
         data = []
 
@@ -81,7 +82,7 @@ class WorklistGenerator():
         self.__worklist = pd.DataFrame(data)
 
         self.__write_input_plates()
-        self.__add_locations(sort_src)
+        self.__add_locations()
 
     def __write_input_plates(self):
         '''Writes input_plates from worklist.'''
@@ -131,7 +132,7 @@ class WorklistGenerator():
                                      False,
                                      row['dest_well_fixed'])
 
-    def __add_locations(self, sort_src):
+    def __add_locations(self):
         '''Add locations to worklist.'''
         locations = self.__worklist.apply(lambda row: self.__get_location(
             row['src_name'], row['dest_name']), axis=1)
@@ -150,28 +151,8 @@ class WorklistGenerator():
                           'dest_row',
                           'pipette_idx']
 
-        self.__worklist = pd.concat([self.__worklist, loc_df], axis=1)
-
-        sort_order = ['level',
-                      'src_is_reagent',
-                      'src_plate',
-                      'dest_plate',
-                      'pipette_idx',
-                      'src_idx',
-                      'dest_idx'] \
-            if sort_src else \
-            ['level',
-             'src_is_reagent',
-             'dest_plate',
-             'src_plate',
-             'pipette_idx',
-             'dest_idx',
-             'src_idx']
-
-        self.__worklist.sort_values(sort_order,
-                                    ascending=[False, False, True, True, True,
-                                               True, True],
-                                    inplace=True)
+        self.__worklist = optimise(pd.concat([self.__worklist, loc_df],
+                                             axis=1))
 
     def __get_location(self, src_name, dest_name):
         '''Get location.'''
@@ -270,6 +251,24 @@ class WorklistGenerator():
             self.__input_plates[new_plate_id] = new_plate
 
         return new_plate_id
+
+
+def optimise(df, optimiser=sort_opt):
+    '''Optimise.'''
+    optimised_dfs = []
+    cols = ['level',
+            'src_is_reagent',
+            'src_plate',
+            'dest_plate',
+            'pipette_idx']
+
+    for _, group_df in df.groupby(cols):
+        optimised_dfs.append(optimiser.optimise(group_df))
+
+    optimised_df = pd.concat(optimised_dfs)
+
+    return optimised_df.sort_values(cols,
+                                    ascending=[False, False, True, True, True])
 
 
 def to_csv(wrklst, out_dir_name='.'):
