@@ -36,7 +36,6 @@ def _sort(df, order):
 def main(args):
     '''main method.'''
     df = opt.get_semirandom_wklst(int(args[0]), int(args[1]))
-    # df = opt.get_shuffled_wklst(int(args[0]))
     df = optimise(df)
     df.to_csv(args[2])
 

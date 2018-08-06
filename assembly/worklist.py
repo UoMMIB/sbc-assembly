@@ -21,7 +21,7 @@ from scipy.spatial.distance import cityblock
 from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
-from assembly.opt import sort_opt
+from assembly.opt import smart_sort_opt
 import pandas as pd
 
 
@@ -142,14 +142,17 @@ class WorklistGenerator():
         loc_df.columns = ['src_plate',
                           'src_well',
                           'src_idx',
-                          'src_col',
                           'src_row',
+                          'src_col',
+                          'src_plate_size',
+                          'src_pipette_idx',
                           'dest_plate',
                           'dest_well',
                           'dest_idx',
-                          'dest_col',
                           'dest_row',
-                          'pipette_idx']
+                          'dest_col',
+                          'dest_plate_size',
+                          'dest_pipette_idx']
 
         self.__worklist = optimise(pd.concat([self.__worklist, loc_df],
                                              axis=1))
@@ -179,16 +182,18 @@ class WorklistGenerator():
                             shortest_dist = dist
                             opt_pair = [src_plt, src_well, src_idx,
                                         *plate.get_indices(src_well),
+                                        *self.__get_pipette_idx(src_plt,
+                                                                src_idx),
                                         dest_plt, dest_well, dest_idx,
                                         *plate.get_indices(dest_well),
-                                        self.__get_pipette_idx(src_plt,
-                                                               src_idx)]
+                                        *self.__get_pipette_idx(dest_plt,
+                                                                dest_idx)]
         return opt_pair
 
     def __get_pipette_idx(self, src_plt, src_idx):
         '''Get pipetting index (supporting 96 and 384 well plates.'''
         plt = self.__input_plates[src_plt]
-        return src_idx % 2 if plt.size() == 384 else 0
+        return plt.size(), src_idx % 2 if plt.size() == 384 else 0
 
     def __traverse(self, dest, level, data):
         '''Traverse tree.'''
@@ -253,14 +258,15 @@ class WorklistGenerator():
         return new_plate_id
 
 
-def optimise(df, optimiser=sort_opt):
+def optimise(df, optimiser=smart_sort_opt):
     '''Optimise.'''
     optimised_dfs = []
     cols = ['level',
             'src_is_reagent',
             'src_plate',
             'dest_plate',
-            'pipette_idx']
+            'src_pipette_idx',
+            'dest_pipette_idx']
 
     for _, group_df in df.groupby(cols):
         optimised_dfs.append(optimiser.optimise(group_df))
@@ -268,7 +274,8 @@ def optimise(df, optimiser=sort_opt):
     optimised_df = pd.concat(optimised_dfs)
 
     return optimised_df.sort_values(cols,
-                                    ascending=[False, False, True, True, True])
+                                    ascending=[False, False, True, True, True,
+                                               True])
 
 
 def to_csv(wrklst, out_dir_name='.'):

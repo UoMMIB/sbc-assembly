@@ -64,20 +64,20 @@ def _get_plates(plasmid_primers, plates):
     for plasmid_id, primer_pair in plasmid_primers.items():
         part_locs = plate.find(plates, plasmid_id)
         plate_id = part_locs.keys()[0]
-        col_row = part_locs.values()[0][0]
-        col, row = plate.get_indices(col_row)
+        row_col = part_locs.values()[0][0]
+        row, col = plate.get_indices(row_col)
 
         nonphospho = primer_plates[plate_id + '_primer_nonphospho']
         phospho = primer_plates[plate_id + '_primer_phospho']
         nonphospho.append(
-            [col_row, plasmid_id + '_F', primer_pair[0][0], row, col])
+            [row_col, plasmid_id + '_F', primer_pair[0][0], row, col])
         nonphospho.append(
-            [col_row, plasmid_id + '_R', primer_pair[1][0], row, col])
+            [row_col, plasmid_id + '_R', primer_pair[1][0], row, col])
         phospho.append(
-            [col_row, plasmid_id + '_F', '/5Phos/' + primer_pair[0][0],
+            [row_col, plasmid_id + '_F', '/5Phos/' + primer_pair[0][0],
              row, col])
         phospho.append(
-            [col_row, plasmid_id + '_R', '/5Phos/' + primer_pair[1][0],
+            [row_col, plasmid_id + '_R', '/5Phos/' + primer_pair[1][0],
              row, col])
 
     columns = ['Well Position', 'Sequence Name',
