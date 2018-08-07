@@ -15,7 +15,7 @@ import pandas as pd
 
 def score(df, channels=8):
     '''Score.'''
-    min_score = math.ceil(len(df.index) / 8) * 2
+    min_score = (math.ceil(len(df.index) / 8) - 1) * 2
 
     scores = [_score_group(pd.DataFrame([list(row) for row in rows
                                          if row is not None],
