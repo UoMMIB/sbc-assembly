@@ -264,18 +264,19 @@ def optimise(df, optimiser=smart_sort_opt):
     cols = ['level',
             'src_is_reagent',
             'src_plate',
-            'dest_plate',
-            'src_pipette_idx',
-            'dest_pipette_idx']
+            'dest_plate']
 
     for _, group_df in df.groupby(cols):
-        optimised_dfs.append(optimiser.optimise(group_df))
+        if group_df['src_is_reagent'].all():
+            for _, subgroup_df in group_df.groupby('src_name'):
+                optimised_dfs.append(optimiser.optimise(subgroup_df))
+        else:
+            optimised_dfs.append(optimiser.optimise(group_df))
 
     optimised_df = pd.concat(optimised_dfs)
 
     return optimised_df.sort_values(cols,
-                                    ascending=[False, False, True, True, True,
-                                               True])
+                                    ascending=[False, False, True, True])
 
 
 def to_csv(wrklst, out_dir_name='.'):
