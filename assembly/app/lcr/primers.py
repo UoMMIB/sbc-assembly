@@ -86,17 +86,12 @@ class PrimerDesigner():
     def __get_location(self, part, existing_plates, new_plates):
         '''Get location.'''
         parent_plasmid = self.__get_parent_plasmid(part)
-
-        if parent_plasmid is None:
-            # Special case: legacy material do not have parent plasmids
-            # in ICE (or perhaps even in reality).
-            parent_plasmid_id = part.get_ice_id()
-        else:
-            parent_plasmid_id = parent_plasmid.get_ice_id()
+        parent_plasmid_id = parent_plasmid.get_ice_id()
 
         part_locs = plate.find(existing_plates, parent_plasmid_id)
 
         if part_locs:
+            # TODO: check whether part_locs can be accessed with keys by index
             plate_id = part_locs.keys()[0]
             row_col = part_locs.values()[0][0]
         else:
