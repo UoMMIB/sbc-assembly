@@ -11,14 +11,13 @@ import os
 import sys
 from time import gmtime, strftime
 
-from synbiochem import utils
-
 from assembly import pipeline, worklist
 from assembly.app.speedy_genes.block import InnerBlockPoolWriter, \
     BlockPcrWriter, BlockPoolWriter
 from assembly.app.speedy_genes.dilution import WtOligoDilutionWriter
 from assembly.app.speedy_genes.gene import CombiGenePcrWriter
 from assembly.app.speedy_genes.pool import MutOligoPoolWriter
+from synbiochem import utils
 
 
 def run(plate_dir, max_mutated, n_blocks, out_dir_parent, exp_name):

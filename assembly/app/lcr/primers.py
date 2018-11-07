@@ -13,6 +13,8 @@ All rights reserved.
 from collections import defaultdict
 import sys
 
+from Bio.Seq import Seq
+
 from assembly import plate
 from assembly.app.lcr import utils
 import pandas as pd
@@ -133,7 +135,8 @@ def _get_primers(parts, restr_enz, tm):
         primers[part_id] = [
             part,
             seq_utils.get_seq_by_melt_temp(digest, tm),
-            seq_utils.get_seq_by_melt_temp(digest, tm, forward=False)
+            seq_utils.get_seq_by_melt_temp(Seq(digest).reverse_complement(),
+                                           tm)
         ]
 
     return primers

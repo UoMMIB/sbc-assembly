@@ -8,9 +8,9 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
 from igraph import Graph
-from synbiochem.utils.graph_utils import add_edge, add_vertex, get_roots
 
 import matplotlib.pyplot as plt
+from synbiochem.utils.graph_utils import add_edge, add_vertex, get_roots
 
 
 class GraphWriter():
