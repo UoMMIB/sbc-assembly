@@ -33,7 +33,7 @@ class PrimerDesigner():
         '''Close.'''
         self.__ice_helper.close()
 
-    def get_primers(self, plasmid_ids, plates, restr_enz, tm):
+    def get_primers(self, plasmid_ids, plates, restr_enz, tm, mg_conc=0.0):
         '''Get primers for Parts by id.'''
         plasmid_parts = \
             self.__ice_helper.get_plasmid_parts(plasmid_ids,
@@ -44,7 +44,7 @@ class PrimerDesigner():
         for dct in plasmid_parts.values():
             parts.update(dct)
 
-        primers = _get_primers(parts, restr_enz, tm)
+        primers = _get_primers(parts, restr_enz, tm, mg_conc)
 
         return self.__get_plates(primers, plates)
 
@@ -125,18 +125,21 @@ class PrimerDesigner():
         return None
 
 
-def _get_primers(parts, restr_enz, tm):
+def _get_primers(parts, restr_enz, tm, mg_conc):
     '''Design primers.'''
     primers = {}
+    reag_conc = {seq_utils.MG: mg_conc}
 
     for part_id, part in parts.items():
         digest = _apply_restricts(part.get_dna(), restr_enz)['seq']
 
         primers[part_id] = [
             part,
-            seq_utils.get_seq_by_melt_temp(digest, tm),
+            seq_utils.get_seq_by_melt_temp(digest, tm,
+                                           reagent_concs=reag_conc),
             seq_utils.get_seq_by_melt_temp(Seq(digest).reverse_complement(),
-                                           tm)
+                                           tm,
+                                           reagent_concs=reag_conc)
         ]
 
     return primers
