@@ -7,19 +7,27 @@ All rights reserved.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
+# pylint: disable=useless-object-inheritance
 # pylint: disable=wrong-import-order
 from collections import defaultdict
 import re
 
-from synbiochem.utils.ice_utils import get_ice_client
+from synbiochem.utils.ice_utils import ICEClientFactory
 
 
 class ICEHelper(object):
     '''Helper class for accessing ICE.'''
 
     def __init__(self, ice_url, ice_username, ice_password):
-        self.__ice_client = get_ice_client(ice_url, ice_username, ice_password)
+        self.__ice_factory = ICEClientFactory()
+        self.__ice_client = self.__ice_factory.get_ice_client(ice_url,
+                                                              ice_username,
+                                                              ice_password)
         self.__ice_entries = {}
+
+    def close(self):
+        '''Close.'''
+        self.__ice_factory.close()
 
     def get_plasmid_parts(self, plasmid_ids, type_filter=None):
         '''Get parts from plasmid ids.'''

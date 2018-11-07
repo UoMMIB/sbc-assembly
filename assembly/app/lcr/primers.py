@@ -8,15 +8,15 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
 # pylint: disable=wrong-import-order
 from collections import defaultdict
 import sys
 
-from synbiochem.utils import dna_utils, seq_utils
-
 from assembly import plate
 from assembly.app.lcr import utils
 import pandas as pd
+from synbiochem.utils import dna_utils, seq_utils
 
 
 class PrimerDesigner():
@@ -26,6 +26,10 @@ class PrimerDesigner():
         self.__ice_helper = utils.ICEHelper(ice_details['url'],
                                             ice_details['username'],
                                             ice_details['password'])
+
+    def close(self):
+        '''Close.'''
+        self.__ice_helper.close()
 
     def get_primers(self, plasmid_ids, plates, restr_enz, tm):
         '''Get primers for Parts by id.'''
@@ -45,11 +49,11 @@ class PrimerDesigner():
     def __get_plates(self, primers, plates):
         '''Map primers to plates.'''
         primer_plates = defaultdict(list)
+        new_plates = [plate.Plate('primer_1')]
 
         for _, values in primers.items():
             primer_id, plate_id, row_col = \
-                self.__get_location(values[0], plates,
-                                    [plate.Plate('primer_1')])
+                self.__get_location(values[0], plates, new_plates)
 
             row, col = plate.get_indices(row_col)
 
@@ -65,8 +69,6 @@ class PrimerDesigner():
             phospho.append(
                 [row_col, primer_id + '_R', '/5Phos/' + values[2][0],
                  row, col])
-
-            print(phospho)
 
         columns = ['Well Position', 'Sequence Name',
                    'Sequence', 'row', 'column']
@@ -166,6 +168,8 @@ def main(args):
 
     for plate_id, plt in primer_plates.items():
         plt.to_csv(plate_id + '.csv', index=False, encoding='utf-8')
+
+    designer.close()
 
 
 if __name__ == '__main__':

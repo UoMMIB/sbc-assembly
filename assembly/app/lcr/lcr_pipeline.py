@@ -41,6 +41,8 @@ def main(args):
 
     worklist.format_worklist(out_dir_name)
 
+    ice_helper.close()
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])
