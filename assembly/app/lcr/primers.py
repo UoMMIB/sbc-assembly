@@ -33,19 +33,25 @@ class PrimerDesigner():
         '''Close.'''
         self.__ice_helper.close()
 
-    def get_primers(self, plasmid_ids, plates, restr_enz, tm, mg_conc=0.0):
-        '''Get primers for Parts by id.'''
+    def get_primers_from_pathway_plasmids(self, pathway_plasmid_ids, plates,
+                                          restr_enz, tm, mg_conc=0.0):
+        '''Get primers for Parts from pathway plasmid ids.'''
         plasmid_parts = \
-            self.__ice_helper.get_plasmid_parts(plasmid_ids,
-                                                type_filter='PART')
+            self.__ice_helper.get_pathway_plasmid_parts(pathway_plasmid_ids,
+                                                        type_filter='PART')
 
         parts = {}
 
         for dct in plasmid_parts.values():
             parts.update(dct)
 
-        primers = _get_primers(parts, restr_enz, tm, mg_conc)
+        return self.get_primers_from_parts(parts, plates, restr_enz, tm,
+                                           mg_conc)
 
+    def get_primers_from_parts(self, parts, plates, restr_enz, tm,
+                               mg_conc=0.0):
+        '''Get primers from parts.'''
+        primers = _get_primers(parts, restr_enz, tm, mg_conc)
         return self.__get_plates(primers, plates)
 
     def __get_plates(self, primers, plates):
@@ -163,9 +169,10 @@ def main(args):
               for filename in args[5].split(',')] \
         if args[5] != 'None' else {}
 
-    primer_plates = designer.get_primers(args[6:], plates,
-                                         args[3].split(','),
-                                         float(args[4]))
+    primer_plates = \
+        designer.get_primers_from_pathway_plasmids(args[6:], plates,
+                                                   args[3].split(','),
+                                                   float(args[4]))
 
     for plate_id, plt in primer_plates.items():
         plt.to_csv(plate_id + '.csv', index=False, encoding='utf-8')
