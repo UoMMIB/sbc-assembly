@@ -29,11 +29,11 @@ class ICEHelper(object):
         '''Close.'''
         self.__ice_factory.close()
 
-    def get_pathway_plasmid_parts(self, pathway_plasmid_ids, type_filter=None):
-        '''Get parts from pathway plasmid ids.'''
+    def get_plasmid_parts(self, plasmid_ids, type_filter=None):
+        '''Get parts from part plasmid ids.'''
         parts = defaultdict(dict)
 
-        for plasmid_id in pathway_plasmid_ids:
+        for plasmid_id in plasmid_ids:
             parts[plasmid_id] = {}
 
             for part_ice in self.__get_parts(plasmid_id):
@@ -45,6 +45,8 @@ class ICEHelper(object):
                           re.match(type_filter,
                                    part_ice.get_parameter('Type')))):
                     parts[plasmid_id][part_id] = part_ice
+
+        assert(len(plasmid_ids) == len(parts))
 
         return parts
 
