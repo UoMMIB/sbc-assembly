@@ -68,13 +68,14 @@ class LcrWriter(GraphWriter):
 
             self._add_edge(mm, plasmid, {'Volume': mm_vol})
             self._add_edge(ampligase, plasmid, {'Volume': ampligase_vol})
-            self._add_edge(domino_pool, plasmid,  {'Volume': domino_pool_vol})
+            self._add_edge(domino_pool, plasmid, {'Volume': domino_pool_vol})
 
             plasmid_water_vol -= (mm_vol + ampligase_vol + domino_pool_vol)
 
             for ice_id, part_ice in parts_map.items():
                 if part_ice.get_parameter('Type') != 'DOMINO':
-                    part = self._add_vertex(ice_id, {'is_reagent': False})
+                    part = self._add_vertex(ice_id + '_dig',
+                                            {'is_reagent': False})
                     self._add_edge(part, plasmid, {'Volume': part_vol})
                     plasmid_water_vol -= part_vol
 

@@ -29,7 +29,7 @@ class PartQcWriter(GraphWriter):
         self._add_edge(bffer, ladder_product, {'Volume': 22.0})
 
         for part_id in self.__part_ids:
-            part = self._add_vertex(part_id, {'is_reagent': False})
+            part = self._add_vertex(part_id + '_dig', {'is_reagent': False})
             product = self._add_vertex(part_id + '_product',
                                        {'is_reagent': False})
 
