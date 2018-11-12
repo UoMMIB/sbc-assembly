@@ -104,4 +104,3 @@ ENV/
 /.pydevproject
 /out/
 /**/.DS_Store
-/data/
