@@ -7,7 +7,6 @@ All rights reserved.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
-
 import random
 import sys
 

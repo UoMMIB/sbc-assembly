@@ -46,7 +46,7 @@ class ICEHelper(object):
                                    part_ice.get_parameter('Type')))):
                     parts[plasmid_id][part_id] = part_ice
 
-        assert(len(plasmid_ids) == len(parts))
+        assert len(plasmid_ids) == len(parts)
 
         return parts
 

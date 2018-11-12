@@ -5,6 +5,8 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=wrong-import-order
 from itertools import zip_longest
 import math
 import random

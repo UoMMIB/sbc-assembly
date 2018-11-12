@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-few-public-methods
 # pylint: disable=wrong-import-order
 import math
 import sys
