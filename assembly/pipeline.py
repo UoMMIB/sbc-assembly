@@ -5,6 +5,8 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=wrong-import-order
 import os
 import shutil
 
@@ -49,7 +51,7 @@ def run(wrtrs, input_plates=None, plate_names=None,
         if isinstance(writers, list):
             for wrt_idx, writer in enumerate(writers):
                 input_plates.update(_run_writer(writer,
-                                                str(idx + 1) + '_' +
+                                                str(idx + 1) + '_' + \
                                                 str(wrt_idx + 1),
                                                 input_plates,
                                                 plate_names,
@@ -79,4 +81,36 @@ def _run_writer(writer, name, input_plates, plate_names,
         print(wrklst.name + '\t' + str(score(wrklst)))
         worklist.to_csv(wrklst, out_dir)
 
+    summary_df = _summarise(wrklsts)
+    summary_df.to_csv(os.path.join(out_dir, 'summary.csv'), index=False)
+
     return plates
+
+
+def _summarise(worklists):
+    '''Summarise worklists.'''
+    vols = {}
+    dest_plates = set()
+
+    for wrklst in worklists:
+        # Add destination plates:
+        dest_plates.update(wrklst['dest_plate'].values)
+
+        # Add volumes:
+        for keys, group_df in wrklst.groupby(['src_plate',
+                                              'src_well',
+                                              'src_name']):
+
+            if keys not in vols:
+                vols[keys] = 0
+
+            vols[keys] += group_df['Volume'].sum()
+
+    out = [list(key) + [value, None] for key, value in vols.items()]
+
+    for dest_plate in dest_plates:
+        out.append([None, None, None, None, dest_plate])
+
+    return pd.DataFrame(out,
+                        columns=['src_plate', 'src_well', 'src_name',
+                                 'total_volume', 'dest_plate'])
