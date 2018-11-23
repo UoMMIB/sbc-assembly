@@ -7,13 +7,11 @@ All rights reserved.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
-import copy
 import os
 import sys
 from time import gmtime, strftime
 
-from assembly import pipeline, worklist
-from assembly import plate
+from assembly import pipeline, plate, worklist
 from assembly.app.plasmid_analysis import colony_pcr
 import pandas as pd
 
@@ -49,15 +47,17 @@ def _get_frag_anal_labels(input_plates, out_dir_name):
 def main(args):
     '''main method.'''
     dte = strftime("%y%m%d", gmtime())
-    out_dir_name = os.path.join(args[3], dte + args[1])
+    out_dir_name = os.path.join(args[4], dte + args[2])
 
     # Parse colony pick output:
     colony_plates, colony_ids = _get_colony_plates(args[0])
 
+    input_plates = pipeline.get_input_plates(args[1])
+    input_plates.update(colony_plates)
+
     #  Write PCR worklists:
-    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[1])]
-    pipeline.run(writers, copy.copy(colony_plates),
-                 {'reagents': args[2]}, out_dir_name)
+    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[2])]
+    pipeline.run(writers, input_plates, {'reagents': args[3]}, out_dir_name)
     worklist.format_worklist(out_dir_name)
 
     # Generate fragment analyse labels:
