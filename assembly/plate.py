@@ -131,13 +131,8 @@ class Plate():
         return get_row_col(idx, self.__plate.shape, self.__col_ord)
 
     def get_idx(self, row, col):
-        '''Map idx to well, column ordered.'''
-        rows, cols = self.__plate.shape
-
-        if self.__col_ord:
-            return row * cols + col
-
-        return col * rows + row
+        '''Map row, col to idx.'''
+        return get_idx(row, col, self.__plate.shape, self.__col_ord)
 
     def to_csv(self, out_dir_name='.'):
         '''Export plate to csv.'''
@@ -164,6 +159,16 @@ def get_row_col(idx, shape=(8, 12), col_ord=False):
         return int(idx / cols), int(idx % cols)
 
     return int(idx % rows), int(idx / rows)
+
+
+def get_idx(row, col, shape=(8, 12), col_ord=False):
+    '''Map idx to well, column ordered.'''
+    rows, cols = shape
+
+    if col_ord:
+        return row * cols + col
+
+    return col * rows + row
 
 
 def get_indices(well_name):

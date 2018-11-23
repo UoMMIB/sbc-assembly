@@ -5,7 +5,9 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=wrong-import-order
+import copy
 import os
 import sys
 from time import gmtime, strftime
@@ -31,19 +33,35 @@ def _get_colony_plates(filename):
     return plates, colony_ids
 
 
+def _get_frag_anal_labels(input_plates, out_dir_name):
+    '''Get fragment analysis plates.'''
+    for name, plt in input_plates.items():
+        components = plt.get_all()
+        labels = [[plate.get_idx(*plate.get_indices(pos), col_ord=True) + 1,
+                   pos, vals['id']]
+                  for pos, vals in components.items()]
+
+        df = pd.DataFrame(labels)
+        df.to_csv(os.path.join(out_dir_name, name + '_frag_anal.csv'),
+                  index=False, header=False)
+
+
 def main(args):
     '''main method.'''
-    input_plates, colony_ids = _get_colony_plates(args[0])
-
     dte = strftime("%y%m%d", gmtime())
-
-    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[1])]
-
     out_dir_name = os.path.join(args[3], dte + args[1])
 
-    pipeline.run(writers, input_plates, {'reagents': args[2]}, out_dir_name)
+    # Parse colony pick output:
+    input_plates, colony_ids = _get_colony_plates(args[0])
 
+    #  Write PCR worklists:
+    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[1])]
+    pipeline.run(writers, copy.copy(input_plates),
+                 {'reagents': args[2]}, out_dir_name)
     worklist.format_worklist(out_dir_name)
+
+    # Generate fragment analyse labels:
+    _get_frag_anal_labels(input_plates, out_dir_name)
 
 
 if __name__ == '__main__':
