@@ -24,7 +24,6 @@ from assembly.opt import smart_sort_opt
 import pandas as pd
 from synbiochem.utils.graph_utils import get_roots
 
-
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
                   {('reagents'): 'MastermixTrough'}}
 
@@ -54,7 +53,9 @@ class WorklistGenerator():
         self.__added_comps = {}
 
     def get_worklist(self, input_plates=None, plate_names=None):
-        '''Gets worklist and input_plates.'''
+        '''Gets worklist and required plates.'''
+        required_plates = {}
+
         if not self.__worklist:
             self.__create_worklist(input_plates, plate_names)
 
@@ -63,8 +64,11 @@ class WorklistGenerator():
         for dest_plate, worklist in self.__worklist.groupby('dest_plate'):
             worklist.name = dest_plate
             worklists.append(worklist)
+            required_plates[dest_plate] = self.__input_plates[dest_plate]
+            required_plates.update({nme: self.__input_plates[nme]
+                                    for nme in worklist['src_plate'].unique()})
 
-        return worklists, self.__input_plates
+        return worklists, required_plates
 
     def __create_worklist(self, input_plates, plate_names):
         '''Creates worklist and plates.'''
