@@ -22,15 +22,15 @@ def _get_colony_plates(filename):
     '''Get colony plates.'''
     colony_df = pd.read_csv(filename)
     plates = {}
-    colony_ids = []
+    all_colony_ids = []
 
     for idx, plate_df in colony_df.groupby('DWPBarcode'):
         plate_df = plate_df[['DWPWell', 'ColonyID']]
         plate_df.columns = ['well', 'id']
         plates[idx] = plate.from_table(plate_df, idx)
-        colony_ids.extend(plate_df['id'].values)
+        all_colony_ids.append(plate_df.values.tolist())
 
-    return plates, colony_ids
+    return plates, all_colony_ids
 
 
 def _get_frag_anal_labels(input_plates, out_dir_name):
@@ -52,16 +52,16 @@ def main(args):
     out_dir_name = os.path.join(args[3], dte + args[1])
 
     # Parse colony pick output:
-    input_plates, colony_ids = _get_colony_plates(args[0])
+    colony_plates, colony_ids = _get_colony_plates(args[0])
 
     #  Write PCR worklists:
     writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[1])]
-    pipeline.run(writers, copy.copy(input_plates),
+    pipeline.run(writers, copy.copy(colony_plates),
                  {'reagents': args[2]}, out_dir_name)
     worklist.format_worklist(out_dir_name)
 
     # Generate fragment analyse labels:
-    _get_frag_anal_labels(input_plates, out_dir_name)
+    _get_frag_anal_labels(colony_plates, out_dir_name)
 
 
 if __name__ == '__main__':

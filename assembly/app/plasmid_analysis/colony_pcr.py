@@ -17,13 +17,18 @@ class ColonyPcrWriter(GraphWriter):
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
-        for colony_id in self.__colony_ids:
+        for idx, colony_ids in enumerate(self.__colony_ids):
+            for colony_id in colony_ids:
+                colony_pcr = self._add_vertex(colony_id[1] + '_pcr',
+                                              {'is_reagent': False})
 
-            colony_pcr = self._add_vertex(colony_id + '_pcr',
-                                          {'is_reagent': False})
+                mm = self._add_vertex('mm', {'is_reagent': True})
 
-            mm = self._add_vertex('mm', {'is_reagent': True})
-            colony = self._add_vertex(colony_id, {'is_reagent': False})
+                barcode = self._add_vertex('ONT%d%s' % (idx + 1, colony_id[0]),
+                                           {'is_reagent': False})
 
-            self._add_edge(mm, colony_pcr, {'Volume': 5.0})
-            self._add_edge(colony, colony_pcr, {'Volume': 2.5})
+                colony = self._add_vertex(colony_id[1], {'is_reagent': False})
+
+                self._add_edge(mm, colony_pcr, {'Volume': 5.0})
+                self._add_edge(barcode, colony_pcr, {'Volume': 2.5})
+                self._add_edge(colony, colony_pcr, {'Volume': 2.5})
