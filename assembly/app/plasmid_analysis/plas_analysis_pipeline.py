@@ -56,7 +56,7 @@ def main(args):
     input_plates.update(colony_plates)
 
     #  Write PCR worklists:
-    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'PCR' + args[2])]
+    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'COL' + args[2])]
     pipeline.run(writers, input_plates, {'reagents': args[3]}, out_dir_name)
     worklist.format_worklist(out_dir_name)
 
