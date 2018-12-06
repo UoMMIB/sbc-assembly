@@ -55,7 +55,7 @@ def _score_group(group_df):
 
 def _score_cols(group_df, columns):
     '''Score group by either src or dest (specified by columns).'''
-    score = 0
+    col_score = 0
     head_col = 0
     head_pos = [[row, head_col] for row in range(0, 8)]
     curr_pos = [list(pos) for pos in group_df[columns].values]
@@ -80,15 +80,15 @@ def _score_cols(group_df, columns):
 
         # Move col:
         head_col = head_curr[next_idx][1][1]
-        score += abs(head_col - head_curr[next_idx][0][1])
+        col_score += abs(head_col - head_curr[next_idx][0][1])
 
         # Move row:
         head_row_offset = head_curr[next_idx][1][0] - head_curr[next_idx][0][0]
-        score += abs(head_row_offset)
+        col_score += abs(head_row_offset)
         head_pos = [[row + head_row_offset, head_col] for row, _ in head_pos]
         curr_pos[next_idx] = [-1, -1]
 
-    return score
+    return col_score
 
 
 def _grouper(n, iterable, fillvalue=None):

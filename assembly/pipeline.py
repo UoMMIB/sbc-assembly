@@ -51,7 +51,7 @@ def run(wrtrs, input_plates=None, plate_names=None,
         if isinstance(writers, list):
             for wrt_idx, writer in enumerate(writers):
                 input_plates.update(_run_writer(writer,
-                                                str(idx + 1) + '_' + \
+                                                str(idx + 1) + '_' +
                                                 str(wrt_idx + 1),
                                                 input_plates,
                                                 plate_names,
