@@ -11,16 +11,20 @@ from itertools import cycle
 import pandas as pd
 
 
-def optimise(df):
+def optimise(df, by_src=False):
     '''Optimise.'''
     data = []
 
     plate_size = list(df['src_plate_size'])[0]
 
-    sort_df = df.sort_values(['dest_idx'])
+    sort_df = df.sort_values(['dest_plate', 'dest_idx']
+                             if by_src
+                             else ['src_plate', 'src_idx'])
 
-    group_dfs = {src_idx: group_df
-                 for src_idx, group_df in sort_df.groupby('src_idx')}
+    group_dfs = {idx: group_df
+                 for idx, group_df in sort_df.groupby('src_idx'
+                                                      if by_src
+                                                      else 'dest_idx')}
 
     for idx in cycle(range(plate_size)):
         group_df = group_dfs.get(idx, None)

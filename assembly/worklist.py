@@ -267,20 +267,28 @@ def optimise(df, optimiser=smart_sort_opt):
     optimised_dfs = []
     cols = ['level',
             'src_is_reagent',
-            'src_plate',
+            # 'src_plate',
             'dest_plate']
 
     for _, group_df in df.groupby(cols):
         if group_df['src_is_reagent'].all():
+            group_df = group_df.copy()
+            group_df.loc[:, 'src_name'] = pd.Categorical(group_df['src_name'],
+                                                         ['water',
+                                                          'buffer', 'ladder',
+                                                          'mm', 'mm_dig',
+                                                          'mm_lcr',
+                                                          'ampligase'])
             for _, subgroup_df in group_df.groupby('src_name'):
-                optimised_dfs.append(optimiser.optimise(subgroup_df))
+                if not subgroup_df.empty:
+                    optimised_dfs.append(optimiser.optimise(subgroup_df))
         else:
             optimised_dfs.append(optimiser.optimise(group_df))
 
     optimised_df = pd.concat(optimised_dfs)
 
     return optimised_df.sort_values(cols,
-                                    ascending=[False, False, True, True])
+                                    ascending=[False, False, True])
 
 
 def to_csv(wrklst, out_dir_name='.'):
