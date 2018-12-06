@@ -243,9 +243,9 @@ class WorklistGenerator():
         grps = re.match(r'(.*)~(\d+)', full_plate_id)
 
         if grps:
-            new_plate_id = grps[1] + '-' + str(int(grps[2]) + 1)
+            new_plate_id = grps[1] + '~' + str(int(grps[2]) + 1)
         else:
-            new_plate_id = full_plate_id + '-2'
+            new_plate_id = full_plate_id + '~2'
 
         if new_plate_id not in self.__input_plates:
             # Add new plate:
