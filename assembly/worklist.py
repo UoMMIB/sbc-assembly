@@ -300,7 +300,6 @@ def to_csv(wrklst, out_dir_name='.'):
 
 def format_worklist(dir_name):
     '''Rename columns to SYNBIOCHEM-specific headers.'''
-
     for(dirpath, _, filenames) in os.walk(dir_name):
         for filename in filenames:
             if filename.endswith('worklist.csv'):
@@ -310,6 +309,9 @@ def format_worklist(dir_name):
                 _rename_cols(df)
                 df = _reorder_cols(df)
                 df.to_csv(filepath, encoding='utf-8', index=False)
+                return df
+
+    return None
 
 
 def _rename_values(df):
