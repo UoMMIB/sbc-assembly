@@ -19,30 +19,34 @@ import pandas as pd
 class EnzymeScreenWriter(GraphWriter):
     '''Class for generating enzyme screen worklist graphs.'''
 
-    def __init__(self, df, blank_ids, output_name='enz_scr'):
+    def __init__(self, df, blank_ids, output_name='enz_scr', replicates=2):
         self.__df = df
         self.__blank_ids = blank_ids
+        self.__replicates = replicates
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
         assay_ids = []
 
         for _, row in self.__df.iterrows():
-            part_ids = tuple(re.split(r'\s\+\s',
-                                      str(row['Part ID (s)']).strip()))
+            for _ in range(self.__replicates):
+                part_ids = re.split(r'\s\+\s',
+                                    str(row['Part ID (s)']).strip())
 
-            self.__add_assay(part_ids, row['Substrate'], assay_ids)
+                self.__add_assay(part_ids, row['Substrate'], assay_ids)
 
         for substrate in self.__df['Substrate'].unique():
-            for blank_id in self.__blank_ids:
-                self.__add_assay(tuple([blank_id]), substrate, assay_ids)
+            for _ in range(self.__replicates):
+                for blank_id in self.__blank_ids:
+                    self.__add_assay([blank_id], substrate, assay_ids)
 
     def __add_assay(self, part_ids, substrate, assay_ids):
         '''Add assay.'''
-        assay_ids.append(part_ids)
+        assay_id = tuple(part_ids + [substrate])
+        assay_ids.append(assay_id)
+        count = str(Counter(assay_ids)[assay_id])
 
-        assay = self._add_vertex('_'.join(part_ids) + '_assay_' +
-                                 str(Counter(assay_ids)[part_ids]),
+        assay = self._add_vertex('_'.join(part_ids + [substrate, count]),
                                  {'is_reagent': False})
 
         substrate = self._add_vertex(substrate, {'is_reagent': False})
