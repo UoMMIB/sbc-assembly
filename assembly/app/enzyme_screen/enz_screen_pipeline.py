@@ -42,8 +42,6 @@ class EnzymeScreenWriter(GraphWriter):
     def __add_lysate(self, part_locs):
         '''Add lysate.'''
         for part_loc in part_locs:
-            print(part_loc)
-
             if part_loc[1]:
                 if part_loc[1][0] in self.__input_plates:
                     input_plate = self.__input_plates[part_loc[1][0]]
@@ -74,12 +72,19 @@ class EnzymeScreenWriter(GraphWriter):
             self._add_edge(part, assay, {'Volume': 19.0 / len(part_ids)})
 
 
-def _get_substrate_plate(wklst_df, substrates, name='substrate_treatment'):
+def _get_substrate_plates(wklst_dfs, substrates, name='substrate_treatment'):
     '''Get substrate plate.'''
-    substrates_df = wklst_df[wklst_df['ComponentName'].isin(substrates)]
-    substrates_df = substrates_df[['ComponentName', 'DestinationPlateWell']]
-    substrates_df.columns = ['id', 'well']
-    return plate.from_table(substrates_df, name)
+    plate_dfs = []
+
+    for count, wklst_df in enumerate(wklst_dfs):
+        substrates_df = wklst_df[wklst_df['ComponentName'].isin(substrates)]
+        substrates_df = substrates_df[['ComponentName',
+                                       'DestinationPlateWell']]
+        substrates_df.columns = ['id', 'well']
+        plate_dfs.append(plate.from_table(substrates_df, name + '_' +
+                                          str(count + 1)))
+
+    return plate_dfs
 
 
 def main(args):
@@ -98,9 +103,11 @@ def main(args):
         pipeline.run(writers, input_plates, {'reagents': args[4]},
                      out_dir_name)
 
-        wklst_df = worklist.format_worklist(out_dir_name)
-        plt = _get_substrate_plate(wklst_df, group_df['Substrate'].unique())
-        plt.to_csv(out_dir_name)
+        wklst_dfs = worklist.format_worklist(out_dir_name)
+        plts = _get_substrate_plates(wklst_dfs, group_df['Substrate'].unique())
+
+        for plt in plts:
+            plt.to_csv(out_dir_name)
 
 
 if __name__ == '__main__':
