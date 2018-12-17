@@ -7,7 +7,6 @@ All rights reserved.
 '''
 from collections import Counter
 import os
-import re
 import sys
 from time import gmtime, strftime
 
@@ -19,9 +18,10 @@ import pandas as pd
 class EnzymeScreenWriter(GraphWriter):
     '''Class for generating enzyme screen worklist graphs.'''
 
-    def __init__(self, df, blank_ids, output_name='enz_scr', replicates=2):
+    def __init__(self, df, input_plates, output_name='enz_scr',
+                 replicates=2):
         self.__df = df
-        self.__blank_ids = blank_ids
+        self.__input_plates = input_plates
         self.__replicates = replicates
         GraphWriter.__init__(self, output_name)
 
@@ -30,15 +30,29 @@ class EnzymeScreenWriter(GraphWriter):
 
         for _, row in self.__df.iterrows():
             for _ in range(self.__replicates):
-                part_ids = re.split(r'\s\+\s',
-                                    str(row['Part ID (s)']).strip())
+                part_ids = [part_id.strip()
+                            for part_id in str(row['Part ID (s)']).split('+')]
+
+                locations = row[['Lysate 1 location', 'Lysate 2 location']]
+
+                self.__add_lysate(zip(part_ids, locations))
 
                 self.__add_assay(part_ids, row['Substrate'], assay_ids)
 
-        for substrate in self.__df['Substrate'].unique():
-            for _ in range(self.__replicates):
-                for blank_id in self.__blank_ids:
-                    self.__add_assay([blank_id], substrate, assay_ids)
+    def __add_lysate(self, part_locs):
+        '''Add lysate.'''
+        for part_loc in part_locs:
+            print(part_loc)
+
+            if part_loc[1]:
+                if part_loc[1][0] in self.__input_plates:
+                    input_plate = self.__input_plates[part_loc[1][0]]
+                else:
+                    input_plate = plate.Plate(part_loc[1][0])
+                    self.__input_plates[part_loc[1][0]] = input_plate
+
+                row, col = plate.get_indices(part_loc[1][1:])
+                input_plate.set({'id': part_loc[0] + '_lys'}, row, col)
 
     def __add_assay(self, part_ids, substrate, assay_ids):
         '''Add assay.'''
@@ -72,14 +86,13 @@ def main(args):
     '''main method.'''
     recipe_df = pd.read_csv(args[0], dtype=str)
 
-    input_plates = pipeline.get_input_plates(args[2])
-
     dte = strftime("%y%m%d", gmtime())
 
     for name, group_df in recipe_df.groupby('Project'):
         out_dir_name = os.path.join(os.path.join(args[1], dte + args[3]), name)
+        input_plates = pipeline.get_input_plates(args[2])
 
-        writers = [EnzymeScreenWriter(group_df, args[5:],
+        writers = [EnzymeScreenWriter(group_df, input_plates,
                                       dte + 'ENZ' + name[:3].upper())]
 
         pipeline.run(writers, input_plates, {'reagents': args[4]},
