@@ -137,7 +137,7 @@ class PcrPoolWriter(GraphWriter):
                 part = self._add_vertex('%s_dig_%i' % (part_id, idx + 1),
                                         {'is_reagent': False})
 
-                self._add_edge(part, pool, {'Volume': 75.0})
+                self._add_edge(part, pool, {'Volume': 1000.0})
 
 
 def get_pcr_numbers(plasmid_parts, part_vol):
