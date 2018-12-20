@@ -8,6 +8,7 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-locals
+# pylint: disable=wrong-import-order
 from assembly.graph_writer import GraphWriter
 
 
@@ -42,8 +43,9 @@ class DominoPoolWriter(GraphWriter):
 class LcrWriter(GraphWriter):
     '''Class for generating LCR worklist graphs.'''
 
-    def __init__(self, plasmid_parts, output_name='lcr'):
+    def __init__(self, plasmid_parts, part_vol, output_name='lcr'):
         self.__plasmid_parts = plasmid_parts
+        self.__part_vol = part_vol
         GraphWriter.__init__(self, output_name)
 
     def _initialise(self):
@@ -55,7 +57,6 @@ class LcrWriter(GraphWriter):
         mm_vol = 7.0
         ampligase_vol = 1.5
         domino_pool_vol = 1.0
-        part_vol = 1.0
 
         for plasmid_id, parts_map in self.__plasmid_parts.items():
             plasmid_water_vol = 25
@@ -76,7 +77,7 @@ class LcrWriter(GraphWriter):
                 if part_ice.get_parameter('Type') != 'DOMINO':
                     part = self._add_vertex(ice_id + '_dig',
                                             {'is_reagent': False})
-                    self._add_edge(part, plasmid, {'Volume': part_vol})
-                    plasmid_water_vol -= part_vol
+                    self._add_edge(part, plasmid, {'Volume': self.__part_vol})
+                    plasmid_water_vol -= self.__part_vol
 
             self._add_edge(water, plasmid, {'Volume': plasmid_water_vol})

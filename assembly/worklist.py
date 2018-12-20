@@ -24,6 +24,7 @@ from assembly.opt import smart_sort_opt
 import pandas as pd
 from synbiochem.utils.graph_utils import get_roots
 
+
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
                   {('reagents'): 'MastermixTrough'}}
 

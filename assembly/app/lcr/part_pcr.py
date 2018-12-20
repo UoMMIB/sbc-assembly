@@ -9,7 +9,12 @@ All rights reserved.
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
 # pylint: disable=unused-argument
+# pylint: disable=wrong-import-order
+from collections import defaultdict
+
 from assembly.graph_writer import GraphWriter
+import numpy as np
+import pandas as pd
 
 
 _REAGENTS = {'water': 23.0, 'mm_pcr': 25.0}
@@ -114,3 +119,25 @@ class SpecificPartPcrWriter(PartPcrWriter):
                                 '_P' if self.__phospho else '_NP'
 
         return None, None
+
+
+def get_pcr_numbers(plasmid_parts, part_vol):
+    '''Get number of PCRs required per part.'''
+    total_part_vols = defaultdict(float)
+    part_len = {}
+
+    for _, parts_map in plasmid_parts.items():
+        for ice_id, part_ice in parts_map.items():
+            if part_ice.get_parameter('Type') != 'DOMINO':
+                total_part_vols[ice_id] += part_vol
+                part_len[ice_id] = len(part_ice.get_dna()['seq'])
+
+    df = pd.DataFrame({
+        'length': pd.Series(part_len),
+        'vol_required': pd.Series(total_part_vols)}).sort_index()
+
+    df['predicted_vol'] = df['length'] / 1000 * -4 + 50.0
+    df['pcrs_required'] = np.ceil(df['vol_required'] /
+                                  df['predicted_vol']).astype(int)
+    df.to_csv('len_vol_parts.csv')
+    return df['pcrs_required'].to_dict()
