@@ -37,6 +37,8 @@ def main(args):
                part_qc.PartQcWriter(part_ids, pcr_numbers,
                                     dte + 'FPT' + args[3]),
                lcr.DominoPoolWriter(plasmid_parts, dte + 'DOM' + args[3]),
+               part_pcr.PcrPoolWriter(pcr_numbers,
+                                      dte + 'POO' + args[3]),
                lcr.LcrWriter(plasmid_parts, part_vol, dte + 'LCR' + args[3])]
 
     input_plates = pipeline.get_input_plates(args[4])
