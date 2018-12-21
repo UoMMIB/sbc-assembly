@@ -18,7 +18,12 @@ def main(args):
     assert len(args[3]) < 4
 
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
-    plasmid_parts = ice_helper.get_plasmid_parts(args[7:])
+
+    if args[7] == 'True':
+        plasmid_parts = ice_helper.get_plasmid_parts(args[8:])
+    else:
+        plasmid_parts = ice_helper.get_plasmid_parts_designs(args[8:])
+
     parts_ice = {ice_id: part_ice
                  for _, parts_map in plasmid_parts.items()
                  for ice_id, part_ice in parts_map.items()

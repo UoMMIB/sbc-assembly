@@ -29,6 +29,18 @@ class ICEHelper(object):
         '''Close.'''
         self.__ice_factory.close()
 
+    def get_plasmid_parts_designs(self, design_numbers):
+        '''Get parts from design numbers.'''
+        parts = {}
+
+        for design_number in design_numbers:
+            plasmid_ids = [entry['entryInfo']['partId']
+                           for entry in
+                           self.__ice_client.search_design(design_number)]
+            parts.update(self.get_plasmid_parts(plasmid_ids))
+
+        return parts
+
     def get_plasmid_parts(self, plasmid_ids, type_filter=None):
         '''Get parts from part plasmid ids.'''
         parts = defaultdict(dict)
