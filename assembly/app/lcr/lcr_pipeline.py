@@ -35,7 +35,8 @@ def main(args):
     part_vol = 1.0
     pcr_numbers = part_pcr.get_pcr_numbers(plasmid_parts, part_vol)
 
-    writers = [part_pcr.SpecificPartPcrWriter(parts_ice, ice_helper,
+    writers = [part_pcr.SpecificPartPcrWriter(parts_ice, pcr_numbers,
+                                              ice_helper,
                                               dte + 'PCR' + args[3]),
                part_dig.PartDigestWriter(part_ids, pcr_numbers,
                                          dte + 'DIG' + args[3]),

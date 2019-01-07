@@ -8,6 +8,7 @@ All rights reserved.
 # pylint: disable=invalid-name
 # pylint: disable=no-self-use
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 # pylint: disable=unused-argument
 # pylint: disable=wrong-import-order
 from collections import defaultdict
@@ -80,8 +81,9 @@ class GenericPartPcrWriter(PartPcrWriter):
 class SpecificPartPcrWriter(PartPcrWriter):
     '''Class for generating Part PCR worklist graphs.'''
 
-    def __init__(self, parts_ice, ice_helper, output_name='part_pcr',
-                 phospho=True):
+    def __init__(self, parts_ice, pcr_numbers, ice_helper,
+                 output_name='part_pcr', phospho=True):
+        self.__pcr_numbers = pcr_numbers
         self.__phospho = phospho
         PartPcrWriter.__init__(self, parts_ice, ice_helper, output_name)
 
@@ -94,11 +96,14 @@ class SpecificPartPcrWriter(PartPcrWriter):
             part_plasmid = self._add_vertex(part_plasmid_ice.get_ice_id(),
                                             {'is_reagent': False})
             primer = self._add_vertex(primer_id, {'is_reagent': False})
-            part = self._add_vertex(part_id, {'is_reagent': False})
 
-            self._add_edge(part_plasmid, part, {'Volume': 1.0})
-            self._add_edge(primer, part, {'Volume': 1.0})
-            self._add_edge(mm, part, {'Volume': 48.0})
+            for idx in range(self.__pcr_numbers[part_id]):
+                part = self._add_vertex('%s_dig_%i' % (part_id, idx + 1),
+                                        {'is_reagent': False})
+
+                self._add_edge(part_plasmid, part, {'Volume': 1.0})
+                self._add_edge(primer, part, {'Volume': 1.0})
+                self._add_edge(mm, part, {'Volume': 48.0})
 
     def _get_plasmid_primer(self, part_ice):
         '''Get "parent" Plasmid from Part.'''
