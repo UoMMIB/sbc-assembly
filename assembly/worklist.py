@@ -63,6 +63,7 @@ class WorklistGenerator():
         worklists = []
 
         for dest_plate, worklist in self.__worklist.groupby('dest_plate'):
+            # TODO: investigate worklist naming:
             worklist.name = dest_plate
             worklists.append(worklist)
             required_plates[dest_plate] = self.__input_plates[dest_plate]

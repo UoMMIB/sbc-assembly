@@ -33,8 +33,9 @@ class PartQcWriter(GraphWriter):
             for idx in range(self.__pcr_numbers[part_id]):
                 part = self._add_vertex('%s_dig_%i' % (part_id, idx + 1),
                                         {'is_reagent': False})
-                product = self._add_vertex('%s_product_%i' % (part_id, idx + 1),
-                                           {'is_reagent': False})
+                product = \
+                    self._add_vertex('%s_product_%i' % (part_id, idx + 1),
+                                     {'is_reagent': False})
 
                 self._add_edge(part, product, {'Volume': 1.0})
                 self._add_edge(bffer, product, {'Volume': 23.0})
