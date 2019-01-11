@@ -12,10 +12,11 @@ import itertools
 import os
 import sys
 
+from synbiochem import utils
+
 from assembly import pipeline, worklist
 from assembly.graph_writer import GraphWriter
 from assembly.optimiser_old import Optimiser
-from synbiochem import utils
 
 
 _DEFAULT_OLIGO_VOLS = {

@@ -10,8 +10,9 @@ All rights reserved.
 import random
 import sys
 
-from assembly import opt
 from synbiochem.optimisation.sim_ann import SimulatedAnnealer
+
+from assembly import opt
 
 
 class WorklistSolution():
