@@ -33,7 +33,7 @@ def main(args):
     dte = strftime("%y%m%d", gmtime())
 
     part_vol = 1.0
-    pcr_numbers = part_pcr.get_pcr_numbers(plasmid_parts, part_vol)
+    pcr_numbers, pcr_df = part_pcr.get_pcr_numbers(plasmid_parts, part_vol)
 
     writers = [part_pcr.SpecificPartPcrWriter(parts_ice, pcr_numbers,
                                               ice_helper,
@@ -53,6 +53,8 @@ def main(args):
                  {'reagents': args[5]}, out_dir_name)
 
     worklist.format_worklist(out_dir_name)
+
+    pcr_df.to_csv(os.path.join(out_dir_name, 'pcr_details.csv'))
 
     ice_helper.close()
 

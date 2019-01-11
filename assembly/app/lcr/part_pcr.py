@@ -161,7 +161,9 @@ def get_pcr_numbers(plasmid_parts, part_vol):
         'vol_required': pd.Series(total_part_vols)}).sort_index()
 
     df['predicted_vol'] = df['length'] / 1000 * -4 + 50.0
-    df['pcrs_required'] = np.ceil(df['vol_required'] /
+
+    # Double volume required to deal with evaporation:
+    df['pcrs_required'] = np.ceil(df['vol_required'] * 2.0 /
                                   df['predicted_vol']).astype(int)
-    df.to_csv('len_vol_parts.csv')
-    return df['pcrs_required'].to_dict()
+
+    return df['pcrs_required'].to_dict(), df
