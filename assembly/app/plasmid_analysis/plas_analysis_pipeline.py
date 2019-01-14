@@ -19,6 +19,9 @@ import pandas as pd
 def _get_colony_plates(filename):
     '''Get colony plates.'''
     colony_df = pd.read_csv(filename)
+    colony_df.drop_duplicates(subset=['DWPBarcode', 'DWPWell'],
+                              keep='last', inplace=True)
+
     plates = {}
     all_colony_ids = []
 
