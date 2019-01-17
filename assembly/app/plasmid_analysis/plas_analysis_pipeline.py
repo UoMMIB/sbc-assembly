@@ -50,7 +50,8 @@ def _get_colony_plates(filenames, input_plates):
         plates[idx] = plate.from_table(plate_df, idx)
         all_colony_ids.append(plate_df.values.tolist())
 
-    return plates, all_colony_ids, colony_df
+    return plates, all_colony_ids, \
+        colony_df.rename(columns={'id': 'actual_ice_id'})
 
 
 def _get_barcode_plates(input_plates):
@@ -107,7 +108,7 @@ def main(args):
     # Generate fragment analyse labels:
     colony_df.to_csv(os.path.join(out_dir_name, 'barcodes.csv'), index=False)
 
-    pd.DataFrame(colony_df['id'].unique()).to_csv(os.path.join(
+    pd.DataFrame(colony_df['actual_ice_id'].unique()).to_csv(os.path.join(
         out_dir_name, 'ice_ids.txt'), index=False, header=False)
 
     _get_frag_anal_labels(colony_plates, out_dir_name)
