@@ -14,7 +14,7 @@ import sys
 from time import gmtime, strftime
 
 from assembly import pipeline, plate, worklist
-from assembly.app.plasmid_analysis import colony_pcr
+from assembly.app.plasmid_analysis import colony_pcr, colony_qc
 import pandas as pd
 
 
@@ -31,10 +31,11 @@ def _get_colony_plates(filenames, input_plates):
 
     colony_df.drop_duplicates(subset=['DWPBarcode', 'DWPWell'],
                               keep='last', inplace=True)
-    colony_df.rename(columns={'DWPWell': 'well'}, inplace=True)
+    colony_df.rename(columns={'DWPWell': 'well',
+                              'ColonyID': 'id'}, inplace=True)
 
-    colony_df['id'] = \
-        colony_df['ColonyID'].apply(lambda x: x.split('_')[0])
+    colony_df['actual_ice_id'] = \
+        colony_df['id'].apply(lambda x: x.split('_')[0])
 
     colony_df['plate_idx'] = \
         colony_df['DWPBarcode'].apply(lambda x: int(x.split('_')[-1]))
@@ -50,8 +51,7 @@ def _get_colony_plates(filenames, input_plates):
         plates[idx] = plate.from_table(plate_df, idx)
         all_colony_ids.append(plate_df.values.tolist())
 
-    return plates, all_colony_ids, \
-        colony_df.rename(columns={'id': 'actual_ice_id'})
+    return plates, all_colony_ids, colony_df
 
 
 def _get_barcode_plates(input_plates):
@@ -101,7 +101,11 @@ def main(args):
     input_plates.update(colony_plates)
 
     #  Write PCR worklists:
-    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'COL' + args[1])]
+    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'COL' + args[1]),
+               colony_qc.ColonyQcWriter([colony_id[1]
+                                         for plt_col_id in colony_ids
+                                         for colony_id in plt_col_id],
+                                        output_name=dte + 'FPT' + args[1])]
     pipeline.run(writers, input_plates, {'reagents': args[2]}, out_dir_name)
     worklist.format_worklist(out_dir_name)
 
