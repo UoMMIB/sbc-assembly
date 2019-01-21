@@ -103,4 +103,5 @@ ENV/
 /.project
 /.pydevproject
 /out/
+/data/colony/
 /**/.DS_Store

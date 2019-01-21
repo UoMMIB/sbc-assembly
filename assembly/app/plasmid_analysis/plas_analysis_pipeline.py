@@ -18,14 +18,18 @@ from assembly.app.plasmid_analysis import colony_pcr, colony_qc
 import pandas as pd
 
 
-def _get_colony_plates(filenames, input_plates):
+def _get_colony_plates(dir_name, input_plates):
     '''Get colony plates.'''
     barcode_plates = _get_barcode_plates(input_plates)
 
     col_dfs = []
 
-    for filename in filenames:
-        col_dfs.append(pd.read_csv(filename))
+    for dirpath, _, filenames in os.walk(os.path.abspath(dir_name)):
+        for filename in filenames:
+            filename = os.path.join(dirpath, filename)
+
+            if filename.endswith('.csv'):
+                col_dfs.append(pd.read_csv(filename))
 
     colony_df = pd.concat(col_dfs, axis=0, ignore_index=True)
 
@@ -95,7 +99,7 @@ def main(args):
     input_plates = pipeline.get_input_plates(args[0])
 
     # Parse colony pick output:
-    colony_plates, colony_ids, colony_df = _get_colony_plates(args[4:],
+    colony_plates, colony_ids, colony_df = _get_colony_plates(args[4],
                                                               input_plates)
 
     input_plates.update(colony_plates)
