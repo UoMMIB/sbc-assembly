@@ -18,10 +18,8 @@ from assembly.app.plasmid_analysis import colony_pcr, colony_qc
 import pandas as pd
 
 
-def _get_colony_plates(dir_name, input_plates):
+def _get_colony_dfs(dir_name):
     '''Get colony plates.'''
-    barcode_plates = _get_barcode_plates(input_plates)
-
     col_dfs = []
 
     for dirpath, _, filenames in os.walk(os.path.abspath(dir_name)):
@@ -31,7 +29,12 @@ def _get_colony_plates(dir_name, input_plates):
             if filename.endswith('.csv'):
                 col_dfs.append(pd.read_csv(filename))
 
-    colony_df = pd.concat(col_dfs, axis=0, ignore_index=True)
+    return col_dfs
+
+
+def _get_colony_plates(colony_df, input_plates):
+    '''Get colony plates.'''
+    barcode_plates = _get_barcode_plates(input_plates)
 
     colony_df.drop_duplicates(subset=['DWPBarcode', 'DWPWell'],
                               keep='last', inplace=True)
@@ -47,15 +50,13 @@ def _get_colony_plates(dir_name, input_plates):
     _get_barcodes_plates = partial(_get_barcodes, barcode_plates)
     colony_df = colony_df.apply(_get_barcodes_plates, axis=1)
 
-    plates = {}
-    all_colony_ids = []
+    plate_idx = colony_df['plate_idx'].iloc[0]
+    plate_name = colony_df['DWPBarcode'].iloc[0]
+    plate_df = colony_df[['well', 'id']]
+    plt = plate.from_table(plate_df, plate_name)
+    colony_ids = plate_df.values.tolist()
 
-    for idx, plate_df in colony_df.groupby('DWPBarcode'):
-        plate_df = plate_df[['well', 'id']]
-        plates[idx] = plate.from_table(plate_df, idx)
-        all_colony_ids.append(plate_df.values.tolist())
-
-    return plates, all_colony_ids, colony_df
+    return plt, plate_idx, plate_name, colony_ids, colony_df
 
 
 def _get_barcode_plates(input_plates):
@@ -79,47 +80,57 @@ def _get_barcodes(barcode_plates, row):
     return row
 
 
-def _get_frag_anal_labels(input_plates, out_dir_name):
+def _get_frag_anal_labels(plt, name, out_dir_name):
     '''Get fragment analysis plates.'''
-    for name, plt in input_plates.items():
-        components = plt.get_all()
-        labels = [[plate.get_idx(*plate.get_indices(pos), col_ord=True) + 1,
-                   pos, vals['id']]
-                  for pos, vals in components.items()]
+    components = plt.get_all()
+    labels = [[plate.get_idx(*plate.get_indices(pos), col_ord=True) + 1,
+               pos, vals['id']]
+              for pos, vals in components.items()]
 
-        df = pd.DataFrame(labels)
-        df.to_csv(os.path.join(out_dir_name, name + '_frag_anal.csv'),
-                  index=False, header=False)
+    df = pd.DataFrame(labels)
+    df.to_csv(os.path.join(out_dir_name, name + '_frag_anal.csv'),
+              index=False, header=False)
 
 
 def main(args):
     '''main method.'''
     dte = strftime("%y%m%d", gmtime())
-    out_dir_name = os.path.join(args[3], dte + args[1])
     input_plates = pipeline.get_input_plates(args[0])
+    colony_dfs = []
 
-    # Parse colony pick output:
-    colony_plates, colony_ids, colony_df = _get_colony_plates(args[4],
-                                                              input_plates)
+    out_dir_name = os.path.join(args[3], dte + args[1])
 
-    input_plates.update(colony_plates)
+    for colony_df in _get_colony_dfs(args[4]):
+        # Parse colony pick output:
+        colony_plate, plate_idx, plate_name, colony_ids, colony_df = \
+            _get_colony_plates(colony_df, input_plates)
 
-    #  Write PCR worklists:
-    writers = [colony_pcr.ColonyPcrWriter(colony_ids, dte + 'COL' + args[1]),
-               colony_qc.ColonyQcWriter([colony_id[1]
-                                         for plt_col_id in colony_ids
-                                         for colony_id in plt_col_id],
-                                        output_name=dte + 'FPT' + args[1])]
-    pipeline.run(writers, input_plates, {'reagents': args[2]}, out_dir_name)
-    worklist.format_worklist(out_dir_name)
+        input_plates[plate_name] = colony_plate
 
-    # Generate fragment analyse labels:
-    colony_df.to_csv(os.path.join(out_dir_name, 'barcodes.csv'), index=False)
+        plate_dir_name = os.path.join(out_dir_name, 'plate_' + str(plate_idx))
 
-    pd.DataFrame(colony_df['actual_ice_id'].unique()).to_csv(os.path.join(
+        #  Write PCR worklists:
+        writers = [colony_pcr.ColonyPcrWriter(colony_ids, plate_idx,
+                                              dte + 'COL' + args[1]),
+                   colony_qc.ColonyQcWriter([colony_id[1]
+                                             for colony_id in colony_ids],
+                                            output_name=dte + 'FPT' + args[1])]
+        pipeline.run(writers, input_plates, {'reagents': args[2]},
+                     plate_dir_name)
+        worklist.format_worklist(plate_dir_name)
+
+        # Generate fragment analyse labels:
+        colony_dfs.append(colony_df)
+        _get_frag_anal_labels(colony_plate, plate_name, plate_dir_name)
+
+    # Write NGS files:
+    barcodes_df = pd.concat(colony_dfs, axis=0, ignore_index=True)
+
+    barcodes_df.to_csv(os.path.join(
+        plate_dir_name, 'barcodes.csv'), index=False)
+
+    pd.DataFrame(barcodes_df['actual_ice_id'].unique()).to_csv(os.path.join(
         out_dir_name, 'ice_ids.txt'), index=False, header=False)
-
-    _get_frag_anal_labels(colony_plates, out_dir_name)
 
 
 if __name__ == '__main__':
