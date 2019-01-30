@@ -94,13 +94,18 @@ def _get_frag_anal_labels(plt, name, out_dir_name):
 
 def main(args):
     '''main method.'''
-    dte = strftime("%y%m%d", gmtime())
-    input_plates = pipeline.get_input_plates(args[0])
     colony_dfs = []
-
+    dte = strftime("%y%m%d", gmtime())
     out_dir_name = os.path.join(args[3], dte + args[1])
 
     for colony_df in _get_colony_dfs(args[4]):
+        # Ignore colony in H12 (if it exists).
+        # This position is reserved for the fragment analyser ladder.
+        colony_df.drop(colony_df[colony_df['DWPWell'] == 'H12'].index,
+                       inplace=True)
+
+        input_plates = pipeline.get_input_plates(args[0])
+
         # Parse colony pick output:
         colony_plate, plate_idx, plate_name, colony_ids, colony_df = \
             _get_colony_plates(colony_df, input_plates)
