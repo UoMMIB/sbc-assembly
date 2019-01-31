@@ -13,6 +13,7 @@ All rights reserved.
 # pylint: disable=ungrouped-imports
 # pylint: disable=unsubscriptable-object
 # pylint: disable=wrong-import-order
+from collections import defaultdict
 from operator import itemgetter
 import os
 import re
@@ -303,6 +304,7 @@ def to_csv(wrklst, out_dir_name='.'):
 def format_worklist(dir_name):
     '''Rename columns to SYNBIOCHEM-specific headers.'''
     dfs = []
+    dir_dfs = defaultdict(list)
 
     for(dirpath, _, filenames) in os.walk(dir_name):
         for filename in filenames:
@@ -314,6 +316,11 @@ def format_worklist(dir_name):
                 df = _reorder_cols(df)
                 df.to_csv(filepath, encoding='utf-8', index=False)
                 dfs.append(df)
+                dir_dfs[dirpath].append(df)
+
+    for dirpath, dfs in dir_dfs.items():
+        filepath = os.path.join(dirpath, 'worklist.csv')
+        pd.concat(dfs).to_csv(filepath)
 
     return dfs
 
