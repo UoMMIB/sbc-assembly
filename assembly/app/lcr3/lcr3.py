@@ -17,7 +17,7 @@ def main(args):
         designs = [tuple(line.strip().split(',')) for line in fle]
 
         for design in designs:
-            design_parts[design].append(design[0:1])
+            design_parts[design].append(((design[0] + 'bb',)))
 
             for idx, _id in enumerate(design):
                 if _id not in ['H', 'L', '']:
@@ -36,6 +36,16 @@ def main(args):
     print()
 
     print(set([part for parts in design_parts.values() for part in parts]))
+    print()
+
+    pairs = set()
+
+    for parts in design_parts.values():
+        for idx, part in enumerate(parts[:-1]):
+            pairs.add((part[-1], parts[idx + 1][0]))
+
+    for pair in pairs:
+        print(pair)
 
 
 if __name__ == '__main__':
