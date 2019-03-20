@@ -15,7 +15,7 @@ class PlateManager():
     def __init__(self):
         self.__id_plate_wells = {}
 
-    def add_plate_df(self, plate_df, typ='96-PCR-flat', name=None):
+    def add_plate_df(self, typ, plate_df, name=None):
         '''Add single plate.'''
         return self.add_container(typ, plate_df['id'], plate_df['well'], name)
 
