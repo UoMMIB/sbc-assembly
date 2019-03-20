@@ -39,6 +39,21 @@ def add_containers(wells_required, typ, contents=None):
     return containers
 
 
+def get_plate_well(plates, comp_ids):
+    '''Get plate and well for given id.'''
+    plate_wells = []
+
+    for comp_id in comp_ids:
+        for plate in plates:
+            for well_id, well in plate.children_by_name.items():
+                if well.properties.get('id', None) == comp_id:
+                    plate_wells.append((plate, well_id))
+
+    assert len(plate_wells) == len(comp_ids)
+
+    return plate_wells
+
+
 def _get_empty_slots():
     '''Get empty slots.'''
     return [slot for slot, child in robot.deck.children_by_name.items()

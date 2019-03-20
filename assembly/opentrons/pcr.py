@@ -21,8 +21,9 @@ class PcrWriter():
         self.__fragments = defaultdict(list)
 
         for product_id, product in products.items():
-            for fragment in product:
-                self.__fragments[fragment].append(product_id)
+            for frag_idx, fragment in enumerate(product):
+                self.__fragments[fragment].append(
+                    (product_id, frag_idx in [0, len(fragment) - 1]))
 
         # Add trash:
         self.__trash = labware.load('trash-box', '1')
@@ -34,12 +35,11 @@ class PcrWriter():
                                  typ='opentrons-tiprack-300ul')
 
         # Add plates:
-        self.__product_plates = utils.add_containers(len(self.__products),
-                                                     '96-PCR-flat',
-                                                     self.__products.keys())
-
-        self.__src_plates = [utils.add_plate(src_plate_df, '96-PCR-flat')
-                             for src_plate_df in src_plate_dfs]
+        self.__plates = utils.add_containers(len(self.__products),
+                                             '96-PCR-flat',
+                                             self.__products.keys()) + \
+            [utils.add_plate(src_plate_df, '96-PCR-flat')
+             for src_plate_df in src_plate_dfs]
 
         # Add pipettes:
         self.__single_pipette = \
@@ -50,11 +50,24 @@ class PcrWriter():
 
     def write(self):
         '''Write commands.'''
+        self._add_fragments()
+
         for _id, product in self.__products.items():
             print(_id, product)
 
-    def _add_fragments(self):
+    def _add_fragments(self, primer_vol=5, internal_vol=1):
         '''Add fragments.'''
-        for fragment in self.__fragments:
-            self.__single_pipette.pick_up_tip()
-            self.__single_pipette.drop_tip()
+        for fragment, prods in self.__fragments.items():
+            src_plate, src_well = \
+                utils.get_plate_well(self.__plates, [fragment])[0]
+
+            prod_plate_wells = defaultdict(list)
+
+            for plate_well in utils.get_plate_well(self.__plates,
+                                                   list(zip(*prods))[0]):
+                prod_plate_wells[plate_well[0]].append(plate_well[1])
+
+            for prod_plate, prod_wells in prod_plate_wells.items():
+                self.__single_pipette.distribute(internal_vol,
+                                                 src_plate.wells(src_well),
+                                                 prod_plate.wells(prod_wells))
