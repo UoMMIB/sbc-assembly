@@ -15,12 +15,12 @@ class PcrWriter():
     def __init__(self, src_plate_dfs, products):
         self.__products = products
 
-        self.__oligos = {fragment
-                         for product in products
-                         for fragment in product}
+        self.__fragments = {fragment
+                            for product in products.values()
+                            for fragment in product}
 
         self.__tip_racks = \
-            utils.add_container((len(self.__oligos) - 1 // 8) + 1  # oligos
+            utils.add_container((len(self.__fragments) - 1 // 8) + 1  # oligos
                                 + 16,  # water and mastermix
                                 typ='opentrons-tiprack-300ul')
 
@@ -32,5 +32,5 @@ class PcrWriter():
 
     def write(self):
         '''Write commands.'''
-        for product in self.__products:
-            print(product)
+        for _id, product in self.__products.items():
+            print(_id, product)
