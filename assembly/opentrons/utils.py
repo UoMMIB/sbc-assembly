@@ -5,53 +5,55 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-few-public-methods
 from opentrons import labware, robot
 
 
-def add_plate(plate_df, typ):
-    '''Add plate to deck.'''
-    empty_slots = _get_empty_slots()
-    plate = labware.load(typ, empty_slots[-1], plate_df.name)
+class PlateManager():
+    '''Class to manage plates.'''
 
-    for _, row in plate_df.iterrows():
-        plate.children_by_name[row['well']].properties['id'] = row['id']
+    def __init__(self):
+        self.__id_plate_wells = {}
 
-    return plate
+    def add_plate_df(self, plate_df, typ='96-PCR-flat', name=None):
+        '''Add single plate.'''
+        return self.add_container(typ, plate_df['id'], plate_df['well'], name)
 
-
-def add_containers(wells_required, typ, contents=None):
-    '''Add container to deck.'''
-    containers = []
-    wells = 0
-
-    while wells < wells_required:
+    def add_container(self, typ, ids, wells=None, name=None):
+        '''Add container to deck.'''
         empty_slots = _get_empty_slots()
-        container = labware.load(typ, slot=empty_slots[-1])
-        plate_size = len(container.rows) * len(container.cols)
-        wells += plate_size
+        container = labware.load(typ, empty_slots[-1], name)
 
-        if contents is not None:
-            for well, _id in zip(container.children_by_name, contents):
-                container.children_by_name[well].properties['id'] = _id
+        if wells is None:
+            wells = list(container.children_by_name.keys())[:len(ids)]
 
-        containers.append(container)
+        for well, _id in zip(wells, ids):
+            # container.children_by_name[well].properties['id'] = _id
+            self.__id_plate_wells[_id] = (container, well)
 
-    return containers
+        return container
 
+    def add_containers(self, typ, ids, name=None):
+        '''Add container to deck.'''
+        if isinstance(ids, int):
+            ids = [None] * ids
 
-def get_plate_well(plates, comp_ids):
-    '''Get plate and well for given id.'''
-    plate_wells = []
+        containers = []
+        wells = 0
 
-    for comp_id in comp_ids:
-        for plate in plates:
-            for well_id, well in plate.children_by_name.items():
-                if well.properties.get('id', None) == comp_id:
-                    plate_wells.append((plate, well_id))
+        while wells < len(ids):
+            container = self.add_container(typ, ids, name=name)
+            plate_size = len(container.rows) * len(container.cols)
+            wells += plate_size
+            containers.append(container)
 
-    assert len(plate_wells) == len(comp_ids)
+        return containers
 
-    return plate_wells
+    def get_plate_well(self, comp_ids):
+        '''Get plate, well for component id.'''
+        plate_wells = [self.__id_plate_wells[comp_id] for comp_id in comp_ids]
+        assert len(plate_wells) == len(comp_ids)
+        return plate_wells
 
 
 def _get_empty_slots():

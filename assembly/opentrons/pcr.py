@@ -17,6 +17,7 @@ class PcrWriter():
     '''Class representing an PCR writer.'''
 
     def __init__(self, src_plate_dfs, products):
+        self.__plate_manager = utils.PlateManager()
         self.__products = products
         self.__fragments = defaultdict(list)
 
@@ -30,15 +31,15 @@ class PcrWriter():
 
         # Add tipracks:
         tip_racks = \
-            utils.add_containers((len(self.__fragments) - 1 // 8) + 1  # oligos
-                                 + 16,  # water and mastermix
-                                 typ='opentrons-tiprack-300ul')
+            self.__plate_manager.add_containers('opentrons-tiprack-300ul',
+                                                (len(self.__fragments) -
+                                                 1 // 8) + 1  # oligos
+                                                + 16)  # water and mastermix
 
         # Add plates:
-        self.__plates = utils.add_containers(len(self.__products),
-                                             '96-PCR-flat',
-                                             self.__products.keys()) + \
-            [utils.add_plate(src_plate_df, '96-PCR-flat')
+        self.__plate_manager.add_containers('96-PCR-flat',
+                                            self.__products.keys()) + \
+            [self.__plate_manager.add_plate_df(src_plate_df, '96-PCR-flat')
              for src_plate_df in src_plate_dfs]
 
         # Add pipettes:
@@ -59,12 +60,12 @@ class PcrWriter():
         '''Add fragments.'''
         for fragment, prods in self.__fragments.items():
             src_plate, src_well = \
-                utils.get_plate_well(self.__plates, [fragment])[0]
+                self.__plate_manager.get_plate_well([fragment])[0]
 
             prod_plate_wells = defaultdict(list)
 
-            for plate_well in utils.get_plate_well(self.__plates,
-                                                   list(zip(*prods))[0]):
+            for plate_well in self.__plate_manager.get_plate_well(
+                    list(zip(*prods))[0]):
                 prod_plate_wells[plate_well[0]].append(plate_well[1])
 
             for prod_plate, prod_wells in prod_plate_wells.items():
