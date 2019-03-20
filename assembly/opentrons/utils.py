@@ -19,7 +19,7 @@ def add_plate(plate_df, typ):
     return plate
 
 
-def add_container(wells_required, typ, contents=None):
+def add_containers(wells_required, typ, contents=None):
     '''Add container to deck.'''
     containers = []
     wells = 0
@@ -31,9 +31,8 @@ def add_container(wells_required, typ, contents=None):
         wells += plate_size
 
         if contents is not None:
-            for _, row in contents.iterrows():
-                container.children_by_name[row['well']].properties['id'] = \
-                    row['id']
+            for well, _id in zip(container.children_by_name, contents):
+                container.children_by_name[well].properties['id'] = _id
 
         containers.append(container)
 
