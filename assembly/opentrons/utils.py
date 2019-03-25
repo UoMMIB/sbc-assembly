@@ -6,6 +6,8 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+import re
+
 from opentrons import labware, robot
 
 
@@ -51,9 +53,44 @@ class PlateManager():
 
     def get_plate_well(self, comp_ids):
         '''Get plate, well for component id.'''
-        plate_wells = [self.__id_plate_wells[comp_id] for comp_id in comp_ids]
-        assert len(plate_wells) == len(comp_ids)
-        return plate_wells
+        return [self.__id_plate_wells[comp_id] for comp_id in comp_ids]
+
+
+def compare_items(item1, item2):
+    '''Compare items.'''
+    regex = r'(\d+)(\D+)?(\d+)?'
+
+    match1 = re.match(regex, item1)
+    match2 = re.match(regex, item2)
+
+    return _compare_items(match1, match2)
+
+
+def _compare_items(match1, match2, index=1):
+    '''Compare items.'''
+    try:
+        val1 = int(match1[index])
+        val2 = int(match2[index])
+    except (TypeError, ValueError):
+        val1 = match1[index]
+        val2 = match2[index]
+
+    if not val1 and not val2:
+        return 0
+
+    if not val1:
+        return -1
+
+    if not val2:
+        return 1
+
+    if val1 > val2:
+        return 1
+
+    if val1 < val2:
+        return -1
+
+    return _compare_items(match1, match2, index + 1)
 
 
 def _get_empty_slots():
