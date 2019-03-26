@@ -25,29 +25,12 @@ _DEFAULT_VOL = {'water': 20.0,
 class PcrWriter():
     '''Class representing an PCR writer.'''
 
-    def __init__(self, src_plate_dfs, products, vol=None):
+    def __init__(self, src_plate_dfs, recipes, vol=None):
         if vol is None:
             vol = _DEFAULT_VOL
 
         self.__plt_mgr = utils.PlateManager()
-        self.__products = products
-
-        fragments = sorted(list({fragment
-                                 for product in products.values()
-                                 for fragment in product}),
-                           key=cmp_to_key(utils.compare_items))
-
-        self.__fragment_df = pd.DataFrame(columns=products.keys(),
-                                          index=['water'] + fragments + ['mm'])
-
-        for product_id, frags in self.__products.items():
-            self.__fragment_df[product_id].loc['water'] = vol['water']
-            self.__fragment_df[product_id].loc[[
-                frags[0], frags[-1]]] = vol['primer']
-            self.__fragment_df[product_id].loc[frags[1:-1]] = vol['internal']
-            self.__fragment_df[product_id].loc['mm'] = vol['mm']
-
-        self.__fragment_df = self.__fragment_df.T
+        self.__recipe_df = _get_recipe_df(recipes, vol)
 
         # Add trash:
         self.__trash = labware.load('trash-box', '1')
@@ -55,7 +38,7 @@ class PcrWriter():
         # Add tipracks:
         tip_racks = \
             self.__plt_mgr.add_containers('opentrons-tiprack-300ul',
-                                          (len(self.__fragment_df.columns) -
+                                          (len(self.__recipe_df.columns) -
                                            3 // 8) + 1  # oligos
                                           + 16)  # water and mastermix
 
@@ -68,8 +51,7 @@ class PcrWriter():
                                      name='reagents')
 
         # Add plates:
-        self.__plt_mgr.add_containers('96-PCR-flat',
-                                      self.__products.keys())
+        self.__plt_mgr.add_containers('96-PCR-flat', self.__recipe_df.index)
 
         for src_plate_df in src_plate_dfs:
             self.__plt_mgr.add_plate_df('96-PCR-flat', src_plate_df)
@@ -83,34 +65,64 @@ class PcrWriter():
 
     def write(self):
         '''Write commands.'''
-        for comp_id in self.__fragment_df:
-            src_plates, src_wells = \
-                zip(*self.__plt_mgr.get_plate_well([comp_id]))
+        for comp_id in self.__recipe_df:
+            src_plate_wells = self.__plt_mgr.get_plate_wells([comp_id])[0]
+            src_plate = src_plate_wells[0][0]
 
-            products = self.__fragment_df[comp_id]
+            products = self.__recipe_df[comp_id]
+            products = products[~products.isnull()]
+            dest_plate_well_vols = self.__get_plate_well_vol(products)
 
-            if products.isnull().any():
-                # Oligo:
-                products = products[~products.isnull()]
-                plate_well_vols = self.__get_plate_well_vol(products)
+            for dest_plate, dest_well_vols in dest_plate_well_vols.items():
+                dest_well, vols = list(zip(*dest_well_vols))
 
-                for plate, well_vols in plate_well_vols.items():
-                    well_vols = list(zip(*well_vols))
+                if len(src_plate_wells) == 1:
+                    # Single pipette:
+                    self.__single_pipette.distribute(
+                        list(vols),
+                        src_plate.wells(src_plate_wells[0][1]),
+                        dest_plate.wells(list(dest_well)))
+                else:
+                    # Multi-pipette:
+                    self.__multi_pipette.pick_up_tip()
 
-                    self.__single_pipette.transfer(
-                        well_vols[1],
-                        src_plates[0].wells(src_wells[0]),
-                        plate.wells(list(well_vols[0])))
-            else:
-                # Reagent:
-                pass
+                    for idx in range(0, len(dest_well), 8):
+                        self.__multi_pipette.distribute(
+                            list(vols[idx:idx + 8]),
+                            src_plate.wells(
+                                [src_plate_well[1]
+                                 for src_plate_well in src_plate_wells]),
+                            dest_plate.wells(list(dest_well[idx:idx + 8])),
+                            new_tip='never')
+
+                    self.__multi_pipette.drop_tip()
 
     def __get_plate_well_vol(self, ids_vols):
         '''Get well / plate / volumes.'''
         plate_well_vol = defaultdict(list)
-        plate_wells = self.__plt_mgr.get_plate_well(ids_vols.index)
+        all_plate_wells = self.__plt_mgr.get_plate_wells(ids_vols.index)
 
-        for plate_well, vol in zip(plate_wells, ids_vols):
-            plate_well_vol[plate_well[0]].append((plate_well[1], vol))
+        for plate_wells, vol in zip(all_plate_wells, ids_vols):
+            for plate_well in plate_wells:
+                plate_well_vol[plate_well[0]].append((plate_well[1], vol))
 
         return plate_well_vol
+
+
+def _get_recipe_df(recipes, vol):
+    '''Get recipe DataFrame.'''
+    ingredients = sorted(list({ingredient
+                               for recipe in recipes.values()
+                               for ingredient in recipe}),
+                         key=cmp_to_key(utils.compare_items))
+
+    recipe_df = pd.DataFrame(columns=recipes.keys(),
+                             index=['water'] + ingredients + ['mm'])
+
+    for product_id, frags in recipes.items():
+        recipe_df[product_id].loc['water'] = vol['water']
+        recipe_df[product_id].loc[[frags[0], frags[-1]]] = vol['primer']
+        recipe_df[product_id].loc[frags[1:-1]] = vol['internal']
+        recipe_df[product_id].loc['mm'] = vol['mm']
+
+    return recipe_df.T

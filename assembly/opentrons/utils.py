@@ -6,6 +6,7 @@ All rights reserved.
 @author: neilswainston
 '''
 # pylint: disable=too-few-public-methods
+from collections import defaultdict
 import re
 
 from opentrons import labware, robot
@@ -15,7 +16,7 @@ class PlateManager():
     '''Class to manage plates.'''
 
     def __init__(self):
-        self.__id_plate_wells = {}
+        self.__id_plate_wells = defaultdict(list)
 
     def add_plate_df(self, typ, plate_df, name=None):
         '''Add single plate.'''
@@ -31,7 +32,7 @@ class PlateManager():
 
         for well, _id in zip(wells, ids):
             # container.children_by_name[well].properties['id'] = _id
-            self.__id_plate_wells[_id] = (container, well)
+            self.__id_plate_wells[_id].append((container, well))
 
         return container
 
@@ -51,8 +52,8 @@ class PlateManager():
 
         return containers
 
-    def get_plate_well(self, comp_ids):
-        '''Get plate, well for component id.'''
+    def get_plate_wells(self, comp_ids):
+        '''Get plate / wells for component id.'''
         return [self.__id_plate_wells[comp_id] for comp_id in comp_ids]
 
 
