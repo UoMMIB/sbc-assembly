@@ -5,10 +5,14 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-many-instance-attributes
 from collections import defaultdict
 from operator import itemgetter
 import sys
 from synbiochem.utils import ice_utils, seq_utils
+
+_H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
+_L_PRIMER = 'TGCTGGATACGACGCTCTACTC'
 
 
 class Lcr3Designer():
@@ -54,7 +58,7 @@ class Lcr3Designer():
             designs = [tuple(line.strip().split(',')) for line in fle]
 
             for design in designs:
-                design_parts[design].append((('', design[0] + 'bb', '')))
+                design_parts[design].append(((design[0] + 'bb', '', '')))
 
                 for idx, _id in enumerate(design):
                     if _id not in ['H', 'L', '']:
@@ -92,24 +96,37 @@ class Lcr3Designer():
 
     def __get_primers_for_part(self, part):
         '''Get primers.'''
-        condensed_part = _condense_part(part)
+        return (self.__get_primer(part, False),
+                self.__get_primer(part, True))
 
-        return (self.__get_primer(condensed_part[0], False),
-                self.__get_primer(condensed_part[-1], True))
-
-    def __get_primer(self, component_id, forward):
+    def __get_primer(self, part, forward):
         '''Get primer from ICE id.'''
         primer = None
 
-        if component_id not in self.__primers[forward]:
-            if 'SBC' in component_id:
-                seq = self.__get_seq(component_id)
-                primer = seq_utils.get_seq_by_melt_temp(
-                    seq, self.__primer_melt_temp, forward)[0]
+        if part not in self.__primers[forward]:
+            if forward:
+                if part[0] == 'H':
+                    return _H_PRIMER
+                if part[0] == 'Lbb':
+                    return None
+                if part[0] == 'Hbb':
+                    return None
+            else:
+                if part[2] == 'L':
+                    return _L_PRIMER
+                if part[0] == 'Lbb':
+                    return None
+                if part[0] == 'Hbb':
+                    return None
 
-            self.__primers[forward][component_id] = primer
+            # else:
+            seq = self.__get_seq(part[1])
+            primer = seq_utils.get_seq_by_melt_temp(
+                seq, self.__primer_melt_temp, forward)[0]
 
-        return self.__primers[forward][component_id]
+            self.__primers[forward][part] = primer
+
+        return self.__primers[forward][part]
 
     def __get_seq(self, ice_id):
         '''Get seq.'''
