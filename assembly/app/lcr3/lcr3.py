@@ -8,24 +8,39 @@ All rights reserved.
 from collections import defaultdict
 from operator import itemgetter
 import sys
+from synbiochem.utils import ice_utils, seq_utils
 
 
 class Lcr3Designer():
     '''Class to design LCR v3 assemblies.'''
 
-    def __init__(self, filename):
+    def __init__(self, filename, ice_params, primer_melt_temp=60.0):
         self.__filename = filename
+        self.__primer_melt_temp = primer_melt_temp
+
+        self.__ice_client_fact = ice_utils.ICEClientFactory()
+        self.__ice_client = \
+            self.__ice_client_fact.get_ice_client(ice_params['url'],
+                                                  ice_params['username'],
+                                                  ice_params['password'])
+
+        self.__primers = defaultdict(dict)
+        self.__seqs = {}
         self.__design_parts = self.__get_design_parts()
-        self.__parts = self.__get_parts()
+        self.__part_primers = self.__get_part_primers()
         self.__pairs = self.__get_pairs()
+
+    def close(self):
+        '''Close.'''
+        self.__ice_client_fact.close()
 
     def get_design_parts(self):
         '''Get design parts.'''
         return self.__design_parts
 
-    def get_parts(self):
-        '''Get parts.'''
-        return self.__parts
+    def get_part_primers(self):
+        '''Get part primers.'''
+        return self.__part_primers
 
     def get_pairs(self):
         '''Get psirs.'''
@@ -55,39 +70,80 @@ class Lcr3Designer():
 
         return design_parts
 
-    def __get_parts(self):
-        '''Get parts.'''
-        return sorted(list({part for parts in self.__design_parts.values()
-                            for part in parts}), key=itemgetter(1, 0, 2))
+    def __get_part_primers(self):
+        '''Get part primers.'''
+        parts = sorted(list({part for parts in self.__design_parts.values()
+                             for part in parts}), key=itemgetter(1, 0, 2))
+
+        return {part: self.__get_primers_for_part(part) for part in parts}
 
     def __get_pairs(self):
         '''Get pairs.'''
         pairs = set()
 
         for design_part in self.__design_parts.values():
-            valid_parts = [[part for part in parts if len(part)]
-                           for parts in design_part]
+            condensed_parts = [_condense_part(part)
+                               for part in design_part]
 
-            for idx, part in enumerate(valid_parts[:-1]):
-                pairs.add((part[-1], self.__parts[idx + 1][0]))
+            for idx, condensed_part in enumerate(condensed_parts[:-1]):
+                pairs.add((condensed_part[-1], condensed_parts[idx + 1][0]))
 
         return pairs
+
+    def __get_primers_for_part(self, part):
+        '''Get primers.'''
+        condensed_part = _condense_part(part)
+
+        return (self.__get_primer(condensed_part[0], False),
+                self.__get_primer(condensed_part[-1], True))
+
+    def __get_primer(self, component_id, forward):
+        '''Get primer from ICE id.'''
+        primer = None
+
+        if component_id not in self.__primers[forward]:
+            if 'SBC' in component_id:
+                seq = self.__get_seq(component_id)
+                primer = seq_utils.get_seq_by_melt_temp(
+                    seq, self.__primer_melt_temp, forward)[0]
+
+            self.__primers[forward][component_id] = primer
+
+        return self.__primers[forward][component_id]
+
+    def __get_seq(self, ice_id):
+        '''Get seq.'''
+        if ice_id not in self.__seqs:
+            self.__seqs[ice_id] = \
+                self.__ice_client.get_ice_entry(ice_id).get_seq()
+
+        return self.__seqs[ice_id]
+
+
+def _condense_part(part):
+    '''Condense part, removing 'empty' components.'''
+    return [component for component in part if len(component)]
 
 
 def main(args):
     '''main method.'''
-    designer = Lcr3Designer(args[0])
+    designer = Lcr3Designer(args[0],
+                            {'url': args[1],
+                             'username': args[2],
+                             'password': args[3]})
+
     design_parts = designer.get_design_parts()
-    parts = designer.get_parts()
+    part_primers = designer.get_part_primers()
     pairs = designer.get_pairs()
+    designer.close()
 
     for design, prts in design_parts.items():
         print(design, prts)
 
     print()
 
-    for part in parts:
-        print(part)
+    for part, primers in part_primers.items():
+        print(part, primers)
 
     print()
 
