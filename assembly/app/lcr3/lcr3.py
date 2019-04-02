@@ -10,55 +10,76 @@ from operator import itemgetter
 import sys
 
 
-def get_design_parts(filename):
-    '''Get design parts.'''
-    design_parts = defaultdict(list)
+class Lcr3Designer():
+    '''Class to design LCR v3 assemblies.'''
 
-    with open(filename) as fle:
-        designs = [tuple(line.strip().split(',')) for line in fle]
+    def __init__(self, filename):
+        self.__filename = filename
+        self.__design_parts = self.__get_design_parts()
+        self.__parts = self.__get_parts()
+        self.__pairs = self.__get_pairs()
 
-        for design in designs:
-            design_parts[design].append((('', design[0] + 'bb', '')))
+    def get_design_parts(self):
+        '''Get design parts.'''
+        return self.__design_parts
 
-            for idx, _id in enumerate(design):
-                if _id not in ['H', 'L', '']:
-                    environment = design[idx - 1:idx + 2]
+    def get_parts(self):
+        '''Get parts.'''
+        return self.__parts
 
-                    part = ('H' if idx > 1 and environment[0] == 'H' else '',
-                            environment[1],
-                            'L' if len(environment) > 2 and
-                            environment[2] == 'L' else '')
+    def get_pairs(self):
+        '''Get psirs.'''
+        return self.__pairs
 
-                    design_parts[design].append(part)
+    def __get_design_parts(self):
+        '''Get design parts.'''
+        design_parts = defaultdict(list)
 
-    return design_parts
+        with open(self.__filename) as fle:
+            designs = [tuple(line.strip().split(',')) for line in fle]
 
+            for design in designs:
+                design_parts[design].append((('', design[0] + 'bb', '')))
 
-def get_parts(design_parts):
-    '''Get parts.'''
-    return sorted(list({part for parts in design_parts.values()
-                        for part in parts}), key=itemgetter(1, 0, 2))
+                for idx, _id in enumerate(design):
+                    if _id not in ['H', 'L', '']:
+                        environment = design[idx - 1:idx + 2]
 
+                        part = ('H' if idx > 1 and
+                                environment[0] == 'H' else '',
+                                environment[1],
+                                'L' if len(environment) > 2 and
+                                environment[2] == 'L' else '')
 
-def get_pairs(design_parts, parts):
-    '''Get pairs.'''
-    pairs = set()
+                        design_parts[design].append(part)
 
-    for design_part in design_parts.values():
-        valid_parts = [[part for part in parts if len(part)]
-                       for parts in design_part]
+        return design_parts
 
-        for idx, part in enumerate(valid_parts[:-1]):
-            pairs.add((part[-1], parts[idx + 1][0]))
+    def __get_parts(self):
+        '''Get parts.'''
+        return sorted(list({part for parts in self.__design_parts.values()
+                            for part in parts}), key=itemgetter(1, 0, 2))
 
-    return pairs
+    def __get_pairs(self):
+        '''Get pairs.'''
+        pairs = set()
+
+        for design_part in self.__design_parts.values():
+            valid_parts = [[part for part in parts if len(part)]
+                           for parts in design_part]
+
+            for idx, part in enumerate(valid_parts[:-1]):
+                pairs.add((part[-1], self.__parts[idx + 1][0]))
+
+        return pairs
 
 
 def main(args):
     '''main method.'''
-    design_parts = get_design_parts(args[0])
-    parts = get_parts(design_parts)
-    pairs = get_pairs(design_parts, parts)
+    designer = Lcr3Designer(args[0])
+    design_parts = designer.get_design_parts()
+    parts = designer.get_parts()
+    pairs = designer.get_pairs()
 
     for design, prts in design_parts.items():
         print(design, prts)
