@@ -10,6 +10,8 @@ from collections import defaultdict
 from operator import itemgetter
 import sys
 from synbiochem.utils import ice_utils, seq_utils
+from assembly.app.lcr3 import overhang
+
 
 _H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
 _L_PRIMER = 'TGCTGGATACGACGCTCTACTC'
@@ -38,6 +40,9 @@ class Lcr3Designer():
         self.__primers[False][('Hbb', '', 'Hbb')] = _HBB_PRIMER_REV
         self.__primers[True][('Lbb', '', 'Lbb')] = _LBB_PRIMER_FORW
         self.__primers[False][('Lbb', '', 'Lbb')] = _LBB_PRIMER_REV
+
+        self.__overhangs = overhang.get_seqs()
+        self.__overhang_idx = 0
 
         self.__seqs = {}
         self.__design_parts = self.__get_design_parts()
@@ -115,10 +120,10 @@ class Lcr3Designer():
         primer = None
 
         if part not in self.__primers[forward]:
-            if part[0] == 'H':
-                return _H_PRIMER
-            if part[2] == 'L':
-                return _L_PRIMER
+            if forward and part[0] == 'H':
+                return self.__get_next_overhang() + _H_PRIMER
+            if not forward and part[2] == 'L':
+                return _L_PRIMER + self.__get_next_overhang()
 
             # else:
             seq = self.__get_seq(part[1])
@@ -136,6 +141,12 @@ class Lcr3Designer():
                 self.__ice_client.get_ice_entry(ice_id).get_seq()
 
         return self.__seqs[ice_id]
+
+    def __get_next_overhang(self):
+        '''Get next overhang.'''
+        ovrhng = self.__overhangs[self.__overhang_idx]
+        self.__overhang_idx += 1
+        return ovrhng.lower()
 
 
 def _condense_part(part):

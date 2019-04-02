@@ -13,12 +13,17 @@ import sys
 from synbiochem.utils import seq_utils
 
 
-def get_seqs(num_overhangs, target_melt_temp, max_repeat_nuc, evalue=1e-3):
+def get_seqs(num_overhangs=128, target_melt_temp=70.0, max_repeat_nuc=3,
+             evalue=1e-3):
     '''Get overhangs.'''
     overhangs = {}
 
     directory = os.path.dirname(os.path.realpath(__file__))
-    filename = os.path.join(directory, 'overhangs.txt')
+    filename = os.path.join(directory,
+                            '%i_%.3f_%i_%.3e.txt' % (num_overhangs,
+                                                     target_melt_temp,
+                                                     max_repeat_nuc,
+                                                     evalue))
 
     if os.path.exists(filename):
         with open(filename) as fle:
@@ -32,7 +37,6 @@ def get_seqs(num_overhangs, target_melt_temp, max_repeat_nuc, evalue=1e-3):
             continue
 
         overhangs[str(len(overhangs))] = overhang
-        print(len(overhangs), overhang)
 
     overhangs = list(overhangs.values())
 
