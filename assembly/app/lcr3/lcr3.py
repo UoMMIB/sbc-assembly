@@ -6,43 +6,69 @@ All rights reserved.
 @author: neilswainston
 '''
 from collections import defaultdict
+from operator import itemgetter
 import sys
 
 
-def main(args):
-    '''main method.'''
+def get_design_parts(filename):
+    '''Get design parts.'''
     design_parts = defaultdict(list)
 
-    with open(args[0]) as fle:
+    with open(filename) as fle:
         designs = [tuple(line.strip().split(',')) for line in fle]
 
         for design in designs:
-            design_parts[design].append(((design[0] + 'bb',)))
+            design_parts[design].append((('', design[0] + 'bb', '')))
 
             for idx, _id in enumerate(design):
                 if _id not in ['H', 'L', '']:
                     environment = design[idx - 1:idx + 2]
-                    design_parts[design].append(
-                        environment[0
-                                    if idx > 1 and environment[0] == 'H'
-                                    else 1:
-                                    3
-                                    if environment[-1] == 'L'
-                                    else 2])
 
-    for design, parts in design_parts.items():
-        print(design, parts)
+                    part = ('H' if idx > 1 and environment[0] == 'H' else '',
+                            environment[1],
+                            'L' if len(environment) > 2 and
+                            environment[2] == 'L' else '')
 
-    print()
+                    design_parts[design].append(part)
 
-    print(set([part for parts in design_parts.values() for part in parts]))
-    print()
+    return design_parts
 
+
+def get_parts(design_parts):
+    '''Get parts.'''
+    return sorted(list({part for parts in design_parts.values()
+                        for part in parts}), key=itemgetter(1, 0, 2))
+
+
+def get_pairs(design_parts, parts):
+    '''Get pairs.'''
     pairs = set()
 
-    for parts in design_parts.values():
-        for idx, part in enumerate(parts[:-1]):
+    for design_part in design_parts.values():
+        valid_parts = [[part for part in parts if len(part)]
+                       for parts in design_part]
+
+        for idx, part in enumerate(valid_parts[:-1]):
             pairs.add((part[-1], parts[idx + 1][0]))
+
+    return pairs
+
+
+def main(args):
+    '''main method.'''
+    design_parts = get_design_parts(args[0])
+    parts = get_parts(design_parts)
+    pairs = get_pairs(design_parts, parts)
+
+    for design, prts in design_parts.items():
+        print(design, prts)
+
+    print()
+
+    for part in parts:
+        print(part)
+
+    print()
 
     for pair in pairs:
         print(pair)
