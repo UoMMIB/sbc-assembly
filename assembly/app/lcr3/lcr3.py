@@ -14,6 +14,11 @@ from synbiochem.utils import ice_utils, seq_utils
 _H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
 _L_PRIMER = 'TGCTGGATACGACGCTCTACTC'
 
+_HBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+_HBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+_LBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+_LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+
 
 class Lcr3Designer():
     '''Class to design LCR v3 assemblies.'''
@@ -29,6 +34,11 @@ class Lcr3Designer():
                                                   ice_params['password'])
 
         self.__primers = defaultdict(dict)
+        self.__primers[True][('Hbb', '', 'Hbb')] = _HBB_PRIMER_FORW
+        self.__primers[False][('Hbb', '', 'Hbb')] = _HBB_PRIMER_REV
+        self.__primers[True][('Lbb', '', 'Lbb')] = _LBB_PRIMER_FORW
+        self.__primers[False][('Lbb', '', 'Lbb')] = _LBB_PRIMER_REV
+
         self.__seqs = {}
         self.__design_parts = self.__get_design_parts()
         self.__part_primers = self.__get_part_primers()
@@ -58,7 +68,8 @@ class Lcr3Designer():
             designs = [tuple(line.strip().split(',')) for line in fle]
 
             for design in designs:
-                design_parts[design].append(((design[0] + 'bb', '', '')))
+                design_parts[design].append((design[0] + 'bb', '',
+                                             (design[0] + 'bb')))
 
                 for idx, _id in enumerate(design):
                     if _id not in ['H', 'L', '']:
@@ -96,28 +107,18 @@ class Lcr3Designer():
 
     def __get_primers_for_part(self, part):
         '''Get primers.'''
-        return (self.__get_primer(part, False),
-                self.__get_primer(part, True))
+        return (self.__get_primer(part, True),
+                self.__get_primer(part, False))
 
     def __get_primer(self, part, forward):
         '''Get primer from ICE id.'''
         primer = None
 
         if part not in self.__primers[forward]:
-            if forward:
-                if part[0] == 'H':
-                    return _H_PRIMER
-                if part[0] == 'Lbb':
-                    return None
-                if part[0] == 'Hbb':
-                    return None
-            else:
-                if part[2] == 'L':
-                    return _L_PRIMER
-                if part[0] == 'Lbb':
-                    return None
-                if part[0] == 'Hbb':
-                    return None
+            if part[0] == 'H':
+                return _H_PRIMER
+            if part[2] == 'L':
+                return _L_PRIMER
 
             # else:
             seq = self.__get_seq(part[1])
