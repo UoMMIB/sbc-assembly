@@ -9,17 +9,20 @@ All rights reserved.
 from collections import defaultdict
 from operator import itemgetter
 import sys
+
+from Bio.Seq import Seq
 from synbiochem.utils import ice_utils, seq_utils
+
 from assembly.app.lcr3 import overhang
 
 
 _H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
 _L_PRIMER = 'TGCTGGATACGACGCTCTACTC'
 
-_HBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
-_HBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
-_LBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
-_LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+# _HBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+# _HBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+# _LBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+# _LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
 
 
 class Lcr3Designer():
@@ -30,6 +33,7 @@ class Lcr3Designer():
         self.__filename = filename
         self.__primer_melt_temp = primer_melt_temp
         self.__lcr_melt_temp = lcr_melt_temp
+        self.__seqs = {}
 
         self.__ice_client_fact = ice_utils.ICEClientFactory()
         self.__ice_client = \
@@ -38,21 +42,24 @@ class Lcr3Designer():
                                                   ice_params['password'])
 
         self.__primers = defaultdict(dict)
-        self.__primers[True]['Hbb'] = _HBB_PRIMER_FORW
-        self.__primers[False]['Hbb'] = _HBB_PRIMER_REV
-        self.__primers[True]['Lbb'] = _LBB_PRIMER_FORW
-        self.__primers[False]['Lbb'] = _LBB_PRIMER_REV
+
+        for forw in [True, False]:
+            self.__primers[forw]['Hbb'] = \
+                self.__get_subseq('SBC010499', primer_melt_temp, forw, True)
+            self.__primers[forw]['Lbb'] = \
+                self.__get_subseq('SBC010500', primer_melt_temp, forw, True)
 
         self.__domino_parts = defaultdict(dict)
-        self.__domino_parts[True]['Hbb'] = '***'
-        self.__domino_parts[False]['Hbb'] = '***'
-        self.__domino_parts[True]['Lbb'] = '***'
-        self.__domino_parts[False]['Lbb'] = '***'
+
+        for forw in [True, False]:
+            self.__domino_parts[forw]['Hbb'] = \
+                self.__get_subseq('SBC010499', lcr_melt_temp, forw, False)
+            self.__domino_parts[forw]['Lbb'] = \
+                self.__get_subseq('SBC010500', lcr_melt_temp, forw, False)
 
         self.__overhangs = overhang.get_seqs()
         self.__overhang_idx = 0
 
-        self.__seqs = {}
         self.__design_parts = self.__get_design_parts()
         self.__part_primers = self.__get_part_primers()
         self.__pair_dominoes = self.__get_pair_dominoes()
@@ -135,16 +142,22 @@ class Lcr3Designer():
 
             # else:
             primer = \
-                self.__get_subseq(part[1], self.__primer_melt_temp, forward)
+                self.__get_subseq(part[1], self.__primer_melt_temp,
+                                  forward, True)
 
             self.__primers[forward][part] = primer
 
         return self.__primers[forward][part]
 
-    def __get_subseq(self, part_id, mlt_temp, forward):
+    def __get_subseq(self, part_id, mlt_temp, forward, primer):
         '''Get subsequence by melting temperature.'''
         seq = self.__get_seq(part_id)
-        return seq_utils.get_seq_by_melt_temp(seq, mlt_temp, forward)[0]
+        subseq = seq_utils.get_seq_by_melt_temp(seq, mlt_temp, forward)[0]
+
+        if primer and not forward:
+            return str(Seq(subseq).reverse_complement())
+
+        return subseq
 
     def __get_seq(self, ice_id):
         '''Get seq.'''
@@ -185,7 +198,8 @@ class Lcr3Designer():
 
             # else:
             primer = \
-                self.__get_subseq(part[1], self.__lcr_melt_temp, not left)
+                self.__get_subseq(part[1], self.__lcr_melt_temp,
+                                  not left, False)
 
             self.__domino_parts[left][part] = primer
 
