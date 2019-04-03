@@ -25,9 +25,11 @@ _LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
 class Lcr3Designer():
     '''Class to design LCR v3 assemblies.'''
 
-    def __init__(self, filename, ice_params, primer_melt_temp=60.0):
+    def __init__(self, filename, ice_params, primer_melt_temp=60.0,
+                 lcr_melt_temp=70.0):
         self.__filename = filename
         self.__primer_melt_temp = primer_melt_temp
+        self.__lcr_melt_temp = lcr_melt_temp
 
         self.__ice_client_fact = ice_utils.ICEClientFactory()
         self.__ice_client = \
@@ -36,10 +38,16 @@ class Lcr3Designer():
                                                   ice_params['password'])
 
         self.__primers = defaultdict(dict)
-        self.__primers[True][('Hbb', '', 'Hbb')] = _HBB_PRIMER_FORW
-        self.__primers[False][('Hbb', '', 'Hbb')] = _HBB_PRIMER_REV
-        self.__primers[True][('Lbb', '', 'Lbb')] = _LBB_PRIMER_FORW
-        self.__primers[False][('Lbb', '', 'Lbb')] = _LBB_PRIMER_REV
+        self.__primers[True]['Hbb'] = _HBB_PRIMER_FORW
+        self.__primers[False]['Hbb'] = _HBB_PRIMER_REV
+        self.__primers[True]['Lbb'] = _LBB_PRIMER_FORW
+        self.__primers[False]['Lbb'] = _LBB_PRIMER_REV
+
+        self.__domino_parts = defaultdict(dict)
+        self.__domino_parts[True]['Hbb'] = '***'
+        self.__domino_parts[False]['Hbb'] = '***'
+        self.__domino_parts[True]['Lbb'] = '***'
+        self.__domino_parts[False]['Lbb'] = '***'
 
         self.__overhangs = overhang.get_seqs()
         self.__overhang_idx = 0
@@ -47,7 +55,7 @@ class Lcr3Designer():
         self.__seqs = {}
         self.__design_parts = self.__get_design_parts()
         self.__part_primers = self.__get_part_primers()
-        self.__pairs = self.__get_pairs()
+        self.__pair_dominoes = self.__get_pair_dominoes()
 
     def close(self):
         '''Close.'''
@@ -61,9 +69,9 @@ class Lcr3Designer():
         '''Get part primers.'''
         return self.__part_primers
 
-    def get_pairs(self):
-        '''Get psirs.'''
-        return self.__pairs
+    def get_pair_dominoes(self):
+        '''Get pair dominoes.'''
+        return self.__pair_dominoes
 
     def __get_design_parts(self):
         '''Get design parts.'''
@@ -73,8 +81,7 @@ class Lcr3Designer():
             designs = [tuple(line.strip().split(',')) for line in fle]
 
             for design in designs:
-                design_parts[design].append((design[0] + 'bb', '',
-                                             (design[0] + 'bb')))
+                design_parts[design].append(design[0] + 'bb')
 
                 for idx, _id in enumerate(design):
                     if _id not in ['H', 'L', '']:
@@ -97,18 +104,19 @@ class Lcr3Designer():
 
         return {part: self.__get_primers_for_part(part) for part in parts}
 
-    def __get_pairs(self):
-        '''Get pairs.'''
-        pairs = set()
+    def __get_pair_dominoes(self):
+        '''Get dominoes.'''
+        pair_dominoes = {}
 
         for design_part in self.__design_parts.values():
-            condensed_parts = [_condense_part(part)
-                               for part in design_part]
+            for idx, part in enumerate(design_part[:-1]):
+                pair = (part, design_part[idx + 1])
 
-            for idx, condensed_part in enumerate(condensed_parts[:-1]):
-                pairs.add((condensed_part[-1], condensed_parts[idx + 1][0]))
+                if pair not in pair_dominoes:
+                    domino = self.__get_domino(pair)
+                    pair_dominoes[pair] = domino
 
-        return pairs
+        return pair_dominoes
 
     def __get_primers_for_part(self, part):
         '''Get primers.'''
@@ -126,13 +134,17 @@ class Lcr3Designer():
                 return _L_PRIMER + self.__get_next_overhang()
 
             # else:
-            seq = self.__get_seq(part[1])
-            primer = seq_utils.get_seq_by_melt_temp(
-                seq, self.__primer_melt_temp, forward)[0]
+            primer = \
+                self.__get_subseq(part[1], self.__primer_melt_temp, forward)
 
             self.__primers[forward][part] = primer
 
         return self.__primers[forward][part]
+
+    def __get_subseq(self, part_id, mlt_temp, forward):
+        '''Get subsequence by melting temperature.'''
+        seq = self.__get_seq(part_id)
+        return seq_utils.get_seq_by_melt_temp(seq, mlt_temp, forward)[0]
 
     def __get_seq(self, ice_id):
         '''Get seq.'''
@@ -148,10 +160,36 @@ class Lcr3Designer():
         self.__overhang_idx += 1
         return ovrhng.lower()
 
+    def __get_domino(self, pair):
+        '''Get domino.'''
+        part1 = self.__get_domino_part(pair[0], True)
+        part2 = self.__get_domino_part(pair[1], False)
 
-def _condense_part(part):
-    '''Condense part, removing 'empty' components.'''
-    return [component for component in part if len(component)]
+        return part1 + part2
+
+    def __get_domino_part(self, part, left):
+        '''Get domino part from ICE id.'''
+        primer = None
+
+        if part not in self.__domino_parts[left]:
+            if not left and part[0] == 'H':
+                seq = self.__part_primers[part][0]
+                return seq_utils.get_seq_by_melt_temp(seq,
+                                                      self.__lcr_melt_temp,
+                                                      True)[0]
+            if left and part[2] == 'L':
+                seq = self.__part_primers[part][1]
+                return seq_utils.get_seq_by_melt_temp(seq,
+                                                      self.__lcr_melt_temp,
+                                                      False)[0]
+
+            # else:
+            primer = \
+                self.__get_subseq(part[1], self.__lcr_melt_temp, not left)
+
+            self.__domino_parts[left][part] = primer
+
+        return self.__domino_parts[left][part]
 
 
 def main(args):
@@ -163,7 +201,7 @@ def main(args):
 
     design_parts = designer.get_design_parts()
     part_primers = designer.get_part_primers()
-    pairs = designer.get_pairs()
+    pair_dominoes = designer.get_pair_dominoes()
     designer.close()
 
     for design, prts in design_parts.items():
@@ -176,8 +214,8 @@ def main(args):
 
     print()
 
-    for pair in pairs:
-        print(pair)
+    for pair, domino in pair_dominoes.items():
+        print(pair, domino)
 
 
 if __name__ == '__main__':
