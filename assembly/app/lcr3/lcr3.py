@@ -5,13 +5,14 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
 from collections import defaultdict
 from operator import itemgetter
 import sys
 
 from Bio.Seq import Seq
-from synbiochem.utils import ice_utils, seq_utils
+from synbiochem.utils import dna_utils, ice_utils, seq_utils
 
 from assembly.app.lcr3 import overhang
 
@@ -29,10 +30,13 @@ class Lcr3Designer():
     '''Class to design LCR v3 assemblies.'''
 
     def __init__(self, filename, ice_params, primer_melt_temp=60.0,
-                 lcr_melt_temp=70.0):
+                 lcr_melt_temp=70.0, restr_enz=None):
         self.__filename = filename
         self.__primer_melt_temp = primer_melt_temp
         self.__lcr_melt_temp = lcr_melt_temp
+
+        self.__restr_enz = ['MlyI'] if restr_enz is None else restr_enz
+
         self.__seqs = {}
 
         self.__ice_client_fact = ice_utils.ICEClientFactory()
@@ -143,15 +147,28 @@ class Lcr3Designer():
             # else:
             primer = \
                 self.__get_subseq(part[1], self.__primer_melt_temp,
-                                  forward, True)
+                                  forward, True, self.__restr_enz)
 
             self.__primers[forward][part] = primer
 
         return self.__primers[forward][part]
 
-    def __get_subseq(self, part_id, mlt_temp, forward, primer):
+    def __get_subseq(self, part_id, mlt_temp, forward, primer, restr_enz=None):
         '''Get subsequence by melting temperature.'''
         seq = self.__get_seq(part_id)
+
+        if restr_enz:
+            dna = dna_utils.DNA(seq=seq, name=part_id, desc=part_id)
+            restrict_dnas = dna_utils.apply_restricts(dna, restr_enz)
+
+            # This is a bit fudgy...
+            # Essentially, return the longest fragment remaining after
+            # digestion.
+            # Assumes prefix and suffix are short sequences that are cleaved
+            # off.
+            restrict_dnas.sort(key=lambda x: len(x['seq']), reverse=True)
+            seq = restrict_dnas[0]['seq']
+
         subseq = seq_utils.get_seq_by_melt_temp(seq, mlt_temp, forward)[0]
 
         if primer and not forward:
@@ -199,7 +216,7 @@ class Lcr3Designer():
             # else:
             primer = \
                 self.__get_subseq(part[1], self.__lcr_melt_temp,
-                                  not left, False)
+                                  not left, False, self.__restr_enz)
 
             self.__domino_parts[left][part] = primer
 
@@ -218,15 +235,17 @@ def main(args):
     pair_dominoes = designer.get_pair_dominoes()
     designer.close()
 
+    print('Designs and parts\n')
+
     for design, prts in design_parts.items():
         print(design, prts)
 
-    print()
+    print('\nParts and primers\n')
 
     for part, primers in part_primers.items():
         print(part, primers)
 
-    print()
+    print('\nPart pairs and dominoes\n')
 
     for pair, domino in pair_dominoes.items():
         print(pair, domino)
