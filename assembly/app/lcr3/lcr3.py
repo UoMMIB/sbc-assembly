@@ -20,10 +20,10 @@ from assembly.app.lcr3 import overhang
 _H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
 _L_PRIMER = 'TGCTGGATACGACGCTCTACTC'
 
-# _HBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
-# _HBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
-# _LBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
-# _LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+_HBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+_HBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
+_LBB_PRIMER_FORW = 'GGATCCAAACTCGAGTAAGG'
+_LBB_PRIMER_REV = 'CTTCTTAAAAGATCTTTTGAATTC'
 
 
 class Lcr3Designer():
@@ -46,12 +46,10 @@ class Lcr3Designer():
                                                   ice_params['password'])
 
         self.__primers = defaultdict(dict)
-
-        for forw in [True, False]:
-            self.__primers[forw]['Hbb'] = \
-                self.__get_subseq('SBC010499', primer_melt_temp, forw, True)
-            self.__primers[forw]['Lbb'] = \
-                self.__get_subseq('SBC010500', primer_melt_temp, forw, True)
+        self.__primers[True]['Hbb'] = _HBB_PRIMER_FORW
+        self.__primers[True]['Lbb'] = _LBB_PRIMER_FORW
+        self.__primers[False]['Hbb'] = _HBB_PRIMER_REV
+        self.__primers[False]['Lbb'] = _LBB_PRIMER_REV
 
         self.__domino_parts = defaultdict(dict)
 
@@ -63,6 +61,8 @@ class Lcr3Designer():
 
         self.__overhangs = overhang.get_seqs()
         self.__overhang_idx = 0
+
+        self.__part_overhang = {}
 
         self.__design_parts = self.__get_design_parts()
         self.__part_primers = self.__get_part_primers()
@@ -140,9 +140,9 @@ class Lcr3Designer():
 
         if part not in self.__primers[forward]:
             if forward and part[0] == 'H':
-                return self.__get_next_overhang() + _H_PRIMER
+                return self.__get_part_overhang(part[:1]) + _H_PRIMER
             if not forward and part[2] == 'L':
-                return _L_PRIMER + self.__get_next_overhang()
+                return self.__get_part_overhang(part[1:]) + _L_PRIMER
 
             # else:
             primer = \
@@ -169,7 +169,11 @@ class Lcr3Designer():
             restrict_dnas.sort(key=lambda x: len(x['seq']), reverse=True)
             seq = restrict_dnas[0]['seq']
 
-        subseq = seq_utils.get_seq_by_melt_temp(seq, mlt_temp, forward)[0]
+        reagent_concs = {seq_utils.MG: 0.0} if primer else None
+
+        subseq = seq_utils.get_seq_by_melt_temp(seq, mlt_temp,
+                                                forward=forward,
+                                                reagent_concs=reagent_concs)[0]
 
         if primer and not forward:
             return str(Seq(subseq).reverse_complement())
@@ -183,6 +187,13 @@ class Lcr3Designer():
                 self.__ice_client.get_ice_entry(ice_id).get_seq()
 
         return self.__seqs[ice_id]
+
+    def __get_part_overhang(self, part):
+        '''Get part overhang.'''
+        if part not in self.__part_overhang:
+            self.__part_overhang[part] = self.__get_next_overhang()
+
+        return self.__part_overhang[part]
 
     def __get_next_overhang(self):
         '''Get next overhang.'''
@@ -203,15 +214,9 @@ class Lcr3Designer():
 
         if part not in self.__domino_parts[left]:
             if not left and part[0] == 'H':
-                seq = self.__part_primers[part][0]
-                return seq_utils.get_seq_by_melt_temp(seq,
-                                                      self.__lcr_melt_temp,
-                                                      True)[0]
+                return self.__get_part_overhang(part[:1])
             if left and part[2] == 'L':
-                seq = self.__part_primers[part][1]
-                return seq_utils.get_seq_by_melt_temp(seq,
-                                                      self.__lcr_melt_temp,
-                                                      False)[0]
+                return self.__get_part_overhang(part[1:])
 
             # else:
             primer = \
@@ -249,6 +254,11 @@ def main(args):
 
     for pair, domino in pair_dominoes.items():
         print(pair, domino)
+
+    print('\nDominoes\n')
+
+    for domino in sorted(list(set(pair_dominoes.values()))):
+        print(domino)
 
 
 if __name__ == '__main__':
