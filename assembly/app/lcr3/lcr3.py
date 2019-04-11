@@ -7,14 +7,17 @@ All rights reserved.
 '''
 # pylint: disable=too-many-arguments
 # pylint: disable=too-many-instance-attributes
+# pylint: disable=wrong-import-order
 from collections import defaultdict
 from operator import itemgetter
+import os
 import sys
 
 from Bio.Seq import Seq
 from synbiochem.utils import dna_utils, ice_utils, seq_utils
 
 from assembly.app.lcr3 import overhang
+import pandas as pd
 
 
 _H_PRIMER = 'ATAGTTCCCTTCACGATAGCCG'
@@ -83,6 +86,34 @@ class Lcr3Designer():
     def get_pair_dominoes(self):
         '''Get pair dominoes.'''
         return self.__pair_dominoes
+
+    def to_csv(self, out_dir):
+        '''Write data to csv.'''
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        design_parts_df = pd.DataFrame(self.get_design_parts().items(),
+                                       columns=['design', 'parts'])
+
+        design_parts_df.to_csv(os.path.join(out_dir, 'design_parts.csv'),
+                               index=False)
+
+        part_primers_df = \
+            pd.DataFrame([[part, *prmrs]
+                          for part, prmrs in self.get_part_primers().items()],
+                         columns=['part', 'forward primer', 'reverse primer'])
+
+        part_primers_df.to_csv(os.path.join(out_dir, 'part_primers.csv'),
+                               index=False)
+
+        pair_dominoes_df = \
+            pd.DataFrame(sorted(list(
+                {(_get_domino_id(*pair), dmn)
+                 for pair, dmn in self.get_pair_dominoes().items()})),
+                columns=['id', 'domino'])
+
+        pair_dominoes_df.to_csv(os.path.join(out_dir, 'pair_dominoes.csv'),
+                                index=False)
 
     def __get_design_parts(self):
         '''Get design parts.'''
@@ -228,12 +259,22 @@ class Lcr3Designer():
         return self.__domino_parts[left][part]
 
 
+def _get_domino_id(left_part, right_part):
+    '''Get domino id.'''
+    return '|'.join([left_part if isinstance(left_part, str)
+                     else '_'.join(left_part[1:]),
+                     right_part if isinstance(right_part, str)
+                     else '_'.join(right_part[:2])])
+
+
 def main(args):
     '''main method.'''
     designer = Lcr3Designer(args[0],
                             {'url': args[1],
                              'username': args[2],
                              'password': args[3]})
+
+    designer.to_csv(args[4])
 
     design_parts = designer.get_design_parts()
     part_primers = designer.get_part_primers()
