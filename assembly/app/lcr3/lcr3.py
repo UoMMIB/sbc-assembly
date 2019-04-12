@@ -99,9 +99,9 @@ class Lcr3Designer():
                                index=False)
 
         part_primers_df = \
-            pd.DataFrame([_get_primer(part, idx, prmr)
+            pd.DataFrame({_get_primer(part, idx, prmr)
                           for part, prmrs in self.get_part_primers().items()
-                          for idx, prmr in enumerate(prmrs)],
+                          for idx, prmr in enumerate(prmrs)},
                          columns=['Name', 'Primer'])
 
         part_primers_df.to_csv(os.path.join(out_dir, 'part_primers.csv'),
@@ -172,7 +172,7 @@ class Lcr3Designer():
 
         if part not in self.__primers[forward]:
             if forward and part[0] == 'H':
-                return self.__get_part_overhang(part[:1]) + _H_PRIMER
+                return self.__get_part_overhang(part[:2]) + _H_PRIMER
             if not forward and part[2] == 'L':
                 return self.__get_part_overhang(part[1:]) + _L_PRIMER
 
@@ -246,7 +246,7 @@ class Lcr3Designer():
 
         if part not in self.__domino_parts[left]:
             if not left and part[0] == 'H':
-                return self.__get_part_overhang(part[:1])
+                return self.__get_part_overhang(part[:2])
             if left and part[2] == 'L':
                 return self.__get_part_overhang(part[1:])
 
@@ -260,17 +260,27 @@ class Lcr3Designer():
         return self.__domino_parts[left][part]
 
 
-def _get_primer(part, idx, prmr):
+def _get_primer(part, reverse, prmr):
     '''Get primer.'''
-    return ''.join(part) + ('-R' if idx else '-F'), '/5Phos/' + prmr
+    return (_get_part_id(part, not reverse) + ('-R' if reverse else '-F'),
+            '/5Phos/' + prmr)
 
 
 def _get_domino_id(left_part, right_part):
     '''Get domino id.'''
-    return '|'.join([left_part if isinstance(left_part, str)
-                     else '_'.join(left_part[1:]),
-                     right_part if isinstance(right_part, str)
-                     else '_'.join(right_part[:2])])
+    return '_'.join([_get_part_id(left_part, False),
+                     _get_part_id(right_part, True)])
+
+
+def _get_part_id(part, start):
+    '''Return part id.'''
+    if isinstance(part, str):
+        return part
+
+    if start:
+        return ''.join(part[:2])
+
+    return ''.join(part[1:])
 
 
 def main(args):
