@@ -99,9 +99,10 @@ class Lcr3Designer():
                                index=False)
 
         part_primers_df = \
-            pd.DataFrame([[part, *prmrs]
-                          for part, prmrs in self.get_part_primers().items()],
-                         columns=['part', 'forward primer', 'reverse primer'])
+            pd.DataFrame([_get_primer(part, idx, prmr)
+                          for part, prmrs in self.get_part_primers().items()
+                          for idx, prmr in enumerate(prmrs)],
+                         columns=['Name', 'Primer'])
 
         part_primers_df.to_csv(os.path.join(out_dir, 'part_primers.csv'),
                                index=False)
@@ -257,6 +258,11 @@ class Lcr3Designer():
             self.__domino_parts[left][part] = primer
 
         return self.__domino_parts[left][part]
+
+
+def _get_primer(part, idx, prmr):
+    '''Get primer.'''
+    return ''.join(part) + ('-R' if idx else '-F'), '/5Phos/' + prmr
 
 
 def _get_domino_id(left_part, right_part):
