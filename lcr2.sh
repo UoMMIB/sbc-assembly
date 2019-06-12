@@ -4,8 +4,8 @@ export PYTHONPATH=$PYTHONPATH:.
 
 python assembly/app/lcr2/lcr2_pipeline.py \
 	https://ice.synbiochem.co.uk \
-	neil.swainston@manchester.ac.uk \
-	P@ris030416 \
+	[USER.NAME]@manchester.ac.uk \
+	[PASSWORD] \
 	LCR \
 	True \
 	SBC008019 \
