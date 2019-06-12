@@ -5,6 +5,7 @@ All rights reserved.
 
 @author: neilswainston
 '''
+# pylint: disable=wrong-import-order
 from collections import Counter
 import os
 import sys
@@ -94,13 +95,13 @@ def main(args):
     dte = strftime("%y%m%d", gmtime())
 
     for name, group_df in recipe_df.groupby('Project'):
-        out_dir_name = os.path.join(os.path.join(args[1], dte + args[3]), name)
-        input_plates = pipeline.get_input_plates(args[2])
+        out_dir_name = os.path.join(os.path.join('out', dte + args[1]), name)
+        input_plates = pipeline.get_input_plates('data/plates')
 
         writers = [EnzymeScreenWriter(group_df, input_plates,
-                                      dte + 'ENZ' + name[:3].upper())]
+                                      dte + 'ENZ' + name[:1].upper())]
 
-        pipeline.run(writers, input_plates, {'reagents': args[4]},
+        pipeline.run(writers, input_plates, {'reagents': 'reagents'},
                      out_dir_name)
 
         wklst_dfs = worklist.format_worklist(out_dir_name)
