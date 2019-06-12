@@ -19,10 +19,10 @@ def main(args):
 
     ice_helper = utils.ICEHelper(args[0], args[1], args[2])
 
-    if args[7] == 'True':
-        plasmid_parts = ice_helper.get_plasmid_parts(args[8:])
+    if args[4] == 'True':
+        plasmid_parts = ice_helper.get_plasmid_parts(args[5:])
     else:
-        plasmid_parts = ice_helper.get_plasmid_parts_designs(args[8:])
+        plasmid_parts = ice_helper.get_plasmid_parts_designs(args[5:])
 
     parts_ice = {ice_id: part_ice
                  for _, parts_map in plasmid_parts.items()
@@ -47,10 +47,10 @@ def main(args):
                                       dte + 'POO' + args[3]),
                lcr.LcrWriter(plasmid_parts, part_vol, dte + 'LCR' + args[3])]
 
-    input_plates = pipeline.get_input_plates(args[4])
-    out_dir_name = os.path.join(args[6], dte + args[3])
+    input_plates = pipeline.get_input_plates('data/plates')
+    out_dir_name = os.path.join('out', dte + args[3])
     pipeline.run(writers, input_plates,
-                 {'reagents': args[5]}, out_dir_name)
+                 {'reagents': 'reagents'}, out_dir_name)
 
     worklist.format_worklist(out_dir_name)
 
