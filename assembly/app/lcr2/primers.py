@@ -17,7 +17,7 @@ from Bio.Seq import Seq
 from synbiochem.utils import dna_utils, seq_utils
 
 from assembly import plate
-from assembly.app.lcr import utils
+from assembly.app.lcr2 import utils
 import pandas as pd
 
 

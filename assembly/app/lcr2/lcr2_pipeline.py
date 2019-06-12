@@ -10,7 +10,7 @@ import sys
 from time import gmtime, strftime
 
 from assembly import pipeline, worklist
-from assembly.app.lcr import lcr, part_pcr, part_qc, part_dig, utils
+from assembly.app.lcr2 import lcr2, part_pcr, part_qc, part_dig, utils
 
 
 def main(args):
@@ -42,10 +42,10 @@ def main(args):
                                          dte + 'DIG' + args[3]),
                part_qc.PartQcWriter(part_ids, pcr_numbers,
                                     dte + 'FPT' + args[3]),
-               lcr.DominoPoolWriter(plasmid_parts, dte + 'DOM' + args[3]),
+               lcr2.DominoPoolWriter(plasmid_parts, dte + 'DOM' + args[3]),
                part_pcr.PcrPoolWriter(pcr_numbers,
                                       dte + 'POO' + args[3]),
-               lcr.LcrWriter(plasmid_parts, part_vol, dte + 'LCR' + args[3])]
+               lcr2.LcrWriter(plasmid_parts, part_vol, dte + 'LCR' + args[3])]
 
     input_plates = pipeline.get_input_plates('data/plates')
     out_dir_name = os.path.join('out', dte + args[3])
