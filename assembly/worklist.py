@@ -19,11 +19,11 @@ import os
 import re
 
 from scipy.spatial.distance import cityblock
-from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 from assembly.opt import smart_sort_opt
 import pandas as pd
+from synbiochem.utils.graph_utils import get_roots
 
 
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
@@ -96,9 +96,17 @@ class WorklistGenerator():
         # Write input plate:
         if 'src_well_fixed' not in self.__worklist:
             self.__worklist['src_well_fixed'] = None
+        else:
+            self.__worklist['src_well_fixed'] = \
+                self.__worklist['src_well_fixed'].where(
+                    (pd.notnull(self.__worklist['src_well_fixed'])), None)
 
         if 'dest_well_fixed' not in self.__worklist:
             self.__worklist['dest_well_fixed'] = None
+        else:
+            self.__worklist['dest_well_fixed'] = \
+                self.__worklist['dest_well_fixed'].where(
+                    (pd.notnull(self.__worklist['dest_well_fixed'])), None)
 
         inpt = \
             self.__worklist.loc[self.__worklist['src_is_input']
@@ -205,22 +213,20 @@ class WorklistGenerator():
     def __traverse(self, dest, level, data):
         '''Traverse tree.'''
         for src in dest.predecessors():
-            edge_idx = self.__graph.get_eid(src.index, dest.index)
-            edge = self.__graph.es[edge_idx]
+            opr = src[1].copy()
 
-            opr = edge.attributes()
-
-            for key, val in src.attributes().items():
+            for key, val in src[0].attributes().items():
                 opr['src_' + key] = val
 
             for key, val in dest.attributes().items():
                 opr['dest_' + key] = val
 
             opr['level'] = level
-            opr['src_is_input'] = not src.indegree() and not src['is_reagent']
+            opr['src_is_input'] = \
+                not src[0].indegree() and not src[0].attributes()['is_reagent']
 
             data.append(opr)
-            self.__traverse(src, level + 1, data)
+            self.__traverse(src[0], level + 1, data)
 
     def __add_component(self, component, plate_id, is_reagent, well_name):
         '''Add component.'''
