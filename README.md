@@ -1,5 +1,7 @@
 # sbc-assembly
 
+For initial environment setup, run the command: `bash setup.sh`.
+
 ## LCR2
 
 This script assumes that PlasmidGenie has been used to add the necessary

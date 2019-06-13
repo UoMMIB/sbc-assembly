@@ -297,25 +297,26 @@ def main(args):
     pair_dominoes = designer.get_pair_dominoes()
     designer.close()
 
-    print('Designs and parts\n')
+    with open(args[5], 'w') as fle:
+        fle.write('Designs and parts\n')
 
-    for design, prts in design_parts.items():
-        print(design, prts)
+        for design, prts in design_parts.items():
+            fle.write(design, prts)
 
-    print('\nParts and primers\n')
+        fle.write('\nParts and primers\n')
 
-    for part, primers in part_primers.items():
-        print(part, primers)
+        for part, primers in part_primers.items():
+            fle.write(part, primers)
 
-    print('\nPart pairs and dominoes\n')
+        fle.write('\nPart pairs and dominoes\n')
 
-    for pair, domino in pair_dominoes.items():
-        print(pair, domino)
+        for pair, domino in pair_dominoes.items():
+            fle.write(pair, domino)
 
-    print('\nDominoes\n')
+        fle.write('\nDominoes\n')
 
-    for domino in sorted(list(set(pair_dominoes.values()))):
-        print(domino)
+        for domino in sorted(list(set(pair_dominoes.values()))):
+            fle.write(domino)
 
 
 if __name__ == '__main__':
