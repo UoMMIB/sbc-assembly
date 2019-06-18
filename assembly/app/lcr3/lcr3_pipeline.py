@@ -301,22 +301,22 @@ def main(args):
         fle.write('Designs and parts\n')
 
         for design, prts in design_parts.items():
-            fle.write(design, prts)
+            fle.write('%s\t%s\n' % (design, prts))
 
         fle.write('\nParts and primers\n')
 
         for part, primers in part_primers.items():
-            fle.write(part, primers)
+            fle.write('%s\t%s\n' % (part, primers))
 
         fle.write('\nPart pairs and dominoes\n')
 
         for pair, domino in pair_dominoes.items():
-            fle.write(pair, domino)
+            fle.write('%s\t%s\n' % (pair, domino))
 
         fle.write('\nDominoes\n')
 
         for domino in sorted(list(set(pair_dominoes.values()))):
-            fle.write(domino)
+            fle.write('%s\n' % domino)
 
 
 if __name__ == '__main__':

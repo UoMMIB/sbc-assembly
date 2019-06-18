@@ -1,3 +1,5 @@
+pip install -r requirements.txt
+
 export PYTHONPATH=$PYTHONPATH:.
 
 python assembly/app/lcr2/lcr2_pipeline.py \

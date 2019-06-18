@@ -1,6 +1,9 @@
 # sbc-assembly
 
-For initial environment setup, run the command: `bash setup.sh`.
+For initial environment setup:
+
+1. Install Vienna RNA (see https://anaconda.org/bioconda/viennarna).
+2. Install NCBI Blast (see https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download).
 
 ## LCR2
 
