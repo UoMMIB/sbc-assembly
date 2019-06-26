@@ -41,9 +41,8 @@ https://ice.synbiochem.co.uk/entry/10040. SBC010040 corresponds to the Part,
 and SBC010041 corresponds to the parent Plasmid. This step essentially PCRs Part
 SBC010040 from its parent Plasmid SBC010041.
 
-2. Part digest. This step performs a digest on the Parts generated in the
-previous step (e.g. SBC010040) to remove unnecessary flanking sequence at the
-5' and 3' ends.
+2. Part digest. This step performs a digest on the Parts generated in Step 1
+(e.g. SBC010040) to remove unnecessary flanking sequence at the 5' and 3' ends.
 
 3. Part QC. This step takes the digested parts from Step 2 and prepares them for
 (optional) analysis on the fragment analyser.
