@@ -1,4 +1,4 @@
-pip install -r requirements.txt
+pip install -r requirements.txt --upgrade
 
 export PATH=$PATH:/usr/local/ncbi/blast/bin/
 export PYTHONPATH=$PYTHONPATH:.
