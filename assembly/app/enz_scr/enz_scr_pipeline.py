@@ -108,7 +108,12 @@ def main(args):
         plts = _get_substrate_plates(wklst_dfs, group_df['Substrate'].unique())
 
         for plt in plts:
-            plt.to_csv(out_dir_name)
+            plate_dir = os.path.join(out_dir_name, 'plates')
+
+            if not os.path.exists(plate_dir):
+                os.makedirs(plate_dir)
+
+            plt.to_csv(plate_dir)
 
 
 if __name__ == '__main__':
