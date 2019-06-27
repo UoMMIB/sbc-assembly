@@ -327,7 +327,9 @@ def format_worklist(dir_name):
 
     for dirpath, dfs in dir_dfs.items():
         filepath = os.path.join(dirpath, 'worklist.csv')
-        pd.concat(dfs).to_csv(filepath, index=False)
+        worklist_df = pd.concat(dfs)
+        worklist_df = worklist_df[_COLUMNS_ORDER + ['dest_name']]
+        worklist_df.to_csv(filepath, index=False)
 
     return dfs
 
