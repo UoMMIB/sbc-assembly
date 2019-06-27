@@ -136,6 +136,9 @@ class Plate():
 
     def to_csv(self, out_dir_name='.'):
         '''Export plate to csv.'''
+        if not os.path.exists(out_dir_name):
+            os.makedirs(out_dir_name)
+
         filepath = os.path.abspath(os.path.join(out_dir_name,
                                                 str(self.__plate.name) +
                                                 '.csv'))

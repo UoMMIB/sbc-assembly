@@ -75,14 +75,14 @@ def _run_writer(writer, name, input_plates, plate_names,
     wrklsts, plates = worklist_gen.get_worklist(input_plates, plate_names)
 
     for plt in plates.values():
-        plt.to_csv(out_dir)
+        plt.to_csv(os.path.join(out_dir, 'plates'))
 
     for wrklst in wrklsts:
         print(wrklst.name + '\t' + str(score(wrklst)))
         worklist.to_csv(wrklst, out_dir)
 
     summary_df = _summarise(wrklsts)
-    summary_df.to_csv(os.path.join(out_dir, 'summary.csv'), index=False)
+    summary_df.to_csv(os.path.join(out_dir, 'input_summary.csv'), index=False)
 
     return plates
 

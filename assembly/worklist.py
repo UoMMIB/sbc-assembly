@@ -19,11 +19,11 @@ import os
 import re
 
 from scipy.spatial.distance import cityblock
+from synbiochem.utils.graph_utils import get_roots
 
 from assembly import plate
 from assembly.opt import smart_sort_opt
 import pandas as pd
-from synbiochem.utils.graph_utils import get_roots
 
 
 _VALUES_RENAME = {('src_plate', 'dest_plate'):
@@ -320,13 +320,14 @@ def format_worklist(dir_name):
                 _rename_values(df)
                 _rename_cols(df)
                 df = _reorder_cols(df)
-                df.to_csv(filepath, encoding='utf-8', index=False)
+                # df.to_csv(filepath, encoding='utf-8', index=False)
                 dfs.append(df)
                 dir_dfs[dirpath].append(df)
+                os.remove(filepath)
 
     for dirpath, dfs in dir_dfs.items():
         filepath = os.path.join(dirpath, 'worklist.csv')
-        pd.concat(dfs).to_csv(filepath)
+        pd.concat(dfs).to_csv(filepath, index=False)
 
     return dfs
 

@@ -15,6 +15,10 @@ as ICE ids to assemble. The optional three-letter code for naming the worklist,
 currently with a default of `LCR`, may also be updated.
 
 2. Ensure that all necessary source plates are in the `data/plates` directory.
+This is a key *issue*: SYNBIOCHEM have never managed to develop a searchable
+database of plates and samples, therefore any plasmids, parts, dominoes, primers,
+etc. required for assembly need to be specified, along with their well location,
+in csv files in this directory.
 Plates that are required include those containing plasmid parts (i.e. individual
 parts within the plasmids, typically that which is returned from Twist), and
 those containing primers (these primers are *not* held in ICE, and must be
@@ -22,7 +26,8 @@ specified here, using the naming convention of `[PART_PLASMID_ID]_P` and
 `[PART_PLASMID_ID]_NP` for phosphorylated and non-phosphorylated primers
 respectively. Plates can be defined in one of two formats (see
 `data/plates/12135272.csv` and `data/plates/11276738.csv`) for examples of each
-format.
+format. The filename typically follows the id / barcode of the plate,
+although any id can be used as barcode reading is not used.
 
 3. Run the script through the command: `bash lcr2.sh`.
 
@@ -51,10 +56,13 @@ SBC010040 from its parent Plasmid SBC010041.
 of each pathway. If, for example, a design contains two pathways, two domino
 pools will be generated.
 
-5. Part PCR pooling.
+5. Part digest pooling. Depending on the design, certain Parts are needed in
+increased volume (for example, a promoter may be needed numerous times). This
+step pools an appropriate number of digested parts from Step 2, ensuring that
+there is enough for the LCR stage (Step 6).
 
 6. LCR writer. This step performs the LCR assembly of each pathway in the
-design, using digested parts from Step 2, and domino pools from Step 4.
+design, using pooled digested parts from Step 5, and domino pools from Step 4.
 
 ## LCR3
 

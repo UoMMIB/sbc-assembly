@@ -126,25 +126,6 @@ class SpecificPartPcrWriter(PartPcrWriter):
         return None, None
 
 
-class PcrPoolWriter(GraphWriter):
-    '''Class for generating PCR pooling worklist graphs.'''
-
-    def __init__(self, pcr_numbers, output_name='pool_pcr'):
-        self.__pcr_numbers = pcr_numbers
-        GraphWriter.__init__(self, output_name)
-
-    def _initialise(self):
-        for part_id, count in self.__pcr_numbers.items():
-            pool = self._add_vertex('%s_dig' % (part_id),
-                                    {'is_reagent': True})
-
-            for idx in range(count):
-                part = self._add_vertex('%s_dig_%i' % (part_id, idx + 1),
-                                        {'is_reagent': False})
-
-                self._add_edge(part, pool, {'Volume': 1000.0})
-
-
 def get_pcr_numbers(plasmid_parts, part_vol):
     '''Get number of PCRs required per part.'''
     total_part_vols = defaultdict(float)
