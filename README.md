@@ -100,6 +100,9 @@ may not be worth doing.
 This script reads a manually-generated screening list, and from which generates
 appropriate worklists.
 
+The worklist essentially just mixes the appropriate cell lysate(s) with the
+compounds being screened. All screens are run in duplicate by default.
+
 See `data/enz_scr/enz_scr.csv` for an example of such a screening list.
 
 1. Amend the script `enz_scr.sh` to update the location of the enzyme screening
@@ -107,3 +110,9 @@ list, and the optional three-letter code for naming the worklist, which
 currently has a default of `ENZ`.
 
 2. Run the script through the command: `bash enz_scr.sh`.
+
+Worklists are output in the `out` directory, and are organised according to
+project. (The project is defined by the `Project` column in the `enz_scr.csv`
+file.)
+
+
